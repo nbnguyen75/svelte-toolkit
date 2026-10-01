@@ -34,13 +34,14 @@
 				{
 					"name": "useScrollToTop",
 					"source": "custom (no VueUse equivalent)",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useScrollToTop/"
 				}
 			],
 			"id": "feat-002",
 			"name": "Browser foundations (implemented)",
-			"status": "todo"
+			"status": "in-progress",
+			"evidence": "useScrollToTop done 2026-10-01 (gates green, 16/16 tests incl. 9 new). Remaining: useEventListener, useDark, useClipboard. Shared helpers added: src/lib/shared/is.ts (isBrowser), src/lib/shared/getter.ts (MaybeGetter, resolveGetter) — both exported from the barrel."
 		},
 		{
 			"dependencies": ["feat-001"],

@@ -42,4 +42,15 @@
 
 - [x] Ran full `init.ps1` gate sequence from `packages/svelte-use/`: `check` 0 errors/0 warnings, `format` clean (31 files), `lint` 0 errors, `test` 6/6, `prepack` publint clean, path-leak scan clean.
 - [x] One repair: `svelte-check` warned "no svelte input files" (pure library, zero `.svelte` under `src/` after the test-scope tightening). Added `test/fixtures/**` to `tsconfig.json` `include` — fixtures are harness support code (not `*.test.*` specs, still excluded), so they are now typechecked and the warning is gone.
-- [x] Marked `feat-001` `done` in `feature_list.json` with evidence.
+- [x] Marked `feat-001` `done` in `feature_list.json` with evidence. (commit `7815a59`)
+
+### useScrollToTop — feat-002 first slice (2026-10-01)
+
+- [x] Ported `useScrollToTop` from the `sv-utils` reference into `src/lib/browser/useScrollToTop/` (`index.svelte.ts`, `index.ts`, `README.md`, `useScrollToTop.test.ts`, `useScrollToTop.ssr.test.ts`).
+- [x] Added the shared helpers it depends on: `src/lib/shared/is.ts` (`isBrowser`) and `src/lib/shared/getter.ts` (`MaybeGetter`, `resolveGetter`). All three exported from the barrel; verified the barrel resolves at runtime (`isBrowser, resolveGetter, useScrollToTop`).
+- [x] Ports the documented `feat-008` fix up front: the generation guard (`runId`) plus `cancel()` handle mean a superseded or cancelled run performs no writes and never touches shared state — covered by tests, so that item is resolved here rather than retrofitted later.
+- [x] Lint clean without suppressions: fixed `method-signature-style` (property signatures), replaced two `no-unsafe-type-assertion` casts with a real `isGetter` type guard and a structural `'scrollY' in el` check, and hoisted the pure `getScrollTop`/`setScrollTop` helpers to module scope (also clears `consistent-function-scoping`). Zero errors, zero warnings.
+- [x] **Test-harness finding (matters for every later batch):** Svelte's `Tween` is driven by an internal rAF loop that reads `performance.now()`, _not_ the rAF timestamp argument — so `test/fixtures/raf.ts` cannot drive it. Use `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync()` instead (it fakes both `requestAnimationFrame` and `performance`). Real-time `setTimeout` sleeps in the reference test were replaced with fake timers per `test-contract.md`.
+- [x] **SSR-test finding:** in the `node` environment `svelte` resolves to its **server** build, where runes are inert and `$effect.root` never invokes its callback. An SSR probe must therefore call the factory _directly_ (no effect root, no mount) — which is what real SSR does. An earlier `render()`-from-`svelte/server` attempt silently produced nothing.
+- [x] Gates: `check` 0/0, `format` clean (38 files), `lint` 0 errors, `test` 16/16 (4 files, 9 new), `prepack` publint clean, path-leak scan clean, `npm pack --dry-run` shows 13 files with `*.test.js` excluded.
+- [ ] Remaining in feat-002: `useEventListener`, `useDark`, `useClipboard`.
