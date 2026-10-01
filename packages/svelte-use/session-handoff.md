@@ -3,13 +3,13 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
+- `feat-001` (Project Setup & Agent Harness) is `done`: full gate sequence green 2026-10-01.
 - Pure library package (no SvelteKit shell): `src/lib/` holds only the template `index.ts`.
-- `feature_list.json` v1.0.0 is a fresh work queue: every port is `todo`; `cut`/`deferred`/`svelte-native` entries encode scope decisions (see `scope.md`, `docs/recipes.md`).
+- `feature_list.json` v1.0.0 work queue: every port is `todo`; `cut`/`deferred`/`svelte-native` entries encode scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- Baseline: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`.
-- Then port the first `todo` feature from `feature_list.json`, following `.agents/rules/batch-workflow.md` and the `vue-to-svelte-analyze` / `vue-to-svelte-port` skills.
+- Port the next `todo` feature from `feature_list.json` (feat-005 blocks all implementation batches; feat-002/003/004 are the first implementation batches), following `.agents/rules/batch-workflow.md` and the `vue-to-svelte-analyze` / `vue-to-svelte-port` skills.
 
 ## How to Resume
 

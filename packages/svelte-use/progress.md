@@ -37,3 +37,9 @@
 ## Next
 
 - Pick the first feature from `feature_list.json` and follow `.agents/rules/batch-workflow.md`.
+
+### feat-001 close-out (2026-10-01)
+
+- [x] Ran full `init.ps1` gate sequence from `packages/svelte-use/`: `check` 0 errors/0 warnings, `format` clean (31 files), `lint` 0 errors, `test` 6/6, `prepack` publint clean, path-leak scan clean.
+- [x] One repair: `svelte-check` warned "no svelte input files" (pure library, zero `.svelte` under `src/` after the test-scope tightening). Added `test/fixtures/**` to `tsconfig.json` `include` — fixtures are harness support code (not `*.test.*` specs, still excluded), so they are now typechecked and the warning is gone.
+- [x] Marked `feat-001` `done` in `feature_list.json` with evidence.

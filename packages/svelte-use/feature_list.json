@@ -3,10 +3,10 @@
 		{
 			"dependencies": [],
 			"description": "Svelte 5 + SvelteKit library package harness with bun, typescript, svelte-check, oxlint, oxfmt, eslint, publint, and .agents workspace configuration.",
-			"evidence": "",
+			"evidence": "init green 2026-10-01: check 0 errors/0 warnings, format clean (31 files), lint 0 errors, test 6/6, prepack publint clean, path-leak scan clean. Fix: tsconfig include now covers test/fixtures/** so svelte-check has inputs (was 0 errors/1 warning on pure-library src with zero .svelte files).",
 			"id": "feat-001",
 			"name": "Project Setup & Agent Harness",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-001"],
