@@ -11,24 +11,24 @@
 		{
 			"dependencies": ["feat-001"],
 			"description": "Port of core browser utilities with runes and SSR safety. Retrofit (docs/tests/fixes) tracked in feat-008.",
-			"evidence": "",
+			"evidence": "useScrollToTop, useEventListener, useDark, useClipboard all ported 2026-10-01 from the sv-utils reference. Shared helpers: src/lib/shared/is.ts (isBrowser), src/lib/shared/getter.ts (MaybeGetter, resolveGetter). Barrel verified at runtime: 9 exports. Gates: check 0/0, format clean, lint 0 errors 0 warnings, test 60/60, prepack publint clean, path-leak clean.",
 			"functions": [
 				{
 					"name": "useEventListener",
 					"source": "vueuse/core/useEventListener",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useEventListener/"
 				},
 				{
 					"name": "useDark",
 					"source": "vueuse/core/useDark",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useDark/"
 				},
 				{
 					"name": "useClipboard",
 					"source": "vueuse/core/useClipboard",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useClipboard/"
 				},
 				{
@@ -40,8 +40,7 @@
 			],
 			"id": "feat-002",
 			"name": "Browser foundations (implemented)",
-			"status": "in-progress",
-			"evidence": "useScrollToTop done 2026-10-01 (gates green, 16/16 tests incl. 9 new). Remaining: useEventListener, useDark, useClipboard. Shared helpers added: src/lib/shared/is.ts (isBrowser), src/lib/shared/getter.ts (MaybeGetter, resolveGetter) — both exported from the barrel."
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-001"],
@@ -51,19 +50,19 @@
 				{
 					"name": "useLocalStorage",
 					"source": "vueuse/core/useLocalStorage",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useStorage/"
 				},
 				{
 					"name": "useSessionStorage",
 					"source": "vueuse/core/useSessionStorage",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useStorage/"
 				},
 				{
 					"name": "useStorage",
 					"source": "vueuse/core/useStorage",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useStorage/"
 				}
 			],
