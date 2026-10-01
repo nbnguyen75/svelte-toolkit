@@ -1,0 +1,14 @@
+{
+  "name": "svelte-toolkit",
+  "version": "1.0.0",
+  "description": "setup for root folder of svelte project",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "author": "Nguyên (Wynn)",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

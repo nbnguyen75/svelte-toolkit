@@ -1,0 +1,36 @@
+{
+	"features": [
+		{
+			"dependencies": [],
+			"description": "Integration adapters: useAxios, useFuse, useIDBKeyval as thin ports with peerDependencies (user installs the lib). Packaging/peerDep complexity isolated in this package. Core (@wynn-dev/svelte-use) should be published first; a workspace:* dependency may be added when an adapter reuses core utils.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useAxios",
+					"source": "vueuse/integrations/useAxios (peer: axios)",
+					"status": "todo",
+					"target": "src/lib/useAxios/"
+				},
+				{
+					"name": "useFuse",
+					"source": "vueuse/integrations/useFuse (peer: fuse.js)",
+					"status": "todo",
+					"target": "src/lib/useFuse/"
+				},
+				{
+					"name": "useIDBKeyval",
+					"source": "vueuse/integrations/useIDBKeyval (peer: idb-keyval)",
+					"status": "todo",
+					"target": "src/lib/useIDBKeyval/"
+				}
+			],
+			"id": "feat-030",
+			"name": "Integration adapters",
+			"status": "todo"
+		}
+	],
+	"notPortedRef": "docs/recipes.md",
+	"rulesRef": ".agents/rules/",
+	"note": "Status index only. Scope/module/docs/test/workflow contracts live in rulesRef; the rationale for every cut/deferred/svelte-native status, plus copy-paste patterns, lives in notPortedRef. Neither is duplicated here. This package tracks only its own adapters — core ports live in the sibling package's list.",
+	"version": "1.0.0"
+}

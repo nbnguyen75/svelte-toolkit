@@ -1,0 +1,1676 @@
+{
+	"features": [
+		{
+			"dependencies": [],
+			"description": "Svelte 5 + SvelteKit library package harness with bun, typescript, svelte-check, oxlint, oxfmt, eslint, publint, and .agents workspace configuration.",
+			"evidence": "",
+			"id": "feat-001",
+			"name": "Project Setup & Agent Harness",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-001"],
+			"description": "Port of core browser utilities with runes and SSR safety. Retrofit (docs/tests/fixes) tracked in feat-008.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useEventListener",
+					"source": "vueuse/core/useEventListener",
+					"status": "todo",
+					"target": "src/lib/browser/useEventListener/"
+				},
+				{
+					"name": "useDark",
+					"source": "vueuse/core/useDark",
+					"status": "todo",
+					"target": "src/lib/browser/useDark/"
+				},
+				{
+					"name": "useClipboard",
+					"source": "vueuse/core/useClipboard",
+					"status": "todo",
+					"target": "src/lib/browser/useClipboard/"
+				},
+				{
+					"name": "useScrollToTop",
+					"source": "custom (no VueUse equivalent)",
+					"status": "todo",
+					"target": "src/lib/browser/useScrollToTop/"
+				}
+			],
+			"id": "feat-002",
+			"name": "Browser foundations (implemented)",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-001"],
+			"description": "Reactive storage utility supporting localStorage/sessionStorage with Svelte 5 runes. Retrofit (docs/tests) tracked in feat-008.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useLocalStorage",
+					"source": "vueuse/core/useLocalStorage",
+					"status": "todo",
+					"target": "src/lib/state/useStorage/"
+				},
+				{
+					"name": "useSessionStorage",
+					"source": "vueuse/core/useSessionStorage",
+					"status": "todo",
+					"target": "src/lib/state/useStorage/"
+				},
+				{
+					"name": "useStorage",
+					"source": "vueuse/core/useStorage",
+					"status": "todo",
+					"target": "src/lib/state/useStorage/"
+				}
+			],
+			"id": "feat-003",
+			"name": "Storage foundations (implemented)",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-001"],
+			"description": "Debounce and throttle helpers with lodash-style leading/trailing/maxWait semantics (vendored, zero-dep) plus cancel/flush. Parity review tracked in feat-006; docs/tests in feat-008.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useDebounceFn",
+					"source": "vueuse/shared/useDebounceFn (debounceFilter semantics)",
+					"status": "todo",
+					"target": "src/lib/utilities/useDebounceFn/"
+				},
+				{
+					"name": "useThrottleFn",
+					"source": "vueuse/shared/useThrottleFn",
+					"status": "todo",
+					"target": "src/lib/utilities/useThrottleFn/"
+				}
+			],
+			"id": "feat-004",
+			"name": "Timing foundations (implemented)",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-001"],
+			"description": "Add vitest + jsdom, `bun run test` script, colocated *.test.ts packaging exclusions, per-module README convention, and wire `test` into init.ps1/init.sh. Blocks all implementation batches.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "test-harness",
+					"source": "internal",
+					"status": "todo",
+					"target": "vitest.config + package.json#test + init scripts"
+				},
+				{
+					"name": "docs-convention",
+					"source": "internal (.agents/rules/module-contract.md + docs-contract.md)",
+					"status": "todo",
+					"target": "per-module README.md template"
+				}
+			],
+			"id": "feat-005",
+			"name": "Test & docs harness",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005"],
+			"description": "Review hand-rolled dual-timer logic against VueUse debounceFilter (timestamp-based leading/trailing/maxWait); align semantics vendored/zero-dep; add useThrottleFn.flush(). Proven by parity tests ported from VueUse filter tests.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useDebounceFn-parity",
+					"source": "vueuse/shared/utils/filters.ts",
+					"status": "todo",
+					"target": "src/lib/utilities/useDebounceFn/"
+				},
+				{
+					"name": "useThrottleFn-flush",
+					"source": "vueuse/shared/useThrottleFn",
+					"status": "todo",
+					"target": "src/lib/utilities/useThrottleFn/"
+				}
+			],
+			"id": "feat-006",
+			"name": "Debounce/throttle lodash-parity review",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005"],
+			"description": "Expand is.ts to full VueUse shared/utils/is.ts parity (isClient/isWorker/isDef/notNullish/isObject/noop/clamp/now/timestamp/rand/hasOwn/assert/isIOS) keeping isBrowser alias. Pure fns, full branch coverage.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "is-guards",
+					"source": "vueuse/shared/utils/is.ts",
+					"status": "todo",
+					"target": "src/lib/shared/is.ts"
+				}
+			],
+			"id": "feat-007",
+			"name": "Shared type guards expansion",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-006", "feat-007"],
+			"description": "Backfill README.md + *.test.ts for feat-002/003/004/007 and apply known fixes: useClipboard reset-timer dispose on unmount; useScrollToTop cancel handle + no stale writes mid-flight.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "retrofit-docs-tests",
+					"source": "internal (.agents/rules/docs-contract.md + test-contract.md)",
+					"status": "todo",
+					"target": "src/lib/browser/*, src/lib/state/useStorage/, src/lib/utilities/*, src/lib/shared/"
+				},
+				{
+					"name": "useClipboard-cleanup-fix",
+					"source": "internal",
+					"status": "todo",
+					"target": "src/lib/browser/useClipboard/"
+				},
+				{
+					"name": "useScrollToTop-cancel-fix",
+					"source": "internal",
+					"status": "todo",
+					"target": "src/lib/browser/useScrollToTop/"
+				}
+			],
+			"id": "feat-008",
+			"name": "Retrofit: docs/tests/fixes for implemented utils",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Most-imported state primitives. useToggle/useCounter cover the majority of toggle/counter needs; history/cloned/cycle/stepper/previous/lastChanged round out local state.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useToggle",
+					"source": "vueuse/shared/useToggle",
+					"status": "todo",
+					"target": "src/lib/state/useToggle/"
+				},
+				{
+					"name": "useCounter",
+					"source": "vueuse/shared/useCounter",
+					"status": "todo",
+					"target": "src/lib/state/useCounter/"
+				},
+				{
+					"name": "usePrevious",
+					"source": "vueuse/core/usePrevious",
+					"status": "todo",
+					"target": "src/lib/state/usePrevious/"
+				},
+				{
+					"name": "useLastChanged",
+					"source": "vueuse/shared/useLastChanged",
+					"status": "todo",
+					"target": "src/lib/state/useLastChanged/"
+				},
+				{
+					"name": "useCloned",
+					"source": "vueuse/core/useCloned",
+					"status": "todo",
+					"target": "src/lib/state/useCloned/"
+				},
+				{
+					"name": "useCycleList",
+					"source": "vueuse/core/useCycleList",
+					"status": "todo",
+					"target": "src/lib/state/useCycleList/"
+				},
+				{
+					"name": "useStepper",
+					"source": "vueuse/core/useStepper",
+					"status": "todo",
+					"target": "src/lib/state/useStepper/"
+				},
+				{
+					"name": "useOffsetPagination",
+					"source": "vueuse/core/useOffsetPagination",
+					"status": "todo",
+					"target": "src/lib/state/useOffsetPagination/"
+				}
+			],
+			"id": "feat-009",
+			"name": "State essentials",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Pure reactive array transforms. All synchronous/pure — high test coverage without compiler; shared/ category.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useArrayMap",
+					"source": "vueuse/shared/useArrayMap",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayMap/"
+				},
+				{
+					"name": "useArrayFilter",
+					"source": "vueuse/shared/useArrayFilter",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayFilter/"
+				},
+				{
+					"name": "useArrayUnique",
+					"source": "vueuse/shared/useArrayUnique",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayUnique/"
+				},
+				{
+					"name": "useArraySome",
+					"source": "vueuse/shared/useArraySome",
+					"status": "todo",
+					"target": "src/lib/shared/useArraySome/"
+				},
+				{
+					"name": "useArrayEvery",
+					"source": "vueuse/shared/useArrayEvery",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayEvery/"
+				},
+				{
+					"name": "useArrayIncludes",
+					"source": "vueuse/shared/useArrayIncludes",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayIncludes/"
+				},
+				{
+					"name": "useArrayJoin",
+					"source": "vueuse/shared/useArrayJoin",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayJoin/"
+				},
+				{
+					"name": "useArrayReduce",
+					"source": "vueuse/shared/useArrayReduce",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayReduce/"
+				},
+				{
+					"name": "useArrayFind",
+					"source": "vueuse/shared/useArrayFind",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayFind/"
+				},
+				{
+					"name": "useArrayFindIndex",
+					"source": "vueuse/shared/useArrayFindIndex",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayFindIndex/"
+				},
+				{
+					"name": "useArrayFindLast",
+					"source": "vueuse/shared/useArrayFindLast",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayFindLast/"
+				},
+				{
+					"name": "useArrayDifference",
+					"source": "vueuse/shared/useArrayDifference",
+					"status": "todo",
+					"target": "src/lib/shared/useArrayDifference/"
+				},
+				{
+					"name": "useSorted",
+					"source": "vueuse/core/useSorted",
+					"status": "todo",
+					"target": "src/lib/shared/useSorted/"
+				}
+			],
+			"id": "feat-010",
+			"name": "Reactive array utils",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Core timers and clock primitives; fake-timer tests. Pausable controls per architecture rules. (useTimeout/useInterval/useNow/useTimestamp cut as recipes.)",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useTimeoutFn",
+					"source": "vueuse/shared/useTimeoutFn",
+					"status": "todo",
+					"target": "src/lib/utilities/useTimeoutFn/"
+				},
+				{
+					"name": "useTimeout",
+					"source": "vueuse/shared/useTimeout",
+					"status": "cut",
+					"target": "src/lib/utilities/useTimeout/"
+				},
+				{
+					"name": "useIntervalFn",
+					"source": "vueuse/shared/useIntervalFn",
+					"status": "todo",
+					"target": "src/lib/utilities/useIntervalFn/"
+				},
+				{
+					"name": "useInterval",
+					"source": "vueuse/shared/useInterval",
+					"status": "cut",
+					"target": "src/lib/utilities/useInterval/"
+				},
+				{
+					"name": "useRafFn",
+					"source": "vueuse/core/useRafFn",
+					"status": "todo",
+					"target": "src/lib/utilities/useRafFn/"
+				},
+				{
+					"name": "useNow",
+					"source": "vueuse/core/useNow",
+					"status": "cut",
+					"target": "src/lib/utilities/useNow/"
+				},
+				{
+					"name": "useTimestamp",
+					"source": "vueuse/core/useTimestamp",
+					"status": "cut",
+					"target": "src/lib/utilities/useTimestamp/"
+				},
+				{
+					"name": "useCountdown",
+					"source": "vueuse/core/useCountdown",
+					"status": "todo",
+					"target": "src/lib/utilities/useCountdown/"
+				},
+				{
+					"name": "useFps",
+					"source": "vueuse/core/useFps",
+					"status": "todo",
+					"target": "src/lib/utilities/useFps/"
+				}
+			],
+			"id": "feat-011",
+			"name": "Timing core (timeouts, intervals, clock)",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Date/time display — DEFERRED to date-fns entirely. Recipes only (ticker, Intl.RelativeTimeFormat); no code in this batch.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useDateFormat",
+					"source": "vueuse/shared/useDateFormat",
+					"status": "deferred",
+					"target": "src/lib/utilities/useDateFormat/"
+				},
+				{
+					"name": "useTimeAgo",
+					"source": "vueuse/core/useTimeAgo",
+					"status": "deferred",
+					"target": "src/lib/utilities/useTimeAgo/"
+				},
+				{
+					"name": "useTimeAgoIntl",
+					"source": "vueuse/core/useTimeAgoIntl",
+					"status": "deferred",
+					"target": "src/lib/utilities/useTimeAgoIntl/"
+				},
+				{
+					"name": "useTemporalNow",
+					"source": "vueuse/core/useTemporalNow",
+					"status": "deferred",
+					"target": "src/lib/utilities/useTemporalNow/"
+				}
+			],
+			"id": "feat-012",
+			"name": "Date/time display",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Reactive watchers kept: until, watchIgnorable, watchTriggerable, watchArray, watchAtMost. (One-liner aliases cut as recipes.)",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "watchOnce",
+					"source": "vueuse/shared/watchOnce",
+					"status": "cut",
+					"target": "src/lib/state/watchOnce/"
+				},
+				{
+					"name": "watchAtMost",
+					"source": "vueuse/shared/watchAtMost",
+					"status": "todo",
+					"target": "src/lib/state/watchAtMost/"
+				},
+				{
+					"name": "watchImmediate",
+					"source": "vueuse/shared/watchImmediate",
+					"status": "cut",
+					"target": "src/lib/state/watchImmediate/"
+				},
+				{
+					"name": "watchDeep",
+					"source": "vueuse/shared/watchDeep",
+					"status": "cut",
+					"target": "src/lib/state/watchDeep/"
+				},
+				{
+					"name": "watchArray",
+					"source": "vueuse/shared/watchArray",
+					"status": "todo",
+					"target": "src/lib/state/watchArray/"
+				},
+				{
+					"name": "whenever",
+					"source": "vueuse/shared/whenever",
+					"status": "cut",
+					"target": "src/lib/state/whenever/"
+				},
+				{
+					"name": "until",
+					"source": "vueuse/shared/until",
+					"status": "todo",
+					"target": "src/lib/state/until/"
+				},
+				{
+					"name": "watchDebounced",
+					"source": "vueuse/shared/watchDebounced",
+					"status": "cut",
+					"target": "src/lib/state/watchDebounced/"
+				},
+				{
+					"name": "watchThrottled",
+					"source": "vueuse/shared/watchThrottled",
+					"status": "cut",
+					"target": "src/lib/state/watchThrottled/"
+				},
+				{
+					"name": "watchPausable",
+					"source": "vueuse/shared/watchPausable",
+					"status": "cut",
+					"target": "src/lib/state/watchPausable/"
+				},
+				{
+					"name": "watchIgnorable",
+					"source": "vueuse/shared/watchIgnorable",
+					"status": "todo",
+					"target": "src/lib/state/watchIgnorable/"
+				},
+				{
+					"name": "watchTriggerable",
+					"source": "vueuse/shared/watchTriggerable",
+					"status": "todo",
+					"target": "src/lib/state/watchTriggerable/"
+				},
+				{
+					"name": "watchWithFilter",
+					"source": "vueuse/shared/watchWithFilter",
+					"status": "cut",
+					"target": "src/lib/state/watchWithFilter/"
+				}
+			],
+			"id": "feat-013",
+			"name": "Reactive watchers",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Ref variants kept: refAutoReset, refManualReset, refWithControl, createEventHook, createGlobalState, createSharedComposable, syncRef, computedWithControl. (Trivial wrappers cut as recipes.)",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "refDefault",
+					"source": "vueuse/shared/refDefault",
+					"status": "cut",
+					"target": "src/lib/state/refDefault/"
+				},
+				{
+					"name": "refDebounced",
+					"source": "vueuse/shared/refDebounced",
+					"status": "cut",
+					"target": "src/lib/state/refDebounced/"
+				},
+				{
+					"name": "refThrottled",
+					"source": "vueuse/shared/refThrottled",
+					"status": "cut",
+					"target": "src/lib/state/refThrottled/"
+				},
+				{
+					"name": "refAutoReset",
+					"source": "vueuse/shared/refAutoReset",
+					"status": "todo",
+					"target": "src/lib/state/refAutoReset/"
+				},
+				{
+					"name": "refManualReset",
+					"source": "vueuse/shared/refManualReset",
+					"status": "todo",
+					"target": "src/lib/state/refManualReset/"
+				},
+				{
+					"name": "refWithControl",
+					"source": "vueuse/shared/refWithControl",
+					"status": "todo",
+					"target": "src/lib/state/refWithControl/"
+				},
+				{
+					"name": "createEventHook",
+					"source": "vueuse/shared/createEventHook",
+					"status": "todo",
+					"target": "src/lib/state/createEventHook/"
+				},
+				{
+					"name": "createGlobalState",
+					"source": "vueuse/shared/createGlobalState",
+					"status": "todo",
+					"target": "src/lib/state/createGlobalState/"
+				},
+				{
+					"name": "createSharedComposable",
+					"source": "vueuse/shared/createSharedComposable",
+					"status": "todo",
+					"target": "src/lib/state/createSharedComposable/"
+				},
+				{
+					"name": "syncRef",
+					"source": "vueuse/shared/syncRef",
+					"status": "todo",
+					"target": "src/lib/state/syncRef/"
+				},
+				{
+					"name": "syncRefs",
+					"source": "vueuse/shared/syncRefs",
+					"status": "cut",
+					"target": "src/lib/state/syncRefs/"
+				},
+				{
+					"name": "computedEager",
+					"source": "vueuse/shared/computedEager",
+					"status": "cut",
+					"target": "src/lib/state/computedEager/"
+				},
+				{
+					"name": "computedWithControl",
+					"source": "vueuse/shared/computedWithControl",
+					"status": "todo",
+					"target": "src/lib/state/computedWithControl/"
+				}
+			],
+			"id": "feat-014",
+			"name": "Ref variants & shared state",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Async data + memoized/derived state. (useCached cut as recipe.) Promise handling must be SSR-safe (pending state on server, no unhandled rejections).",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useAsyncState",
+					"source": "vueuse/core/useAsyncState",
+					"status": "todo",
+					"target": "src/lib/state/useAsyncState/"
+				},
+				{
+					"name": "computedAsync",
+					"source": "vueuse/core/computedAsync",
+					"status": "todo",
+					"target": "src/lib/state/computedAsync/"
+				},
+				{
+					"name": "useAsyncQueue",
+					"source": "vueuse/core/useAsyncQueue",
+					"status": "todo",
+					"target": "src/lib/state/useAsyncQueue/"
+				},
+				{
+					"name": "useStorageAsync",
+					"source": "vueuse/core/useStorageAsync",
+					"status": "todo",
+					"target": "src/lib/state/useStorageAsync/"
+				},
+				{
+					"name": "useMemoize",
+					"source": "vueuse/core/useMemoize",
+					"status": "todo",
+					"target": "src/lib/state/useMemoize/"
+				},
+				{
+					"name": "useCached",
+					"source": "vueuse/core/useCached",
+					"status": "cut",
+					"target": "src/lib/state/useCached/"
+				},
+				{
+					"name": "useRefHistory",
+					"source": "vueuse/core/useRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useRefHistory/"
+				},
+				{
+					"name": "useManualRefHistory",
+					"source": "vueuse/core/useManualRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useManualRefHistory/"
+				},
+				{
+					"name": "useDebouncedRefHistory",
+					"source": "vueuse/core/useDebouncedRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useDebouncedRefHistory/"
+				},
+				{
+					"name": "useThrottledRefHistory",
+					"source": "vueuse/core/useThrottledRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useThrottledRefHistory/"
+				}
+			],
+			"id": "feat-015",
+			"name": "Async & history state",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Most-used responsive primitives. (useSSRWidth cut as recipe.) matchMedia mocks in tests; SSR returns fallback values (no hydration mismatch).",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useMediaQuery",
+					"source": "vueuse/core/useMediaQuery",
+					"status": "todo",
+					"target": "src/lib/browser/useMediaQuery/"
+				},
+				{
+					"name": "usePreferredDark",
+					"source": "vueuse/core/usePreferredDark",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredDark/"
+				},
+				{
+					"name": "usePreferredColorScheme",
+					"source": "vueuse/core/usePreferredColorScheme",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredColorScheme/"
+				},
+				{
+					"name": "useBreakpoints",
+					"source": "vueuse/core/useBreakpoints",
+					"status": "todo",
+					"target": "src/lib/browser/useBreakpoints/"
+				},
+				{
+					"name": "useWindowSize",
+					"source": "vueuse/core/useWindowSize",
+					"status": "todo",
+					"target": "src/lib/browser/useWindowSize/"
+				},
+				{
+					"name": "usePreferredReducedMotion",
+					"source": "vueuse/core/usePreferredReducedMotion",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredReducedMotion/"
+				},
+				{
+					"name": "usePreferredLanguages",
+					"source": "vueuse/core/usePreferredLanguages",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredLanguages/"
+				},
+				{
+					"name": "usePreferredContrast",
+					"source": "vueuse/core/usePreferredContrast",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredContrast/"
+				},
+				{
+					"name": "usePreferredReducedTransparency",
+					"source": "vueuse/core/usePreferredReducedTransparency",
+					"status": "todo",
+					"target": "src/lib/browser/usePreferredReducedTransparency/"
+				},
+				{
+					"name": "useTextDirection",
+					"source": "vueuse/core/useTextDirection",
+					"status": "todo",
+					"target": "src/lib/browser/useTextDirection/"
+				},
+				{
+					"name": "useSSRWidth",
+					"source": "vueuse/core/useSSRWidth",
+					"status": "cut",
+					"target": "src/lib/browser/useSSRWidth/"
+				}
+			],
+			"id": "feat-016",
+			"name": "Viewport & media preferences",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Element measurement and focus tracking. New elements/ category (created by this batch). Observer mocks + disconnect-on-dispose tests.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useElementSize",
+					"source": "vueuse/core/useElementSize",
+					"status": "todo",
+					"target": "src/lib/elements/useElementSize/"
+				},
+				{
+					"name": "useElementBounding",
+					"source": "vueuse/core/useElementBounding",
+					"status": "todo",
+					"target": "src/lib/elements/useElementBounding/"
+				},
+				{
+					"name": "useElementVisibility",
+					"source": "vueuse/core/useElementVisibility",
+					"status": "todo",
+					"target": "src/lib/elements/useElementVisibility/"
+				},
+				{
+					"name": "useIntersectionObserver",
+					"source": "vueuse/core/useIntersectionObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useIntersectionObserver/"
+				},
+				{
+					"name": "useResizeObserver",
+					"source": "vueuse/core/useResizeObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useResizeObserver/"
+				},
+				{
+					"name": "useMutationObserver",
+					"source": "vueuse/core/useMutationObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useMutationObserver/"
+				},
+				{
+					"name": "useActiveElement",
+					"source": "vueuse/core/useActiveElement",
+					"status": "todo",
+					"target": "src/lib/elements/useActiveElement/"
+				},
+				{
+					"name": "useFocus",
+					"source": "vueuse/core/useFocus",
+					"status": "todo",
+					"target": "src/lib/elements/useFocus/"
+				},
+				{
+					"name": "useFocusWithin",
+					"source": "vueuse/core/useFocusWithin",
+					"status": "todo",
+					"target": "src/lib/elements/useFocusWithin/"
+				}
+			],
+			"id": "feat-017",
+			"name": "Elements: size, visibility, focus",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Document/page-level visibility, icon, fullscreen. (useTitle skipped: <svelte:head> covers it.) All SSR-guarded with server fallbacks.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useDocumentVisibility",
+					"source": "vueuse/core/useDocumentVisibility",
+					"status": "todo",
+					"target": "src/lib/browser/useDocumentVisibility/"
+				},
+				{
+					"name": "useWindowFocus",
+					"source": "vueuse/core/useWindowFocus",
+					"status": "todo",
+					"target": "src/lib/browser/useWindowFocus/"
+				},
+				{
+					"name": "usePageLeave",
+					"source": "vueuse/core/usePageLeave",
+					"status": "todo",
+					"target": "src/lib/browser/usePageLeave/"
+				},
+				{
+					"name": "useTitle",
+					"source": "vueuse/core/useTitle",
+					"status": "svelte-native",
+					"target": "src/lib/browser/useTitle/"
+				},
+				{
+					"name": "useFavicon",
+					"source": "vueuse/core/useFavicon",
+					"status": "todo",
+					"target": "src/lib/browser/useFavicon/"
+				},
+				{
+					"name": "useFullscreen",
+					"source": "vueuse/core/useFullscreen",
+					"status": "todo",
+					"target": "src/lib/browser/useFullscreen/"
+				}
+			],
+			"id": "feat-018",
+			"name": "Document & page UI",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Scroll position/lock/infinite lists plus pointer position primitives. Passive listeners; SSR fallbacks.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useWindowScroll",
+					"source": "vueuse/core/useWindowScroll",
+					"status": "todo",
+					"target": "src/lib/browser/useWindowScroll/"
+				},
+				{
+					"name": "useScroll",
+					"source": "vueuse/core/useScroll",
+					"status": "todo",
+					"target": "src/lib/browser/useScroll/"
+				},
+				{
+					"name": "useScrollLock",
+					"source": "vueuse/core/useScrollLock",
+					"status": "todo",
+					"target": "src/lib/browser/useScrollLock/"
+				},
+				{
+					"name": "useInfiniteScroll",
+					"source": "vueuse/core/useInfiniteScroll",
+					"status": "todo",
+					"target": "src/lib/browser/useInfiniteScroll/"
+				},
+				{
+					"name": "useMouse",
+					"source": "vueuse/core/useMouse",
+					"status": "todo",
+					"target": "src/lib/browser/useMouse/"
+				},
+				{
+					"name": "useMouseInElement",
+					"source": "vueuse/core/useMouseInElement",
+					"status": "todo",
+					"target": "src/lib/browser/useMouseInElement/"
+				},
+				{
+					"name": "useMousePressed",
+					"source": "vueuse/core/useMousePressed",
+					"status": "todo",
+					"target": "src/lib/browser/useMousePressed/"
+				},
+				{
+					"name": "useElementHover",
+					"source": "vueuse/core/useElementHover",
+					"status": "todo",
+					"target": "src/lib/browser/useElementHover/"
+				}
+			],
+			"id": "feat-019",
+			"name": "Scroll & mouse",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Touch/drag interactions and outside/long-press handlers. (useDraggable reopened as real scope: a zero-dep port of VueUse's element/handle dragging, shipped alongside @neodrag/svelte rather than deferring to it; useParallax moved to feat-026 — needs useDeviceOrientation + useScreenOrientation.) Touch + mouse event mocks in tests.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useSwipe",
+					"source": "vueuse/core/useSwipe",
+					"status": "todo",
+					"target": "src/lib/browser/useSwipe/"
+				},
+				{
+					"name": "usePointerSwipe",
+					"source": "vueuse/core/usePointerSwipe",
+					"status": "todo",
+					"target": "src/lib/browser/usePointerSwipe/"
+				},
+				{
+					"name": "useDraggable",
+					"source": "vueuse/core/useDraggable",
+					"status": "todo",
+					"target": "src/lib/browser/useDraggable/"
+				},
+				{
+					"name": "useDropZone",
+					"source": "vueuse/core/useDropZone",
+					"status": "todo",
+					"target": "src/lib/browser/useDropZone/"
+				},
+				{
+					"name": "usePointer",
+					"source": "vueuse/core/usePointer",
+					"status": "todo",
+					"target": "src/lib/browser/usePointer/"
+				},
+				{
+					"name": "usePointerLock",
+					"source": "vueuse/core/usePointerLock",
+					"status": "todo",
+					"target": "src/lib/browser/usePointerLock/"
+				},
+				{
+					"name": "useElementByPoint",
+					"source": "vueuse/core/useElementByPoint",
+					"status": "todo",
+					"target": "src/lib/browser/useElementByPoint/"
+				},
+				{
+					"name": "onClickOutside",
+					"source": "vueuse/core/onClickOutside",
+					"status": "todo",
+					"target": "src/lib/browser/onClickOutside/"
+				},
+				{
+					"name": "onLongPress",
+					"source": "vueuse/core/onLongPress",
+					"status": "todo",
+					"target": "src/lib/browser/onLongPress/"
+				},
+				{
+					"name": "onElementRemoval",
+					"source": "vueuse/core/onElementRemoval",
+					"status": "todo",
+					"target": "src/lib/browser/onElementRemoval/"
+				}
+			],
+			"id": "feat-020",
+			"name": "Gestures & drag",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Keyboard shortcuts and typing detection plus auto-growing textareas. KeyboardEvent mocks in tests.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "onKeyStroke",
+					"source": "vueuse/core/onKeyStroke",
+					"status": "todo",
+					"target": "src/lib/browser/onKeyStroke/"
+				},
+				{
+					"name": "useMagicKeys",
+					"source": "vueuse/core/useMagicKeys",
+					"status": "todo",
+					"target": "src/lib/browser/useMagicKeys/"
+				},
+				{
+					"name": "useKeyModifier",
+					"source": "vueuse/core/useKeyModifier",
+					"status": "todo",
+					"target": "src/lib/browser/useKeyModifier/"
+				},
+				{
+					"name": "onStartTyping",
+					"source": "vueuse/core/onStartTyping",
+					"status": "todo",
+					"target": "src/lib/browser/onStartTyping/"
+				},
+				{
+					"name": "useTextareaAutosize",
+					"source": "vueuse/core/useTextareaAutosize",
+					"status": "todo",
+					"target": "src/lib/browser/useTextareaAutosize/"
+				}
+			],
+			"id": "feat-021",
+			"name": "Keyboard & typing",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Extended clipboard/files plus theming/style/script injection. Depends on feat-002 useDark for useColorMode.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useClipboardItems",
+					"source": "vueuse/core/useClipboardItems",
+					"status": "todo",
+					"target": "src/lib/browser/useClipboardItems/"
+				},
+				{
+					"name": "useBase64",
+					"source": "vueuse/core/useBase64",
+					"status": "todo",
+					"target": "src/lib/browser/useBase64/"
+				},
+				{
+					"name": "useObjectUrl",
+					"source": "vueuse/core/useObjectUrl",
+					"status": "todo",
+					"target": "src/lib/browser/useObjectUrl/"
+				},
+				{
+					"name": "useFileDialog",
+					"source": "vueuse/core/useFileDialog",
+					"status": "todo",
+					"target": "src/lib/browser/useFileDialog/"
+				},
+				{
+					"name": "useImage",
+					"source": "vueuse/core/useImage",
+					"status": "todo",
+					"target": "src/lib/browser/useImage/"
+				},
+				{
+					"name": "useColorMode",
+					"source": "vueuse/core/useColorMode",
+					"status": "todo",
+					"target": "src/lib/browser/useColorMode/"
+				},
+				{
+					"name": "useCssVar",
+					"source": "vueuse/core/useCssVar",
+					"status": "todo",
+					"target": "src/lib/browser/useCssVar/"
+				},
+				{
+					"name": "useStyleTag",
+					"source": "vueuse/core/useStyleTag",
+					"status": "todo",
+					"target": "src/lib/browser/useStyleTag/"
+				},
+				{
+					"name": "useScriptTag",
+					"source": "vueuse/core/useScriptTag",
+					"status": "todo",
+					"target": "src/lib/browser/useScriptTag/"
+				},
+				{
+					"name": "useCssSupports",
+					"source": "vueuse/core/useCssSupports",
+					"status": "todo",
+					"target": "src/lib/browser/useCssSupports/"
+				}
+			],
+			"id": "feat-022",
+			"name": "Clipboard extras, files, theming",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Connectivity, realtime, sharing, URL state. New network/ category (created by this batch). Reconnect/abort/unsupported-path tests required.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useOnline",
+					"source": "vueuse/core/useOnline",
+					"status": "svelte-native",
+					"target": "src/lib/network/useOnline/"
+				},
+				{
+					"name": "useNetwork",
+					"source": "vueuse/core/useNetwork",
+					"status": "todo",
+					"target": "src/lib/network/useNetwork/"
+				},
+				{
+					"name": "useFetch",
+					"source": "vueuse/core/useFetch",
+					"status": "todo",
+					"target": "src/lib/network/useFetch/"
+				},
+				{
+					"name": "useWebSocket",
+					"source": "vueuse/core/useWebSocket",
+					"status": "todo",
+					"target": "src/lib/network/useWebSocket/"
+				},
+				{
+					"name": "useEventSource",
+					"source": "vueuse/core/useEventSource",
+					"status": "todo",
+					"target": "src/lib/network/useEventSource/"
+				},
+				{
+					"name": "useBroadcastChannel",
+					"source": "vueuse/core/useBroadcastChannel",
+					"status": "todo",
+					"target": "src/lib/network/useBroadcastChannel/"
+				},
+				{
+					"name": "useShare",
+					"source": "vueuse/core/useShare",
+					"status": "todo",
+					"target": "src/lib/network/useShare/"
+				},
+				{
+					"name": "useUrlSearchParams",
+					"source": "vueuse/core/useUrlSearchParams",
+					"status": "todo",
+					"target": "src/lib/network/useUrlSearchParams/"
+				},
+				{
+					"name": "useBrowserLocation",
+					"source": "vueuse/core/useBrowserLocation",
+					"status": "todo",
+					"target": "src/lib/network/useBrowserLocation/"
+				}
+			],
+			"id": "feat-023",
+			"name": "Network & connectivity",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Hardware/OS capability sensing. New sensors/ category (created by this batch). Permission-denied/unsupported fallbacks are the main test cases.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useBattery",
+					"source": "vueuse/core/useBattery",
+					"status": "todo",
+					"target": "src/lib/sensors/useBattery/"
+				},
+				{
+					"name": "useGeolocation",
+					"source": "vueuse/core/useGeolocation",
+					"status": "todo",
+					"target": "src/lib/sensors/useGeolocation/"
+				},
+				{
+					"name": "useDeviceMotion",
+					"source": "vueuse/core/useDeviceMotion",
+					"status": "todo",
+					"target": "src/lib/sensors/useDeviceMotion/"
+				},
+				{
+					"name": "useDeviceOrientation",
+					"source": "vueuse/core/useDeviceOrientation",
+					"status": "todo",
+					"target": "src/lib/sensors/useDeviceOrientation/"
+				},
+				{
+					"name": "useDevicePixelRatio",
+					"source": "vueuse/core/useDevicePixelRatio",
+					"status": "svelte-native",
+					"target": "src/lib/sensors/useDevicePixelRatio/"
+				},
+				{
+					"name": "useMemory",
+					"source": "vueuse/core/useMemory",
+					"status": "todo",
+					"target": "src/lib/sensors/useMemory/"
+				},
+				{
+					"name": "useNavigatorLanguage",
+					"source": "vueuse/core/useNavigatorLanguage",
+					"status": "todo",
+					"target": "src/lib/sensors/useNavigatorLanguage/"
+				},
+				{
+					"name": "usePermission",
+					"source": "vueuse/core/usePermission",
+					"status": "todo",
+					"target": "src/lib/sensors/usePermission/"
+				},
+				{
+					"name": "useIdle",
+					"source": "vueuse/core/useIdle",
+					"status": "todo",
+					"target": "src/lib/sensors/useIdle/"
+				},
+				{
+					"name": "useDevicesList",
+					"source": "vueuse/core/useDevicesList",
+					"status": "todo",
+					"target": "src/lib/sensors/useDevicesList/"
+				}
+			],
+			"id": "feat-024",
+			"name": "Sensors & device",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Event bus + dialogs + support detection + element overflow. (useMounted/useTransition/useAnimate skipped as Svelte-native; useVirtualList deferred to @tanstack/svelte-virtual.)",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useEventBus",
+					"source": "vueuse/core/useEventBus",
+					"status": "todo",
+					"target": "src/lib/browser/useEventBus/"
+				},
+				{
+					"name": "useConfirmDialog",
+					"source": "vueuse/core/useConfirmDialog",
+					"status": "todo",
+					"target": "src/lib/browser/useConfirmDialog/"
+				},
+				{
+					"name": "useMounted",
+					"source": "vueuse/core/useMounted",
+					"status": "svelte-native",
+					"target": "src/lib/browser/useMounted/"
+				},
+				{
+					"name": "useSupported",
+					"source": "vueuse/core/useSupported",
+					"status": "todo",
+					"target": "src/lib/shared/useSupported/"
+				},
+				{
+					"name": "useTransition",
+					"source": "vueuse/core/useTransition",
+					"status": "svelte-native",
+					"target": "src/lib/utilities/useTransition/"
+				},
+				{
+					"name": "useAnimate",
+					"source": "vueuse/core/useAnimate",
+					"status": "svelte-native",
+					"target": "src/lib/browser/useAnimate/"
+				},
+				{
+					"name": "useVirtualList",
+					"source": "vueuse/core/useVirtualList",
+					"status": "deferred",
+					"target": "src/lib/browser/useVirtualList/"
+				},
+				{
+					"name": "useElementOverflow",
+					"source": "vueuse/core/useElementOverflow",
+					"status": "todo",
+					"target": "src/lib/elements/useElementOverflow/"
+				}
+			],
+			"id": "feat-025",
+			"name": "Events, dialogs, animation",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Niche device/media APIs. Smallest audiences; last among browser ports. Every fn must no-op safely when the API is absent (primary test case).",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useEyeDropper",
+					"source": "vueuse/core/useEyeDropper",
+					"status": "todo",
+					"target": "src/lib/browser/useEyeDropper/"
+				},
+				{
+					"name": "useGamepad",
+					"source": "vueuse/core/useGamepad",
+					"status": "todo",
+					"target": "src/lib/browser/useGamepad/"
+				},
+				{
+					"name": "useVibrate",
+					"source": "vueuse/core/useVibrate",
+					"status": "todo",
+					"target": "src/lib/browser/useVibrate/"
+				},
+				{
+					"name": "useWakeLock",
+					"source": "vueuse/core/useWakeLock",
+					"status": "todo",
+					"target": "src/lib/browser/useWakeLock/"
+				},
+				{
+					"name": "useWebNotification",
+					"source": "vueuse/core/useWebNotification",
+					"status": "todo",
+					"target": "src/lib/browser/useWebNotification/"
+				},
+				{
+					"name": "useSpeechRecognition",
+					"source": "vueuse/core/useSpeechRecognition",
+					"status": "todo",
+					"target": "src/lib/browser/useSpeechRecognition/"
+				},
+				{
+					"name": "useSpeechSynthesis",
+					"source": "vueuse/core/useSpeechSynthesis",
+					"status": "todo",
+					"target": "src/lib/browser/useSpeechSynthesis/"
+				},
+				{
+					"name": "useUserMedia",
+					"source": "vueuse/core/useUserMedia",
+					"status": "todo",
+					"target": "src/lib/browser/useUserMedia/"
+				},
+				{
+					"name": "useDisplayMedia",
+					"source": "vueuse/core/useDisplayMedia",
+					"status": "todo",
+					"target": "src/lib/browser/useDisplayMedia/"
+				},
+				{
+					"name": "useBluetooth",
+					"source": "vueuse/core/useBluetooth",
+					"status": "todo",
+					"target": "src/lib/browser/useBluetooth/"
+				},
+				{
+					"name": "useScreenOrientation",
+					"source": "vueuse/core/useScreenOrientation",
+					"status": "todo",
+					"target": "src/lib/browser/useScreenOrientation/"
+				},
+				{
+					"name": "useParallax",
+					"source": "vueuse/core/useParallax",
+					"status": "todo",
+					"target": "src/lib/browser/useParallax/"
+				},
+				{
+					"name": "useScreenSafeArea",
+					"source": "vueuse/core/useScreenSafeArea",
+					"status": "todo",
+					"target": "src/lib/browser/useScreenSafeArea/"
+				},
+				{
+					"name": "useFileSystemAccess",
+					"source": "vueuse/core/useFileSystemAccess",
+					"status": "todo",
+					"target": "src/lib/browser/useFileSystemAccess/"
+				},
+				{
+					"name": "useWebWorker",
+					"source": "vueuse/core/useWebWorker",
+					"status": "todo",
+					"target": "src/lib/browser/useWebWorker/"
+				},
+				{
+					"name": "useWebWorkerFn",
+					"source": "vueuse/core/useWebWorkerFn",
+					"status": "todo",
+					"target": "src/lib/browser/useWebWorkerFn/"
+				},
+				{
+					"name": "useWebMCP",
+					"source": "vueuse/core/useWebMCP",
+					"status": "todo",
+					"target": "src/lib/browser/useWebMCP/"
+				}
+			],
+			"id": "feat-026",
+			"name": "Niche device & media APIs",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Reactive math kept: useClamp, usePrecision, createProjection, createGenericProjection. (One-liner wrappers cut as recipes.) Pure/SSR-trivial; full branch coverage.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useClamp",
+					"source": "vueuse/math/useClamp",
+					"status": "todo",
+					"target": "src/lib/shared/useClamp/"
+				},
+				{
+					"name": "useMin",
+					"source": "vueuse/math/useMin",
+					"status": "cut",
+					"target": "src/lib/shared/useMin/"
+				},
+				{
+					"name": "useMax",
+					"source": "vueuse/math/useMax",
+					"status": "cut",
+					"target": "src/lib/shared/useMax/"
+				},
+				{
+					"name": "useAverage",
+					"source": "vueuse/math/useAverage",
+					"status": "cut",
+					"target": "src/lib/shared/useAverage/"
+				},
+				{
+					"name": "useSum",
+					"source": "vueuse/math/useSum",
+					"status": "cut",
+					"target": "src/lib/shared/useSum/"
+				},
+				{
+					"name": "usePrecision",
+					"source": "vueuse/math/usePrecision",
+					"status": "todo",
+					"target": "src/lib/shared/usePrecision/"
+				},
+				{
+					"name": "useRound",
+					"source": "vueuse/math/useRound",
+					"status": "cut",
+					"target": "src/lib/shared/useRound/"
+				},
+				{
+					"name": "useCeil",
+					"source": "vueuse/math/useCeil",
+					"status": "cut",
+					"target": "src/lib/shared/useCeil/"
+				},
+				{
+					"name": "useFloor",
+					"source": "vueuse/math/useFloor",
+					"status": "cut",
+					"target": "src/lib/shared/useFloor/"
+				},
+				{
+					"name": "useTrunc",
+					"source": "vueuse/math/useTrunc",
+					"status": "cut",
+					"target": "src/lib/shared/useTrunc/"
+				},
+				{
+					"name": "useAbs",
+					"source": "vueuse/math/useAbs",
+					"status": "cut",
+					"target": "src/lib/shared/useAbs/"
+				},
+				{
+					"name": "useMath",
+					"source": "vueuse/math/useMath",
+					"status": "cut",
+					"target": "src/lib/shared/useMath/"
+				},
+				{
+					"name": "logicAnd",
+					"source": "vueuse/math/logicAnd",
+					"status": "cut",
+					"target": "src/lib/shared/logicAnd/"
+				},
+				{
+					"name": "logicOr",
+					"source": "vueuse/math/logicOr",
+					"status": "cut",
+					"target": "src/lib/shared/logicOr/"
+				},
+				{
+					"name": "logicNot",
+					"source": "vueuse/math/logicNot",
+					"status": "cut",
+					"target": "src/lib/shared/logicNot/"
+				},
+				{
+					"name": "useProjection",
+					"source": "vueuse/math/useProjection",
+					"status": "cut",
+					"target": "src/lib/shared/useProjection/"
+				},
+				{
+					"name": "createProjection",
+					"source": "vueuse/math/createProjection",
+					"status": "todo",
+					"target": "src/lib/shared/createProjection/"
+				},
+				{
+					"name": "createGenericProjection",
+					"source": "vueuse/math/createGenericProjection",
+					"status": "todo",
+					"target": "src/lib/shared/createGenericProjection/"
+				}
+			],
+			"id": "feat-027",
+			"name": "Reactive math",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Shared helpers kept: useToNumber, reactifyObject, reactiveOmit, reactivePick, toReactive, makeDestructurable. (Trivial accessors cut as recipes.) Pure and fully testable.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "isDefined",
+					"source": "vueuse/shared/isDefined",
+					"status": "cut",
+					"target": "src/lib/shared/isDefined/"
+				},
+				{
+					"name": "get",
+					"source": "vueuse/shared/get",
+					"status": "cut",
+					"target": "src/lib/shared/get/"
+				},
+				{
+					"name": "set",
+					"source": "vueuse/shared/set",
+					"status": "cut",
+					"target": "src/lib/shared/set/"
+				},
+				{
+					"name": "useToNumber",
+					"source": "vueuse/shared/useToNumber",
+					"status": "todo",
+					"target": "src/lib/shared/useToNumber/"
+				},
+				{
+					"name": "useToString",
+					"source": "vueuse/shared/useToString",
+					"status": "cut",
+					"target": "src/lib/shared/useToString/"
+				},
+				{
+					"name": "reactify",
+					"source": "vueuse/shared/reactify",
+					"status": "cut",
+					"target": "src/lib/shared/reactify/"
+				},
+				{
+					"name": "reactifyObject",
+					"source": "vueuse/shared/reactifyObject",
+					"status": "todo",
+					"target": "src/lib/shared/reactifyObject/"
+				},
+				{
+					"name": "reactiveComputed",
+					"source": "vueuse/shared/reactiveComputed",
+					"status": "cut",
+					"target": "src/lib/shared/reactiveComputed/"
+				},
+				{
+					"name": "reactiveOmit",
+					"source": "vueuse/shared/reactiveOmit",
+					"status": "todo",
+					"target": "src/lib/shared/reactiveOmit/"
+				},
+				{
+					"name": "reactivePick",
+					"source": "vueuse/shared/reactivePick",
+					"status": "todo",
+					"target": "src/lib/shared/reactivePick/"
+				},
+				{
+					"name": "toReactive",
+					"source": "vueuse/shared/toReactive",
+					"status": "todo",
+					"target": "src/lib/shared/toReactive/"
+				},
+				{
+					"name": "makeDestructurable",
+					"source": "vueuse/shared/makeDestructurable",
+					"status": "todo",
+					"target": "src/lib/shared/makeDestructurable/"
+				}
+			],
+			"id": "feat-028",
+			"name": "Shared value & reactivity helpers",
+			"status": "todo"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Ports of 11 svbase utilities ( Tier A pure helpers + Tier B Svelte attachments): composeHandlers, mergeProps, id utilities (generateId/createId/getTabIds), stateAttrs, sliderMath, roving, tooltip grace-delay, clickOutside/escapeKey attachments (browser/dismiss/), trackOutsidePress, context helpers. Specs are written fresh per test-contract.md.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "composeHandlers",
+					"source": "svbase/utils/compose-handlers.ts",
+					"status": "todo",
+					"target": "src/lib/shared/composeHandlers/"
+				},
+				{
+					"name": "mergeProps",
+					"source": "svbase/utils/merge-props.ts",
+					"status": "todo",
+					"target": "src/lib/shared/mergeProps/"
+				},
+				{
+					"name": "generateId/createId/getTabIds",
+					"source": "svbase/utils/id.ts + tabs/context.ts",
+					"status": "todo",
+					"target": "src/lib/shared/id/"
+				},
+				{
+					"name": "getCheckableDataAttributes",
+					"source": "svbase/utils/state-attrs.ts",
+					"status": "todo",
+					"target": "src/lib/shared/stateAttrs/"
+				},
+				{
+					"name": "sliderMath",
+					"source": "svbase/utils/slider-math.ts",
+					"status": "todo",
+					"target": "src/lib/shared/sliderMath/"
+				},
+				{
+					"name": "nextRovingTarget",
+					"source": "svbase/utils/roving.ts",
+					"status": "todo",
+					"target": "src/lib/shared/roving/"
+				},
+				{
+					"name": "tooltipDelay",
+					"source": "svbase/primitives/tooltip/delay.ts",
+					"status": "todo",
+					"target": "src/lib/shared/tooltipDelay/"
+				},
+				{
+					"name": "clickOutside/escapeKey",
+					"source": "svbase/actions/dismiss.ts",
+					"status": "todo",
+					"target": "src/lib/browser/dismiss/"
+				},
+				{
+					"name": "trackOutsidePress",
+					"source": "svbase/utils/outside.ts",
+					"status": "todo",
+					"target": "src/lib/browser/trackOutsidePress/"
+				},
+				{
+					"name": "contextHelpers",
+					"source": "svbase/utils/context.ts",
+					"status": "todo",
+					"target": "src/lib/shared/context/"
+				}
+			],
+			"id": "feat-029",
+			"name": "svbase ports",
+			"status": "todo"
+		}
+	],
+	"notPortedRef": "docs/recipes.md",
+	"rulesRef": ".agents/rules/",
+	"note": "Status index only. Scope/module/docs/test/workflow contracts live in rulesRef; the rationale for every cut/deferred/svelte-native status, plus copy-paste patterns, lives in notPortedRef. Neither is duplicated here.",
+	"version": "1.0.0"
+}

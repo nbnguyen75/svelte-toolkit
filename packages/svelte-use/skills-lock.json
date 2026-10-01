@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"skills": {
+		"frontend-design": {
+			"source": "anthropics/skills",
+			"sourceType": "github",
+			"skillPath": "skills/frontend-design/SKILL.md",
+			"computedHash": "d75c1f4ccfe5cacb26626e18df2fad042c6da8151b062e1a3e275ba856902e28"
+		},
+		"improve": {
+			"source": "shadcn/improve",
+			"sourceType": "github",
+			"skillPath": "skills/improve/SKILL.md",
+			"computedHash": "e671f31b276c4d91dc5a829e36561a6b5e8cb0090f665c272fff4a6e091b8884"
+		},
+		"modern-javascript-patterns": {
+			"source": "wshobson/agents",
+			"sourceType": "github",
+			"skillPath": "plugins/javascript-typescript/skills/modern-javascript-patterns/SKILL.md",
+			"computedHash": "b39a6d074904376b61daf71beb0eef48a92d55c33316141e4fab75801a3607be"
+		},
+		"refactor": {
+			"source": "./.agents/skills/refactor",
+			"sourceType": "local",
+			"skillPath": "SKILL.md",
+			"computedHash": "2cdb37d5ab1933f6a650b2fa7c553a61b16ebafe16cec0e9c6ae13ba26b45190"
+		},
+		"research": {
+			"source": "mattpocock/skills",
+			"sourceType": "github",
+			"skillPath": "skills/engineering/research/SKILL.md",
+			"computedHash": "524b404b1ca373a8b00f63a64667ec4b0a61c3c9cf4e8f246e639be859bb6979"
+		},
+		"svelte-code-writer": {
+			"source": "./.agents/skills/svelte-code-writer",
+			"sourceType": "local",
+			"skillPath": "SKILL.md",
+			"computedHash": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"
+		},
+		"svelte-core-bestpractices": {
+			"source": "./.agents/skills/svelte-core-bestpractices",
+			"sourceType": "local",
+			"skillPath": "SKILL.md",
+			"computedHash": "b2c3d4e5f6a10718293a4b5c6d7e8f9012345678"
+		},
+		"typescript-advanced-types": {
+			"source": "wshobson/agents",
+			"sourceType": "github",
+			"skillPath": "plugins/javascript-typescript/skills/typescript-advanced-types/SKILL.md",
+			"computedHash": "696b98d5a6f90a7d0f0797c6e24590deda11c42dab620c3f93c1d2befccbd7bb"
+		},
+		"vue-to-svelte-analyze": {
+			"source": "./.agents/skills/vue-to-svelte-analyze",
+			"sourceType": "local",
+			"skillPath": "SKILL.md",
+			"computedHash": "c3d4e5f6a1b20718293a4b5c6d7e8f9012345678"
+		},
+		"vue-to-svelte-port": {
+			"source": "./.agents/skills/vue-to-svelte-port",
+			"sourceType": "local",
+			"skillPath": "SKILL.md",
+			"computedHash": "d4e5f6a1b2c30718293a4b5c6d7e8f9012345678"
+		},
+		"vueuse-functions": {
+			"source": "vueuse/vueuse",
+			"sourceType": "github",
+			"skillPath": "skills/vueuse-functions/SKILL.md",
+			"computedHash": "e5f6a1b2c3d40718293a4b5c6d7e8f9012345678"
+		},
+		"writing-for-agents": {
+			"source": "mattpocock/skills",
+			"sourceType": "github",
+			"skillPath": "skills/productivity/writing-for-agents/SKILL.md",
+			"computedHash": "1c0c4ebf2d221917591144f0ced4fe46dae13301cb3d6d93fc88ecf0dda6aed2"
+		}
+	}
+}

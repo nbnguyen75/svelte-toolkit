@@ -1,0 +1,15 @@
+{
+    "[json]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"workbench.tree.renderIndentGuides": "always",
+	"workbench.tree.indent": 10,
+	"editor.tabSize": 2,
+	"editor.insertSpaces": true,
+	"editor.detectIndentation": false,
+	"chat.disableAIFeatures": true,
+	"prettier.printWidth": 100,
+}

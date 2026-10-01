@@ -1,0 +1,65 @@
+{
+	"files.readonlyInclude": {
+		"**/bun.lock": true
+	},
+	"files.watcherExclude": {
+		"**/eslint.config.js": true,
+		"**/.git/objects/**": true,
+		"**/node_modules/**": true,
+		"**/dist/**": true,
+		"**/.vite/**": true
+	},
+	"search.exclude": {
+		"**/skills-lock.json": true,
+		"**/bun.lock": true,
+		"**/dist": true,
+		"**/node_modules": true,
+		"**/.vite": true
+	},
+	"js/ts.tsserver.maxMemory": 4096,
+	"js/ts.preferences.importModuleSpecifier": "non-relative",
+	"js/ts.preferences.preferTypeOnlyAutoImports": true,
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/.svelte-kit": true,
+		"**/node_modules": true,
+		"**/LICENSE": true,
+		"README.md": true,
+		"**/.eslintcache": true
+	},
+	"editor.codeActionsOnSave": {
+		"source.fixAll.prettier": "never",
+		"source.addMissingImports.ts": "explicit",
+		"source.organizeImports": "never"
+	},
+	"js/ts.updateImportsOnFileMove.enabled": "always",
+	"workbench.tree.renderIndentGuides": "always",
+	"workbench.tree.indent": 10,
+	"editor.tabSize": 2,
+	"editor.insertSpaces": true,
+	"editor.detectIndentation": false,
+	"chat.disableAIFeatures": true,
+	"prettier.printWidth": 100,
+	"[typescript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[html]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	}
+}
