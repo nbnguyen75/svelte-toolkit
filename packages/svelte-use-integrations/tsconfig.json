@@ -1,25 +1,28 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"rewriteRelativeImportExtensions": true,
+		"target": "ESNext",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"moduleDetection": "force",
 		"allowJs": true,
 		"checkJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"module": "NodeNext",
-		"moduleResolution": "NodeNext",
-		"moduleDetection": "force",
-
+		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"erasableSyntaxOnly": true,
-
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
 		"noImplicitOverride": true
-	}
+	},
+	"include": ["src/**/*.ts", "src/**/*.svelte", "*.config.ts"],
+	"exclude": ["**/*.test.ts", "**/*.test.svelte", "**/*.spec.ts", "**/*.spec.svelte"]
 }

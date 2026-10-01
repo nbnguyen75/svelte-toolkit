@@ -7,7 +7,7 @@ import svelte from 'eslint-plugin-svelte';
 import { includeIgnoreFile, defineConfig } from 'eslint/config';
 import ts from 'typescript-eslint';
 
-import { LINT_IGNORE_PATTERNS } from './shared-ignore.config.js';
+import { LINT_IGNORE_PATTERNS } from './shared-ignore.config.ts';
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 

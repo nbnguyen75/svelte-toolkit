@@ -1,5 +1,5 @@
 import { defineConfig } from 'oxfmt';
-import { FORMAT_IGNORE_PATTERNS } from './shared-ignore.config.js';
+import { FORMAT_IGNORE_PATTERNS } from './shared-ignore.config.ts';
 
 export default defineConfig({
 	useTabs: true,

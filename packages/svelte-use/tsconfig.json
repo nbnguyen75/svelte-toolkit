@@ -12,6 +12,8 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"rewriteRelativeImportExtensions": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
@@ -21,5 +23,6 @@
 		"exactOptionalPropertyTypes": true,
 		"noImplicitOverride": true
 	},
-	"include": ["src/**/*.ts", "src/**/*.svelte", "test/**/*.ts", "test/**/*.svelte", "*.config.ts"]
+	"include": ["src/**/*.ts", "src/**/*.svelte", "*.config.ts"],
+	"exclude": ["**/*.test.ts", "**/*.test.svelte", "**/*.spec.ts", "**/*.spec.svelte"]
 }

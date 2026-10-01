@@ -9,6 +9,12 @@
 - [x] Tooling: `oxlint.config.ts`, `oxfmt.config.ts`, `shared-ignore.config.js`, `eslint.config.js` (perfectionist), strict `tsconfig.json`, `vitest.config.ts`, self-contained smoke tests, `docs/` templates.
 - [x] `package.json`: bun scripts, Oxc + Vitest devDeps; Prettier removed. No core dependency yet — add `"@wynn-dev/svelte-use": "workspace:*"` only when an adapter needs it.
 
+### Pure-library de-kit (post-commit)
+
+- [x] Removed SvelteKit app shell (`src/routes/`, `src/app.html`, `src/app.d.ts`, `static/`, `.svelte-kit/`) — pure `svelte-package` library like core.
+- [x] Dropped `@sveltejs/kit` + adapter deps/scripts; `vite.config.ts` uses `@sveltejs/vite-plugin-svelte`; self-contained `tsconfig.json`; `shared-ignore.config.js` → `.ts`.
+- [x] `init.ps1` green: check 0/0, format clean, lint 0 errors, test 6/6, prepack publint clean, no leaks.
+
 ## Next
 
 - Run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use-integrations/` for baseline verification.

@@ -47,7 +47,13 @@ export const LINT_IGNORE_PATTERNS = [
 	// Tooling cache & timestamps
 	'**/vite.config.js.timestamp-*',
 	'**/vite.config.ts.timestamp-*',
-	'**/.eslintcache'
+	'**/.eslintcache',
+
+	// Tests are specification, not shipped surface: exercised by vitest,
+	// never typechecked or linted so specs never churn for tooling rules
+	'test',
+	'**/*.test.*',
+	'**/*.spec.*'
 ];
 
 export const SHARED_IGNORE_PATTERNS = [

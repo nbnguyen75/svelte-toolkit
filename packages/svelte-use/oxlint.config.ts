@@ -2,10 +2,16 @@ import { defineConfig } from 'oxlint';
 import { LINT_IGNORE_PATTERNS } from './shared-ignore.config.ts';
 
 export default defineConfig({
-	plugins: ['typescript', 'unicorn'],
+	plugins: ['eslint', 'typescript', 'unicorn', 'import'],
 	jsPlugins: ['eslint-plugin-svelte'],
+	options: {
+		typeAware: true
+	},
 	categories: {
-		correctness: 'off'
+		correctness: 'error',
+		suspicious: 'warn',
+		pedantic: 'off',
+		style: 'off'
 	},
 	env: {
 		builtin: true,
@@ -152,7 +158,13 @@ export default defineConfig({
 		// =========================================================================
 
 		// Strict Types & Prohibitions
-		'typescript/ban-ts-comment': 'error',
+		'typescript/ban-ts-comment': [
+			'error',
+			{
+				'ts-expect-error': 'allow-with-description',
+				'ts-ignore': false
+			}
+		],
 		'typescript/no-duplicate-enum-values': 'error',
 		'typescript/no-empty-object-type': 'error',
 		'typescript/no-explicit-any': 'error',
@@ -177,9 +189,74 @@ export default defineConfig({
 				prefer: 'type-imports',
 				fixStyle: 'separate-type-imports'
 			}
-		]
+		],
+
+		// =========================================================================
+		// Async Safety, Precision & Hygiene (type-aware where marked)
+		// =========================================================================
+
+		'no-console': ['error', { allow: ['warn', 'error'] }],
+
+		// Floating / misused promises: silently dropped async failures
+		'typescript/no-floating-promises': 'error',
+		'typescript/no-misused-promises': 'error',
+
+		// Unsafe any-propagation through async boundaries
+		'typescript/no-unsafe-member-access': 'error',
+		'typescript/no-unsafe-argument': 'error',
+		'typescript/no-unsafe-return': 'error',
+		'typescript/no-unsafe-type-assertion': 'error',
+		'typescript/no-unsafe-assignment': 'warn',
+		'typescript/no-unsafe-call': 'warn',
+
+		// Dead code & precision
+		'typescript/no-unnecessary-condition': 'error',
+		'typescript/no-unnecessary-type-assertion': 'error',
+		'typescript/no-for-in-array': 'error',
+		'typescript/no-inferrable-types': [
+			'error',
+			{
+				ignoreParameters: true
+			}
+		],
+		'typescript/method-signature-style': ['error', 'property'],
+		'typescript/only-throw-error': 'error',
+		'typescript/require-await': 'warn',
+		'typescript/prefer-for-of': 'warn',
+
+		// Import hygiene
+		'import/no-duplicates': 'error',
+		'import/no-commonjs': 'error',
+
+		// Unicorn mutation & scoping guards
+		'unicorn/no-array-reverse': 'warn',
+		'unicorn/no-array-sort': 'warn',
+		'unicorn/consistent-function-scoping': 'warn',
+		'unicorn/throw-new-error': 'warn',
+		'unicorn/prefer-number-properties': 'warn',
+		'unicorn/prefer-node-protocol': 'error'
 	},
 	overrides: [
+		{
+			// Plain-JS tooling glue sits outside the TS program, so type-aware
+			// rules only see `error` types here. Syntax rules still apply.
+			files: ['*.config.js'],
+			rules: {
+				'typescript/no-unsafe-member-access': 'off',
+				'typescript/no-unsafe-argument': 'off',
+				'typescript/no-unsafe-return': 'off',
+				'typescript/no-unsafe-type-assertion': 'off',
+				'typescript/no-unsafe-assignment': 'off',
+				'typescript/no-unsafe-call': 'off'
+			}
+		},
+		{
+			// Barrel placeholder until the first port lands its exports.
+			files: ['src/lib/index.ts'],
+			rules: {
+				'unicorn/no-empty-file': 'off'
+			}
+		},
 		{
 			files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
 			rules: {
