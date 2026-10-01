@@ -8,3 +8,6 @@ export * from './shared/getter.ts';
 export * from './shared/is.ts';
 // * State
 export * from './state/useStorage/index.ts';
+// * Utilities
+export * from './utilities/useDebounceFn/index.ts';
+export * from './utilities/useThrottleFn/index.ts';

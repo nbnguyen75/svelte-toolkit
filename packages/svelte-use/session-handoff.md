@@ -3,19 +3,23 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001`, `feat-002`, `feat-003` are `done` (gates green 2026-10-01).
+- `feat-001` through `feat-004` are `done` (gates green 2026-10-01).
 - Pure library package (no SvelteKit shell). Shipped utils:
-  `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser) and
-  `useStorage`/`useLocalStorage`/`useSessionStorage` (state), plus shared
-  `is.ts` / `getter.ts`. Barrel exports 9 symbols.
+  `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
+  `useStorage`/`useLocalStorage`/`useSessionStorage` (state),
+  `useDebounceFn`/`useThrottleFn` (utilities), plus shared `is.ts`/`getter.ts`.
+  Barrel exports 11 symbols.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- feat-004 (Timing foundations) is the next unblocked batch — `useDebounceFn`,
-  `useThrottleFn`, `useInterval`, etc. from `sv-utils/packages/src/lib/utilities/`.
-  Then feat-005, which blocks feat-006/007.
+- feat-005 (Test & docs harness) is next and blocks feat-006/007.
+- The sv-utils reference also has `useCountdown`, `useFps`, `useIntervalFn`,
+  `useRafFn`, `useTimeoutFn` in `src/lib/utilities/`. They are **not** in
+  feat-004's function list — check `feature_list.json` for which feature
+  (if any) claims them before porting, and prefer the Svelte-native
+  equivalents in `svelte/reactivity` where one exists.
 
 ## Harness Notes (learned this session — do not rediscover)
 
@@ -27,6 +31,10 @@
   a runtime type guard instead, which is how `useStorage`'s serializer is built.
 - `$effect` cleanup must be callable, not `undefined`: a bare early `return;`
   trips `consistent-return`. Return a no-op function instead.
+- The sv-utils reference casts to generics freely (`lastArgs as Args`,
+  `JSON.parse(raw) as T`). Both are unreachable here — `no-unsafe-type-assertion`
+  rejects any assertion whose target is a generic type parameter. Narrow with a
+  runtime guard or a `value is T` predicate instead.
 - In the `node` test environment `svelte` resolves to its **server** build: runes
   are inert and `$effect.root` never calls back. SSR probes must call the factory
   directly, never inside an effect root or `mount()`.

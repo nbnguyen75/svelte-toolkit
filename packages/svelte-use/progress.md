@@ -63,3 +63,14 @@
 - [x] Corrected one wrong test of my own: I asserted an empty array default would reject `[1,'b']` for a `string[]` cell. It cannot — there is no element-type information to check against. The guard was right; the expectation was rewritten to assert the actual (documented) behavior.
 - [x] Gates: `check` 0/0, `format` clean (58 files), `lint` 0 errors 0 warnings, `test` 60/60 (12 files), `prepack` publint clean, path-leak scan clean. Barrel resolves 9 exports at runtime (`isBrowser, resolveGetter, useClipboard, useDark, useEventListener, useLocalStorage, useScrollToTop, useSessionStorage, useStorage`).
 - [x] feat-002 and feat-003 marked `done` in `feature_list.json` with evidence.
+
+### feat-004 — timing utilities (2026-10-01)
+
+- [x] `useDebounceFn` and `useThrottleFn` ported from the sv-utils reference (lodash-style `leading`/`trailing`/`maxWait`, vendored zero-dep). Both stayed plain `.ts` — no runes, no DOM, no effect scope — so they are SSR-safe by construction and need no `.svelte.ts` variant.
+- [x] Replaced the reference's `lastArgs as Args` casts with a narrowed `invokeLatest()` helper. `no-unsafe-type-assertion` rejects an assertion to a generic `Args` (same rule that blocked `useStorage`), and a truthiness guard is both lint-clean and more honest: a cleared burst can never fire `fn` with `undefined` args.
+- [x] Fixed a real ordering bug carried by the reference's throttle: it cleared `timer` _after_ invoking, so a re-entrant call from `fn` saw a still-armed timer and silently queued a second trailing invocation. Now `timer` is cleared before `invokeLatest()`. Pinned with a re-entrancy test that also proves the chain is bounded rather than recursing.
+- [x] Wrote that re-entrancy test against my own wrong expectation first (assumed one re-fire per step; the correct behavior is one fresh window per re-entrant call, advancing to the caller's own bound). Rewritten to assert the real behavior.
+- [x] Added coverage the reference lacked: multi-argument forwarding for both, `useDebounceFn` post-cancel no-fire, and the both-edges-off throttle case pinned to VueUse `throttleFilter` semantics.
+- [x] Documented the operational caveat neither the reference nor VueUse states: the wrappers hold no effect scope, so **nothing disposes them for you** — call `cancel()` in an `$effect` teardown or a pending invocation can fire after teardown. Also noted `Date.now()` wall-clock window drift and that these are not event filters (no promise, no `this`).
+- [x] Deliberate API divergence: VueUse's `throttleFilter` takes positional `(ms, trailing, leading)` or an object; this port takes only an options object, so the argument order cannot be misread.
+- [x] Gates: `check` 0/0, `format` clean (64 files), `lint` 0 errors 0 warnings, `test` 85/85 (14 files), `prepack` publint clean, path-leak clean. Barrel resolves 11 exports at runtime.

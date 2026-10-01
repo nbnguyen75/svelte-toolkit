@@ -73,24 +73,24 @@
 		{
 			"dependencies": ["feat-001"],
 			"description": "Debounce and throttle helpers with lodash-style leading/trailing/maxWait semantics (vendored, zero-dep) plus cancel/flush. Parity review tracked in feat-006; docs/tests in feat-008.",
-			"evidence": "",
+			"evidence": "useDebounceFn + useThrottleFn ported 2026-10-01 from the sv-utils reference (lodash-style leading/trailing/maxWait, zero-dep). Replaced the reference lastArgs-as-Args casts with a narrowed invokeLatest() helper: no-unsafe-type-assertion rejects an assertion to a generic Args. Kept as plain .ts (no runes, no DOM), so both are SSR-safe by construction. Gates green; 25 tests across the two modules.",
 			"functions": [
 				{
 					"name": "useDebounceFn",
 					"source": "vueuse/shared/useDebounceFn (debounceFilter semantics)",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useDebounceFn/"
 				},
 				{
 					"name": "useThrottleFn",
 					"source": "vueuse/shared/useThrottleFn",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useThrottleFn/"
 				}
 			],
 			"id": "feat-004",
 			"name": "Timing foundations (implemented)",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-001"],
