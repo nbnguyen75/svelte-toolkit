@@ -515,7 +515,7 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Kept: refAutoReset (timer lifecycle), computedWithControl (controlled derivation), createSharedComposable (SSR-safe shared singleton). Cut as recipes: refManualReset, refWithControl, createEventHook, createGlobalState, syncRef.",
-			"evidence": "",
+			"evidence": "Shipped 3 state utils under src/lib/state/: refAutoReset (quiet-period reset, getter defaultValue/afterMs re-resolved per write, timer cleared on unmount, no timer armed on the server), computedWithControl (memoized per revision with manual trigger(), read-only and writable get/set overloads, fn reads untracked, undefined T cached correctly), createSharedComposable (client singleton held in a wrapper cell so an undefined-returning composable is still invoked once; server returns the composable untouched so requests stay isolated). Re-scoped this batch from 8 kept to 3: refManualReset, refWithControl, createEventHook, createGlobalState and syncRef are cut as recipes per scope.md section 3. Tests: 20 new (6 files); full suite 489 passed; svelte-check 0 errors/0 warnings; lint 0 errors/0 warnings; format clean; prepack publint clean; runtime exports 55 to 58.",
 			"functions": [
 				{
 					"name": "refDefault",
@@ -538,7 +538,7 @@
 				{
 					"name": "refAutoReset",
 					"source": "vueuse/shared/refAutoReset",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/refAutoReset/"
 				},
 				{
@@ -568,7 +568,7 @@
 				{
 					"name": "createSharedComposable",
 					"source": "vueuse/shared/createSharedComposable",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/createSharedComposable/"
 				},
 				{
@@ -592,13 +592,13 @@
 				{
 					"name": "computedWithControl",
 					"source": "vueuse/shared/computedWithControl",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/computedWithControl/"
 				}
 			],
 			"id": "feat-014",
 			"name": "Ref variants & shared state",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],

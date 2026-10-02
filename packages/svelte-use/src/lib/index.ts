@@ -20,6 +20,9 @@ export * from './shared/useArraySome/index.ts';
 export * from './shared/useArrayUnique/index.ts';
 export * from './shared/useSorted/index.ts';
 // * State
+export * from './state/computedWithControl/index.ts';
+export * from './state/createSharedComposable/index.ts';
+export * from './state/refAutoReset/index.ts';
 export * from './state/until/index.ts';
 export * from './state/useCloned/index.ts';
 export * from './state/useCounter/index.ts';

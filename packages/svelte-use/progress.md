@@ -165,3 +165,20 @@ Five watcher utilities under `src/lib/state/`, each with `index.svelte.ts`, an `
 - [x] 45 new tests across 10 files (5 jsdom + 5 SSR). Suite is now **469/469 across 78 files** (was 424/424 across 68).
 - [x] Gates: `check` 0/0, `format` clean, `lint` 0 errors 0 warnings, `test` 469/469, `prepack` publint "All good!", path-leak clean. Barrel resolves 5 new functions (50 → 55 runtime exports).
 - [x] feat-013 marked `done`: 5 functions `done`, 8 `cut`.
+
+### feat-014 Ref variants & shared state implemented (2026-10-02)
+
+Re-scoped from 8 kept to **3** before implementation, then shipped: `refAutoReset`, `computedWithControl`, `createSharedComposable` under `src/lib/state/`, each with a README, a jsdom suite, and an SSR probe.
+
+- [x] **Five more functions were `cut` as recipes** after re-reading them against `scope.md` §3: `refManualReset` (a `$state` cell plus a `reset()`), `refWithControl` (a setter function; `untrackedGet` is native `untrack`), `createEventHook` (Svelte callback props supersede a hand-rolled emitter, and nothing in this package consumes one), `createGlobalState` (a six-line lazy memo — §2 already tells users to write their own factory or use context), and `syncRef` (its microtask loop-breaker plus `as unknown as` casts, inconsistent with `syncRefs` which was already cut). Their rows were added to `docs/recipes.md`.
+- [x] **`refAutoReset` arms its timer only in the browser.** On the server `$effect` is inert, so the cleanup that clears a pending timer never runs — a timer armed during SSR could outlive the render. The setter still stores the value; it just skips `setTimeout`, which is probed by the SSR test.
+- [x] **`refAutoReset` re-resolves getter arguments per write**, matching VueUse: every set cancels and re-arms, so `() => fallback` and `() => wait` can track reactive state. Pinned by a test that changes the delay between two writes.
+- [x] **`computedWithControl` caches by revision, not by truthiness.** The reference cached into `T | undefined` and returned `cached as T`, which is both a cast and wrong for a legitimately `undefined` `T`. Storing `{ value: T } | undefined` makes the cache honest and the return cast-free; a test asserts a `() => undefined` derivation still runs once.
+- [x] **`computedWithControl` reads `fn` untracked and only `source` decides recomputation**, which is the whole point of the "with control" variant. Two tests pin both halves: a source change recomputes, and a change to state read _inside_ `fn` does not.
+- [x] **`createSharedComposable` holds its cache in a `{ value: R }` wrapper**, because the reference's `if (state === undefined)` re-invoked any composable that returns `undefined`. The server branch returns the composable untouched, so no instance is shared between requests — pinned by an SSR test that asserts two calls produce two distinct objects.
+- [x] **The no-refcount ceiling is documented rather than hidden.** VueUse disposes the shared instance when the last consumer unmounts via `effectScope`; a Svelte port cannot without a subscriber protocol, so the README and JSDoc say so and point at context instead.
+- [x] `createSharedComposable` ships as a single `index.ts` — it uses no runes, and `module-contract.md` §1 requires pure logic to stay compiler-free.
+- [x] Four lint findings fixed by autofix without suppressions: `perfectionist/sort-interfaces` (`trigger` before `value`) and `perfectionist/sort-object-types` (`set` before `get` in the writable overload's inline type).
+- [x] 20 new tests across 6 files (3 jsdom + 3 SSR). Suite is now **489/489 across 84 files** (was 469/469 across 78).
+- [x] Gates: `check` 0/0, `format` clean, `lint` 0 errors 0 warnings, `test` 489/489, `prepack` publint "All good!", path-leak clean. Barrel resolves 3 new functions (55 → 58 runtime exports).
+- [x] feat-014 marked `done`: 3 functions `done`, 10 `cut`.

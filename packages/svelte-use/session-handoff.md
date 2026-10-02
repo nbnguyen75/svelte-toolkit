@@ -3,28 +3,30 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-011` and `feat-013` are `done`; `feat-012` is
+- `feat-001` through `feat-011`, `feat-013` and `feat-014` are `done`; `feat-012` is
   `deferred` (gates green 2026-10-02).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
   `useStorage`/`useLocalStorage`/`useSessionStorage` plus `useToggle`/`useCounter`/`usePrevious`/`useLastChanged`/`useCloned`/`useCycleList`/`useStepper`/`useOffsetPagination` (state),
   the watchers `watchIgnorable`/`watchTriggerable`/`watchAtMost`/`watchArray`/
   `until` (state),
+  plus `refAutoReset`/`computedWithControl`/`createSharedComposable` (state),
   `useDebounceFn`/`useThrottleFn`/`useTimeoutFn`/`useIntervalFn`/`useCountdown`/
   `useRafFn`/`useFps` (utilities), the 13 reactive array transforms
   `useArrayMap`/`useArrayFilter`/`useArrayUnique`/`useArraySome`/`useArrayEvery`/
   `useArrayIncludes`/`useArrayJoin`/`useArrayReduce`/`useArrayFind`/
   `useArrayFindIndex`/`useArrayFindLast`/`useArrayDifference`/`useSorted` (shared),
   plus shared `is.ts` (14 guard/predicate exports) / `getter.ts`.
-  Barrel exports 55 runtime symbols. Suite: 469 tests / 78 files.
+  Barrel exports 58 runtime symbols. Suite: 489 tests / 84 files.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
 - **feat-013 Reactive watchers is `done`** — the 5 kept watchers listed above; the 8 one-liners are `cut` as recipes in `docs/recipes.md` (gates green 2026-10-02); details below.
-- **Next unblocked coding feature is feat-014** — re-scoped to **3** kept (`refAutoReset`, `computedWithControl`, `createSharedComposable`); 10 cut as recipes. Plan: `plans/feat-014-ref-variants.md`. feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
-- `feat-015` onward (async/history) are also unblocked; take them in id order unless the roadmap says otherwise.
+- **feat-014 Ref variants & shared state is `done`** — 3 kept (`refAutoReset`, `computedWithControl`, `createSharedComposable`); 10 `cut` as recipes after a §3 re-review (gates green 2026-10-02); details below.
+- **Next unblocked coding feature is feat-015** (async data + memoized/derived state, 9 `todo`). Promise handling must stay SSR-safe (pending state on the server, no unhandled rejections). feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
+- `feat-016` onward (viewport/elements) are also unblocked; take them in id order unless the roadmap says otherwise.
 - `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` — they are
   recipes in `docs/recipes.md`, not library code.
 
@@ -147,8 +149,8 @@
 ## Next Session
 
 - **Last Updated**: 2026-10-02
-- **Current Objective**: start feat-014 (ref variants) — feat-012 is deferred to date-fns recipes.
-- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`, then read `feature_list.json` for feat-014's function list.
+- **Current Objective**: start feat-015 (async data + memoized/derived state) — feat-012 is deferred to date-fns recipes.
+- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`, then read `feature_list.json` for feat-015's function list.
 
 ## State essentials — how feat-009 is built (do not re-derive)
 
@@ -238,3 +240,33 @@
   function types (`stop: () => void`), not methods. `unicorn/no-new-array` bans
   `new Array(n)`; use `.map(() => false)`. `unbound-method` bans passing a
   method reference unbound — wrap forwarded controls in arrows.
+
+## Ref variants — how feat-014 is built (do not re-derive)
+
+- **This batch was re-scoped 8 → 3 before any code was written.** `refManualReset`,
+  `refWithControl`, `createEventHook`, `createGlobalState` and `syncRef` fail
+  `scope.md` §3 and are `cut`. Do not re-add them; their reasons live in the
+  `docs/recipes.md` Refs/Shared rows.
+- **Cache `undefined` results in a wrapper object.** `createSharedComposable` holds
+  `let shared: { value: R } | undefined`, not `R | undefined` — a truthiness check
+  would re-invoke any composable that returns `undefined`. Same trick in
+  `computedWithControl`: `cached: { value: T } | undefined` replaces the
+  reference's `cached as T`.
+- **`refAutoReset` arms its timer only when `isBrowser`.** On the server `$effect`
+  is inert, so the unmount cleanup never runs and a stray timer could outlive the
+  render. The value still stores; only `setTimeout` is skipped.
+- **`computedWithControl` recomputes per revision, never per read.** A `$state`
+  `epoch` is bumped by an `$effect` that tracks `source` and by `trigger()`; the
+  cache is keyed on it. Reads inside `fn` run in `untrack`, so only `source`
+  decides recomputation — that is the entire point of the util.
+- **`createSharedComposable` has no refcount and cannot grow one.** VueUse disposes
+  the shared instance when the last consumer unmounts via `effectScope`; a Svelte
+  port has no subscriber protocol for that. The ceiling is documented in the JSDoc
+  and README, which point at context instead. Do not "fix" it with a module-level
+  cache — `scope.md` §2 forbids that.
+- **A util with no runes ships a single `index.ts`.** `createSharedComposable` has
+  no `index.svelte.ts` because `module-contract.md` §1 requires pure logic to stay
+  compiler-free.
+- **`perfectionist/sort-interfaces` orders `trigger` before `value`**, and
+  `perfectionist/sort-object-types` orders `set` before `get`. Run `lint:fix` before
+  `format:fix`; the autofix reorders code and leaves formatting to `oxfmt`.
