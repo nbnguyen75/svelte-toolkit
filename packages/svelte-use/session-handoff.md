@@ -23,7 +23,7 @@
 ## Immediate Next Task
 
 - **feat-013 Reactive watchers is `done`** — the 5 kept watchers listed above; the 8 one-liners are `cut` as recipes in `docs/recipes.md` (gates green 2026-10-02); details below.
-- **Next unblocked coding feature is feat-014** (ref variants). feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
+- **Next unblocked coding feature is feat-014** — re-scoped to **3** kept (`refAutoReset`, `computedWithControl`, `createSharedComposable`); 10 cut as recipes. Plan: `plans/feat-014-ref-variants.md`. feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
 - `feat-015` onward (async/history) are also unblocked; take them in id order unless the roadmap says otherwise.
 - `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` — they are
   recipes in `docs/recipes.md`, not library code.

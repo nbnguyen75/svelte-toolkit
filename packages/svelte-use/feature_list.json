@@ -514,7 +514,7 @@
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
-			"description": "Ref variants kept: refAutoReset, refManualReset, refWithControl, createEventHook, createGlobalState, createSharedComposable, syncRef, computedWithControl. (Trivial wrappers cut as recipes.)",
+			"description": "Kept: refAutoReset (timer lifecycle), computedWithControl (controlled derivation), createSharedComposable (SSR-safe shared singleton). Cut as recipes: refManualReset, refWithControl, createEventHook, createGlobalState, syncRef.",
 			"evidence": "",
 			"functions": [
 				{
@@ -544,25 +544,25 @@
 				{
 					"name": "refManualReset",
 					"source": "vueuse/shared/refManualReset",
-					"status": "todo",
+					"status": "cut",
 					"target": "src/lib/state/refManualReset/"
 				},
 				{
 					"name": "refWithControl",
 					"source": "vueuse/shared/refWithControl",
-					"status": "todo",
+					"status": "cut",
 					"target": "src/lib/state/refWithControl/"
 				},
 				{
 					"name": "createEventHook",
 					"source": "vueuse/shared/createEventHook",
-					"status": "todo",
+					"status": "cut",
 					"target": "src/lib/state/createEventHook/"
 				},
 				{
 					"name": "createGlobalState",
 					"source": "vueuse/shared/createGlobalState",
-					"status": "todo",
+					"status": "cut",
 					"target": "src/lib/state/createGlobalState/"
 				},
 				{
@@ -574,7 +574,7 @@
 				{
 					"name": "syncRef",
 					"source": "vueuse/shared/syncRef",
-					"status": "todo",
+					"status": "cut",
 					"target": "src/lib/state/syncRef/"
 				},
 				{
