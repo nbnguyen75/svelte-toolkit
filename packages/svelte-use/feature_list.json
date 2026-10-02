@@ -183,60 +183,60 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Most-imported state primitives. useToggle/useCounter cover the majority of toggle/counter needs; history/cloned/cycle/stepper/previous/lastChanged round out local state.",
-			"evidence": "",
+			"evidence": "Shipped 8/8 modules under src/lib/state/ (useToggle, useCounter, usePrevious, useLastChanged, useCloned, useCycleList, useStepper, useOffsetPagination), each with index.svelte.ts + index.ts, README.md, a jsdom suite and an SSR probe. 91 new state tests; suite is 266/266 across 42 files. Barrel exports all 8 plus their option/return interfaces. Zero assertions and zero suppressions despite no-unsafe-type-assertion: (1) useToggle avoids pushing a boolean literal into the generic slot by giving valuesToggle() the two values as arguments and calling it with an explicit T; arity-vs-explicit-undefined is carried in the type via rest args `[] | [T]` instead of arguments.length. (2) useCloned cannot structuredClone a reactive proxy (DOMException, pinned by a probe), so the default clone runs over $state.snapshot; the snapshot type is named with ReturnType<typeof defaultClone<T>> because Svelte does not export Snapshot, which keeps value exactly T for plain data with no cast. (3) useCycleList reads list items with a non-null assertion justified by the wraparound bounds check. Documented divergences: usePrevious returns T | undefined before the first change; useCycleList returns T (and -1 index) for an empty list, matching VueUse. Gates green.",
 			"functions": [
 				{
 					"name": "useToggle",
 					"source": "vueuse/shared/useToggle",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useToggle/"
 				},
 				{
 					"name": "useCounter",
 					"source": "vueuse/shared/useCounter",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useCounter/"
 				},
 				{
 					"name": "usePrevious",
 					"source": "vueuse/core/usePrevious",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/usePrevious/"
 				},
 				{
 					"name": "useLastChanged",
 					"source": "vueuse/shared/useLastChanged",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useLastChanged/"
 				},
 				{
 					"name": "useCloned",
 					"source": "vueuse/core/useCloned",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useCloned/"
 				},
 				{
 					"name": "useCycleList",
 					"source": "vueuse/core/useCycleList",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useCycleList/"
 				},
 				{
 					"name": "useStepper",
 					"source": "vueuse/core/useStepper",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useStepper/"
 				},
 				{
 					"name": "useOffsetPagination",
 					"source": "vueuse/core/useOffsetPagination",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useOffsetPagination/"
 				}
 			],
 			"id": "feat-009",
 			"name": "State essentials",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -329,7 +329,7 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Core timers and clock primitives; fake-timer tests. Pausable controls per architecture rules. (useTimeout/useInterval/useNow/useTimestamp cut as recipes.)",
-			"evidence": "Hand-rolled: svelte/reactivity has no timer primitive (7 exports, none of them a clock). Ships useTimeoutFn, useIntervalFn, useCountdown, useRafFn, useFps under src/lib/utilities/, each with README.md, a jsdom suite and an SSR probe. 54 new tests; suite is now 175/175 across 26 files. All five arm inside , so nothing starts on the server and every timer/frame is released on unmount. useTimeout/useInterval/useNow/useTimestamp remain cut as recipes (docs/recipes.md).",
+			"evidence": "Hand-rolled: svelte/reactivity has no timer primitive (7 exports, none of them a clock). Ships useTimeoutFn, useIntervalFn, useCountdown, useRafFn, useFps under src/lib/utilities/, each with README.md, a jsdom suite and an SSR probe. 54 new tests; suite is now 175/175 across 26 files. All five arm inside `$effect`, so nothing starts on the server and every timer/frame is released on unmount. useTimeout/useInterval/useNow/useTimestamp remain cut as recipes (docs/recipes.md).",
 			"functions": [
 				{
 					"name": "useTimeoutFn",

@@ -3,23 +3,21 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-008` and `feat-011` are `done` (gates green 2026-10-01).
+- `feat-001` through `feat-009` and `feat-011` are `done` (gates green 2026-10-02).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
-  `useStorage`/`useLocalStorage`/`useSessionStorage` (state),
+  `useStorage`/`useLocalStorage`/`useSessionStorage` plus `useToggle`/`useCounter`/`usePrevious`/`useLastChanged`/`useCloned`/`useCycleList`/`useStepper`/`useOffsetPagination` (state),
   `useDebounceFn`/`useThrottleFn`/`useTimeoutFn`/`useIntervalFn`/`useCountdown`/
   `useRafFn`/`useFps` (utilities), plus shared `is.ts` (14 guard/predicate
-  exports) / `getter.ts`. Barrel exports 29 symbols. Suite: 175 tests / 26 files.
+  exports) / `getter.ts`. Barrel exports 37 symbols. Suite: 266 tests / 42 files.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
 - **feat-001 through feat-008 and feat-011 are `done`** (gates green 2026-10-01).
-- **Next unblocked feature is feat-009 State essentials** â€” `useToggle`, `useCounter`,
-  `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`,
-  `useOffsetPagination`. Deps (feat-005, feat-008) are done.
-- Still open after that: feat-010, feat-012 â€¦ feat-029.
+- **feat-009 State essentials is `done`** - `useToggle`, `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`, `useOffsetPagination` (gates green 2026-10-02).
+- **Next unblocked feature is feat-010 Reactive arrays** - `useArrayMap`, `useArrayFilter`, `useArrayUnique`, and friends. Deps (feat-005, feat-008) are done. Pure transforms, `shared/` category, no compiler needed.
 - `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` â€” they are
   recipes in `docs/recipes.md`, not library code.
 
@@ -111,3 +109,32 @@
 - **Last Updated**: 2026-10-01
 - **Current Objective**: baseline verification, then first utility port.
 - **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`.
+
+## State essentials — how feat-009 is built (do not re-derive)
+
+- **Three type problems cost most of the time here. All three are solved without
+  a cast or a lint suppression; keep it that way.**
+- **`useToggle`**: never assign a literal into the generic slot. Pass the two
+  values to a private `valuesToggle()` as *arguments* so `T` is inferred as
+  `boolean` on the boolean overload. The boolean overload takes no options.
+- **`toggle()` vs `toggle(undefined)` differ, and a default parameter cannot
+  express that.** The arity is the signal, carried by a rest parameter typed
+  `...args: [] | [T]`. Do not go back to `arguments.length` (legacy style) or to
+  an optional parameter (loses the distinction). `Object.is` drives the compare.
+- **`structuredClone` cannot read a reactive proxy** (`DOMException`), and
+  `$state.raw` does not de-proxy. Only `$state.snapshot` works, so the default
+  clone is `structuredClone($state.snapshot(source))`.
+- **Svelte exports neither `Snapshot` nor `snapshot`,** so the type is named with
+  `ReturnType<typeof defaultClone<T>>` (an instantiation expression). A
+  hand-written conditional alias is rejected — TS cannot prove it matches
+  Svelte's for a deferred `T`.
+- **`usePrevious` needs a non-reactive `last`** holding the previous effect run's
+  value. Reading the source inside the effect gives you the *current* value, not
+  the prior one; that bug shipped in the first draft and the tests caught it.
+- **`noUncheckedIndexedAccess` is on,** so `list[i]` is `T | undefined`.
+  `useCycleList` uses `list[wrapped]!` because the wraparound arithmetic already
+  proves the index is in range.
+- **`useStepper` works in `unknown` space** on purpose, so array steps (names are
+  the values) and record steps (names are the keys) share one path — and the impl
+  signature declares the widened return, which is why even the final return needs
+  no cast.
