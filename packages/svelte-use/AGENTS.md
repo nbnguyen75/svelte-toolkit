@@ -78,7 +78,8 @@ Always use the standard npm/bun scripts configured in `package.json` for validat
 - **SSR & Browser Guards**: Every DOM/browser API access must check `typeof window !== 'undefined'` or run safely inside `$effect`.
 - **No Module-Scope Mutable State**: Module scope is for immutable constants only — server modules are shared across requests. See `scope.md` §2.
 - **Zero Memory Leaks**: Always return cleanup functions or provide `.stop()` / `.cleanup()` methods for event listeners, observers, and timers.
-- **Check Svelte first**: Before implementing, see whether `svelte/reactivity` or `svelte/reactivity/window` already covers it (`scope.md` §5).
+- **Check Svelte first**: Before implementing, see whether `svelte/reactivity` or `svelte/reactivity/window` already covers it (`scope.md` §5). No timer primitive exists there, so the timing utils (`useIntervalFn`, `useTimeoutFn`, `useCountdown`, `useRafFn`, `useFps`) must be hand-rolled.
+- **Peer Floor Is `^5.11.0`**: `svelte/reactivity` requires 5.7.0+ and `svelte/reactivity/window` requires 5.11.0+. A subpath import fails at build time, not install time, so `peerDependencies.svelte` is the only thing that catches an unsupported version. Do not lower it without checking `scope.md` §5.1.
 - **Strict TypeScript**: Export options and return types for each utility from its module folder (`index.ts`). No `any`, no `@ts-ignore`.
 - **Relative Imports Inside `src/lib/`**: Never use `$lib` path aliases inside `src/lib/` — `svelte-package` does not rewrite aliases in `.d.ts` / `.js` files.
 - **Formatting & Linting First**: Use `bun run format:fix` and `bun run lint:fix` during editing.

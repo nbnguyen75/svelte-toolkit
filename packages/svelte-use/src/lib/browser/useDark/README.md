@@ -60,10 +60,13 @@ server HTML does not hard-code a theme class to avoid hydration mismatch.
   explicit mode ignores them until `setMode('auto')`.
 - `toggle()` resolves `auto` first: it writes the opposite of the _effective_
   value, so toggling from a dark OS preference lands on `light`, not `dark`.
-- The media-query listener and DOM sync dispose with the component.
+- The media-query subscription and DOM sync dispose with the component.
+- OS preference is read through Svelte's `MediaQuery` primitive
+  (`svelte/reactivity`), one instance per `useDark()` call. Cleanup is shared,
+  so repeated reads never rebind a listener. This requires `svelte` `^5.7.0`.
 - A `selector` matching nothing is a safe no-op — the mode still resolves,
   only the marker is skipped.
-- Must be called in component initialization (uses `$state` / `$effect`).
+- Must be called in component initialization (uses `$derived` / `$effect`).
 
 ## Parity notes
 

@@ -1,6 +1,7 @@
+import { MediaQuery } from 'svelte/reactivity';
+
 import { isBrowser } from '../../shared/is.ts';
 import { useLocalStorage } from '../../state/useStorage/index.svelte.ts';
-import { useEventListener } from '../useEventListener/index.svelte.ts';
 
 const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 
@@ -54,21 +55,17 @@ export function useDark(opts: UseDarkOptions = {}): UseDarkReturn {
 	const selector = opts.selector ?? 'html';
 	const attribute = opts.attribute ?? 'class';
 
-	const preferred = $state({
-		value: isBrowser && window.matchMedia(DARK_MEDIA_QUERY).matches
-	});
-
-	if (isBrowser) {
-		useEventListener(
-			() => window.matchMedia(DARK_MEDIA_QUERY),
-			'change',
-			(e: MediaQueryListEvent) => (preferred.value = e.matches)
-		);
-	}
+	// One `MediaQuery` per caller, built inside the factory so no instance is
+	// shared across callers or requests (scope.md §2). Its constructor touches
+	// `window.matchMedia`, so it cannot be constructed during SSR — `MediaQuery`
+	// resolves to a stub there anyway (scope.md §5.2).
+	const prefersDark = isBrowser ? new MediaQuery(DARK_MEDIA_QUERY, false) : null;
 
 	const stored = useLocalStorage<UseDarkMode>(storageKey, 'auto');
 
-	const isDark = $derived(stored.value === 'auto' ? preferred.value : stored.value === 'dark');
+	const isDark = $derived(
+		stored.value === 'auto' ? (prefersDark?.current ?? false) : stored.value === 'dark'
+	);
 
 	$effect(() => {
 		if (!isBrowser) return;

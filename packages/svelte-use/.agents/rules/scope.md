@@ -111,9 +111,9 @@ re-wrap them without adding option surface a consumer actually needs.
 | Primitive | Import | Replaces |
 | --- | --- | --- |
 | `scrollX`, `scrollY`, `innerWidth`, `innerHeight`, `outerWidth`, `outerHeight`, `screenLeft`, `screenTop`, `online`, `devicePixelRatio` | `svelte/reactivity/window` | `useOnline`, `useDevicePixelRatio` (both `svelte-native`) |
-| `MediaQuery` | `svelte/reactivity` | backs `useMediaQuery` |
+| `MediaQuery` | `svelte/reactivity` | backs `useMediaQuery`; used by `useDark` |
 | `SvelteSet`, `SvelteMap`, `SvelteDate`, `SvelteURL`, `SvelteURLSearchParams` | `svelte/reactivity` | reactive collections |
-| `createSubscriber` | `svelte/reactivity` | the idiomatic way to wrap an event/observer as reactive state — adopted incrementally, not in one sweep |
+| `createSubscriber` | `svelte/reactivity` | the idiomatic way to wrap an event/observer as reactive state — adopt **only** when a util needs a reactive event *value*, not a side effect |
 
 These are module-level singletons with SSR-safe `undefined` fallbacks and
 built-in cleanup. Reading `innerWidth.current` subscribes to one shared
@@ -124,6 +124,71 @@ Do **not** reimplement a primitive to add an option nothing uses. `useWindowSize
 keeps `initialWidth`/`initialHeight`/`includeScrollbar`/`listenOrientation`
 because those solve real hydration and scrollbar problems; a zero-option
 delegation is a recipe, not a util.
+
+### 5.1 Version Floors (settled — do not re-derive)
+
+`peerDependencies.svelte` is **`^5.11.0`**. The floor is the *later* of the two
+modules below, chosen so both are available and the range does not have to move
+again:
+
+| Module / export | Available since |
+| --- | --- |
+| `svelte/reactivity` — `MediaQuery`, `createSubscriber`, `SvelteSet`/`SvelteMap`/`SvelteDate`/`SvelteURL`/`SvelteURLSearchParams` | **5.7.0** |
+| `svelte/reactivity/window` — `scrollX`, `innerWidth`, `online`, … | **5.11.0** |
+
+**Why the floor matters.** A subpath import fails at *build* time, not install
+time. With `"svelte": "^5.0.0"`, a consumer on 5.4 satisfies the peer check, npm
+reports success, and the build then dies on a module-not-found error for
+`svelte/reactivity`. Nothing but the range prevents that. If you add a
+`svelte/reactivity` import, confirm `peerDependencies.svelte` already covers it.
+
+### 5.2 SSR Behavior Of These Modules
+
+`package.json` exports `./reactivity` under `browser`/`worker`/`default`
+conditions, so the server build resolves identity stubs:
+
+```ts
+// server entry
+export const SvelteMap = globalThis.Map;
+export function createSubscriber(_) {} // no-op
+export class MediaQuery {}            // stub
+```
+
+Consequences for our code:
+
+- `new SvelteMap()` during SSR yields a plain `Map` — usable, not reactive.
+  Correct. No guard needed.
+- `createSubscriber` on the server is a no-op, so a getter calling it simply
+  does not subscribe. Correct. No guard needed.
+- **`new MediaQuery(...)` is a stub on the server.** Guard with `isBrowser`
+  *before* constructing, exactly as `useDark` does. Do not construct it at
+  module scope (§2) — each caller needs its own instance anyway.
+
+### 5.3 Coverage Is Narrow — Check Before Adopting
+
+The module exports 7 symbols. **None of them is a timer.** There is no
+`useIntervalFn`/`useTimeoutFn`/`useRafFn`/`useCountdown`/`useFps` primitive, so
+feat-011's timing batch cannot delegate and must be implemented directly.
+
+There is also no collection- or URL-shaped util in `feature_list.json` today, so
+`SvelteSet`/`SvelteMap`/`SvelteURL` have no current caller either.
+
+**Adopt at the point of use, not as a policy.** `MediaQuery` in `useDark` was
+adopted because it fixed a real defect (see §5.4). `createSubscriber` was
+deliberately *not* adopted for `useEventListener`: that util returns `void` and
+has no reactive value to read, so a subscription mechanism buys nothing while
+the 5 overloads (which type by event map either way) remain regardless.
+
+### 5.4 `useDark` Uses `MediaQuery` — Do Not Revert
+
+`useDark` previously called `window.matchMedia(DARK_MEDIA_QUERY)` **inside a
+getter** passed to `useEventListener`. A getter re-resolves on every effect run,
+so each run constructed a fresh `MediaQueryList` and rebound a listener. That
+was a defect, not a style choice.
+
+The fix is one `MediaQuery` instance created once inside the factory, read via
+`.current`. Do not "simplify" it back to `matchMedia` in a getter — that
+reinstates the repeated-construction behavior.
 
 ## 6. Roadmap Tiering (why the order is what it is)
 
