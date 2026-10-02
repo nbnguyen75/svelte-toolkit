@@ -6,23 +6,23 @@
 import { describe, expect, it } from 'vitest';
 
 import { isBrowser } from '../../shared/is.ts';
-import { useScrollToTop, type UseScrollToTopReturn } from './index.ts';
+import { useSmoothScroll, type UseSmoothScrollReturn } from './index.ts';
 
-describe('useScrollToTop (ssr)', () => {
+describe('useSmoothScroll (ssr)', () => {
 	it('reports a non-browser environment', () => {
 		expect(isBrowser).toBe(false);
 	});
 
-	it('constructs without a DOM and scrollToTop resolves immediately', async () => {
-		const api: UseScrollToTopReturn = useScrollToTop();
+	it('constructs without a DOM and scrollTo resolves immediately', async () => {
+		const api: UseSmoothScrollReturn = useSmoothScroll();
 		expect(api.scrolling).toBe(false);
-		await api.scrollToTop();
+		await api.scrollTo(0);
 		expect(api.scrolling).toBe(false);
 		api.cancel();
 		expect(api.scrolling).toBe(false);
 	});
 
-	it('constructs with an explicit element target without writing', async () => {
+	it('constructs with an explicit element container without writing', async () => {
 		let writes = 0;
 		const fake = {
 			scrollTo: () => {
@@ -31,8 +31,8 @@ describe('useScrollToTop (ssr)', () => {
 			scrollTop: 250,
 			scrollY: undefined
 		} as unknown as HTMLElement;
-		const api: UseScrollToTopReturn = useScrollToTop(() => fake);
-		await api.scrollToTop();
+		const api: UseSmoothScrollReturn = useSmoothScroll(() => fake);
+		await api.scrollTo(0);
 		expect(api.scrolling).toBe(false);
 		expect(fake.scrollTop).toBe(250);
 		expect(writes).toBe(0);

@@ -1,41 +1,375 @@
-# Recipes — cut, deferred, and Svelte-native patterns
+# Recipes — VueUse hooks you do not need in Svelte
 
-Everything the roadmap intentionally does **not** ship as library code, and
-what to reach for instead. Rationale for every `cut` / `deferred` /
-`svelte-native` status lives here; the machine-readable status lives in
-`feature_list.json` (`function.status`).
+Every VueUse function this package deliberately does not ship, and the
+Svelte-native thing to reach for instead.
 
-**The rule for this file:** if a recipe fits on screen without scrolling, it
-is not here. Write the `$derived` or `$effect` yourself. The trivial
-compositions that used to appear below were deleted for exactly that reason —
-their one-line reasons are kept in the index table, but their snippets are not,
-because a 3-line snippet that saves you 3 lines is a worse import than the
-one you just wrote.
-
-Snippets are SSR-safe unless noted. `MaybeGetter<T>` is `T | (() => T)`;
-`resolve` unwraps it (`typeof v === 'function' ? v() : v`). Snippets calling
-`$effect` must run in component initialization.
-
----
-
-## Why these are not utilities
+This file is the source of truth for anything not in
+[`feature_list.json`](../feature_list.json), and it is what the Astro
+migration docs render from: one row per VueUse hook, so a Vue user can look up
+the hook they know and see the Svelte answer next to it.
 
 The yardstick ([`.agents/rules/scope.md`](../.agents/rules/scope.md) §3): a
 function earns library code only if it owns **lifecycle**, **environment
 branching**, **non-trivial reactive state**, a **real algorithm with options**,
 or is a **building block for another util**. Otherwise it is a recipe.
 
-| Group    | Not ported                                                                                                                     | Why                                                                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Timing   | `useTimeout`, `useInterval`, `useNow`, `useTimestamp`                                                                          | Thin wrappers over the kept `useTimeoutFn` / `useIntervalFn`, or sub-10-line tickers.                                                                                                                       |
-| Watchers | `watchOnce`, `watchImmediate`, `watchDeep`, `watchDebounced`, `watchThrottled`, `watchPausable`, `whenever`, `watchWithFilter` | Plain `$effect` covers the one-liners; kept filter utils cover the rest. `watchDeep` needs nothing — `$state` proxies already track nested reads.                                                           |
-| Refs     | `refDefault`, `refDebounced`, `refThrottled`, `refManualReset`, `refWithControl`, `syncRef`, `syncRefs`, `computedEager`       | Nullish fallback in a `$derived`; reset/veto/untrack are a `$state` cell plus a setter; the kept filters cover settle behavior; `syncRef` needs microtask loop guards; `$derived` is already eager on read. |
-| Async    | `useCached`                                                                                                                    | Gate updates behind a comparator in one `$effect`.                                                                                                                                                          |
-| Viewport | `useSSRWidth`                                                                                                                  | A one-line SSR fallback constant; use `useWindowSize` (feat-016) when live updates matter.                                                                                                                  |
-| Math     | `useMin/Max/Average/Sum/Round/Ceil/Floor/Trunc/Abs`, `useMath`, `logicAnd/Or/Not`, `useProjection`                             | One-line deriveds; templates already express `&&` / `\|\|` / `!` natively. `createProjection` is kept in feat-027.                                                                                          |
-| Shared   | `isDefined`, `get`, `set`, `useToString`, `reactify`, `reactiveComputed`, `createEventHook`, `createGlobalState`               | Inline the checks, or derive over reactive inputs directly. `createEventHook` is a callback prop / `$state`; `createGlobalState` is a factory you write (or scope through context).                         |
+Two kinds of entry live here:
+
+- **Dropped** — Svelte or the platform already does this. Wrapping it costs an
+  import, a type, a README, and a test to save two lines, and it _loses_
+  composability, because a caller cannot spread a util's return into their own
+  `$derived`.
+- **Cut** — the effect is real but the whole thing is smaller than the wrapper
+  around it.
 
 ---
+
+## Master index
+
+| VueUse hook                                                                                                     | Use instead                                                                            |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Timing**                                                                                                      |                                                                                        |
+| `useTimeout`                                                                                                    | [`useTimeoutFn`](#timing)                                                              |
+| `useInterval`                                                                                                   | [`useIntervalFn`](#timing)                                                             |
+| `useDebouncedCallback`                                                                                          | [`useDebounceFn`](#timing)                                                             |
+| `useCached`                                                                                                     | [`$effect` + comparator](#timing)                                                      |
+| **Watchers**                                                                                                    |                                                                                        |
+| `watchOnce`                                                                                                     | [`$effect`](#watchers)                                                                 |
+| `watchImmediate`                                                                                                | [`$effect`](#watchers)                                                                 |
+| `watchDeep`                                                                                                     | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
+| `watchDebounced`                                                                                                | [`useDebounceFn` + `$effect`](#watchers)                                               |
+| `watchThrottled`                                                                                                | [`useThrottleFn` + `$effect`](#watchers)                                               |
+| `watchPausable`                                                                                                 | [`$state` flag read in `$effect`](#watchers)                                           |
+| `watchWithFilter`                                                                                               | [`useDebounceFn` / `useThrottleFn`](#watchers)                                         |
+| `watchIgnorable`                                                                                                | [`$effect` teardown / `untrack`](#watchers)                                            |
+| `watchTriggerable`                                                                                              | [`$state` token read in `$effect`](#watchers)                                          |
+| `watchAtMost`                                                                                                   | [`$effect` + last-seen local](#watchers)                                               |
+| `watchArray`                                                                                                    | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
+| `whenever`                                                                                                      | [`$effect` with a `when` guard](#watchers)                                             |
+| **Refs & computed**                                                                                             |                                                                                        |
+| `refDefault`                                                                                                    | [`$derived(x ?? fallback)`](#refs--computed)                                           |
+| `refDebounced`                                                                                                  | [`useDebounceFn` + `$state`](#refs--computed)                                          |
+| `refThrottled`                                                                                                  | [`useThrottleFn` + `$state`](#refs--computed)                                          |
+| `refManualReset`                                                                                                | [`$state` cell + setter](#refs--computed)                                              |
+| `refWithControl`                                                                                                | [`$state` cell + setter](#refs--computed)                                              |
+| `computedEager`                                                                                                 | [`$derived` is already eager on read](#refs--computed)                                 |
+| `computedWithControl`                                                                                           | [`$state` revision + `$derived`](#refs--computed)                                      |
+| `syncRef` / `syncRefs`                                                                                          | [`$effect` + microtask guard](#refs--computed)                                         |
+| `useSSRWidth`                                                                                                   | [a constant](#refs--computed)                                                          |
+| `useProjection`                                                                                                 | [`$derived`](#refs--computed)                                                          |
+| **Arrays**                                                                                                      |                                                                                        |
+| `useArrayMap` … `useArrayJoin` (12 hooks)                                                                       | [template expressions + `$derived`](#arrays)                                           |
+| `useSorted`                                                                                                     | [`$derived` + `.sort()`](#arrays)                                                      |
+| **Math**                                                                                                        |                                                                                        |
+| `useMin` `useMax` `useAverage` `useSum` `useRound` `useCeil` `useFloor` `useTrunc` `useAbs` `useMath`           | [one-line `$derived`](#math)                                                           |
+| `logicAnd` `logicOr` `logicNot`                                                                                 | [`&&` `\|\|` `!`](#math)                                                               |
+| **Shared & state plumbing**                                                                                     |                                                                                        |
+| `isDefined`                                                                                                     | [`!== undefined` / optional chaining](#shared--state-plumbing)                         |
+| `get` / `set`                                                                                                   | [direct property access](#shared--state-plumbing)                                      |
+| `useToString`                                                                                                   | [`String(x)`](#shared--state-plumbing)                                                 |
+| `reactify` / `reactifyObject`                                                                                   | [`$state`](#shared--state-plumbing)                                                    |
+| `reactiveComputed`                                                                                              | [`$derived`](#shared--state-plumbing)                                                  |
+| `reactiveOmit` / `reactivePick`                                                                                 | [rest spread / destructuring](#shared--state-plumbing)                                 |
+| `toReactive`                                                                                                    | [`$state`](#shared--state-plumbing)                                                    |
+| `makeDestructurable`                                                                                            | [a plain object with getters — what our utils already return](#shared--state-plumbing) |
+| `createProjection` / `createGenericProjection`                                                                  | [`$derived` over a reactive object](#shared--state-plumbing)                           |
+| `createEventHook`                                                                                               | [a callback prop + `$state`](#shared--state-plumbing)                                  |
+| `useEventBus`                                                                                                   | [a `$state` map + `$effect`](#shared--state-plumbing)                                  |
+| `createGlobalState` / `createSharedComposable`                                                                  | [context (`setContext` / `getContext`)](#shared--state-plumbing)                       |
+| `composeHandlers` / `mergeProps`                                                                                | [`mergeProps` from `svelte/mergeprops`](#shared--state-plumbing)                       |
+| `useBoolean`                                                                                                    | [`useToggle` (shipped)](#shared--state-plumbing)                                       |
+| **Svelte already has it**                                                                                       |                                                                                        |
+| `useWindowSize` `useWindowScroll` `useOnline` `useDevicePixelRatio`                                             | [`svelte/reactivity/window`](#svelte-already-has-it)                                   |
+| `useMediaQuery` `usePreferredDark` `usePreferredContrast` `usePreferredReducedMotion` `usePreferredColorScheme` | [`MediaQuery` / `prefersReducedMotion`](#svelte-already-has-it)                        |
+| `useElementSize`                                                                                                | [`bind:clientHeight` / `ResizeObserver`](#svelte-already-has-it)                       |
+| `useActiveElement` `useDocumentVisibility`                                                                      | [binding on `<svelte:document>` / `<svelte:window>`](#svelte-already-has-it)           |
+| `useTitle` `useFavicon`                                                                                         | [`<svelte:head>`](#svelte-already-has-it)                                              |
+| `useMounted`                                                                                                    | [an `$effect` body _is_ mount](#svelte-already-has-it)                                 |
+| `useTransition`                                                                                                 | [`Tween` / `Spring` / `tweened`](#svelte-already-has-it)                               |
+| `useAnimate`                                                                                                    | [`svelte/animate`, WAAPI, or a transition](#svelte-already-has-it)                     |
+| **Deferred to a library**                                                                                       |                                                                                        |
+| `useDateFormat` `useTimeAgo` `useTimeAgoIntl` `useTemporalNow`                                                  | [`date-fns` / `Intl` / Temporal](#dates-deferred-to-date-fns)                          |
+| `useVirtualList`                                                                                                | [`@tanstack/svelte-virtual`](#virtual-lists-deferred-to-tanstack)                      |
+
+---
+
+## Timing
+
+`useTimeout` and `useInterval` are thin wrappers over the shipped
+`useTimeoutFn` / `useIntervalFn`, which already own the pause/resume/reset
+lifecycle. `useDebouncedCallback` is `useDebounceFn` — it already exposes
+`cancel()`, `flush()`, and `pending()`.
+
+```ts
+import { useDebounceFn } from '@wynn-dev/svelte-use';
+
+const notify = useDebounceFn((message: string) => toast(message), 300);
+notify('saved');
+notify.flush(); // or .cancel() / .pending()
+```
+
+`useCached` gates updates behind a comparator. One `$effect` is the whole
+implementation:
+
+```ts
+let shown = $state(source());
+$effect(() => {
+	const next = source();
+	if (!isEqual(next, shown)) shown = next;
+});
+```
+
+## Watchers
+
+`$effect` is the watcher. Every one of these is a `$state` cell or a filter
+composed with it — a util would only move the `$effect` somewhere else.
+
+```ts
+// watchOnce / watchImmediate — an $effect body runs once per mount anyway.
+$effect(() => {
+	onReady(value());
+});
+
+// watchDebounced / watchThrottled
+const onResize = useDebounceFn(() => {
+	width = window.innerWidth;
+}, 100);
+$effect(() => {
+	onResize();
+});
+
+// watchPausable — flip a flag, read it in the effect.
+let paused = $state(false);
+$effect(() => {
+	if (paused) return;
+	tick(counter());
+});
+
+// watchIgnorable — the effect teardown IS the undo, and untrack is the
+// "don't watch" escape hatch.
+$effect(() => {
+	// ...work that writes state...
+	return () => {
+		// undo
+	};
+});
+
+// watchTriggerable — a token the effect reads.
+let trigger = $state(0);
+$effect(() => {
+	trigger;
+	recompute();
+});
+
+// watchAtMost — a last-seen local is all the dedupe there is.
+let last = $state.raw<string>();
+$effect(() => {
+	const next = key();
+	if (next !== last) {
+		last = next;
+		emit();
+	}
+});
+```
+
+`watchDeep` and `watchArray` need nothing at all: reading a nested property of
+a `$state` proxy already registers the dependency, and writing a nested
+property already notifies.
+
+`whenever` is `$effect` with a `when` guard:
+
+```ts
+$effect(() => {
+	if (ready()) emit();
+});
+```
+
+## Refs & computed
+
+```ts
+// refDefault — nullish fallback in a derived.
+const label = $derived(input() ?? 'Untitled');
+
+// refDebounced / refThrottled
+let search = $state('');
+const apply = useDebounceFn((value: string) => {
+	results = query(value);
+}, 300);
+$effect(() => {
+	apply(search);
+});
+
+// refManualReset / refWithControl — a cell plus a setter.
+let text = $state('');
+function setText(next: string, { manualReset = false } = {}) {
+	text = next;
+	if (!manualReset) clearTimeout(timer);
+}
+
+// computedEager — $derived is already recomputed on read, not lazily cached
+// behind a watcher. There is nothing to force.
+
+// computedWithControl — manual invalidation is a revision counter.
+let revision = $state(0);
+const total = $derived.by(() => {
+	revision;
+	return items().length;
+});
+const bump = () => (revision += 1);
+
+// syncRef / syncRefs — the loop guard is the whole trick.
+let syncing = false;
+$effect(() => {
+	if (syncing) return;
+	syncing = true;
+	queueMicrotask(() => {
+		syncing = false;
+	});
+	other = local;
+});
+
+// useSSRWidth — a constant.
+const SSR_WIDTH = 1280;
+
+// useProjection — project fields off a source object.
+const view = $derived.by(() => {
+	const { a, b } = source();
+	return { sum: a + b };
+});
+```
+
+## Arrays
+
+Every `useArray*` hook exists because Vue templates cannot call methods. Svelte
+templates can. `useArrayMap` is `items.map(...)`, `useArrayFilter` is
+`items.filter(...)`, and the reactive version is a `$derived` around it. Same
+for `useSorted` — `$derived.by` plus `.sort()` with your comparator.
+
+```svelte
+<!-- useSorted, with a $derived so the comparator reruns on change -->
+<script lang="ts">
+	const sorted = $derived.by(() => [...items].sort((a, b) => a.name.localeCompare(b.name)));
+</script>
+
+<!-- useArrayFilter / useArrayMap -->
+{#each items.filter((item) => item.active) as item}
+	<span>{item.name.toUpperCase()}</span>
+{/each}
+```
+
+Spread into a copy before sorting: `.sort()` mutates in place, and mutating a
+`$derived`'s input is a bug, not a style question.
+
+## Math
+
+Nine one-line `$derived`s and three operators:
+
+```ts
+const min = $derived(Math.min(...values()));
+const avg = $derived(values().reduce((sum, n) => sum + n, 0) / values().length);
+const rounded = $derived(Math.round(raw() * 100) / 100);
+
+// logicAnd / logicOr / logicNot — the language has these.
+const ready = $derived(isLoaded() && !isError());
+```
+
+## Shared & state plumbing
+
+```ts
+// isDefined / get / set / useToString
+const name = user?.name ?? '';
+
+// reactify / toReactive / reactiveComputed — runes, not factories.
+let items = $state<Item[]>([]);
+const total = $derived(items.length);
+
+// reactiveOmit / reactivePick — destructuring.
+const { id, ...rest } = entity();
+
+// makeDestructurable — this is what every util in this package already
+// returns: a plain object whose reactive fields are getters, so destructuring
+// keeps reactivity.
+const { canUndo, undo } = history;
+
+// createEventHook — a callback prop plus state.
+let onChange = $state<(next: string) => void>(() => {});
+
+// useEventBus — a state map.
+const bus = $state<Record<string, ((payload: unknown) => void)[]>>({});
+
+// createGlobalState / createSharedComposable — context is the Svelte answer,
+// and it is per-request on the server for free.
+setContext('cart', cart);
+const cart = getContext<Cart>('cart');
+
+// composeHandlers / mergeProps — the platform ships it.
+import { mergeProps } from 'svelte/mergeprops';
+```
+
+`createGlobalState` deserves a note: a module-level singleton is a _leak across
+SSR requests_, which is exactly why it is not a util here. Context gives you
+the shared-instance ergonomics without the shared-request bug.
+
+## Svelte already has it
+
+Do not wrap these. A wrapper costs an import, a type, a README, and a test to
+save two lines, and it _loses_ composability, because a caller cannot spread a
+util's return into their own `$derived`.
+
+```svelte
+<!-- useTitle / useFavicon -->
+<svelte:head>
+	<title>{title()}</title>
+	<link rel="icon" href={favicon()} />
+</svelte:head>
+
+<!-- useActiveElement -->
+<svelte:window bind:this={win} on:focusin={onFocus} />
+<!-- or: <svelte:document bind:visibilityState={visibility} /> -->
+
+<!-- useElementSize -->
+<div bind:clientHeight={height}></div>
+<!-- or a ResizeObserver for the content box -->
+```
+
+```ts
+// useWindowSize / useWindowScroll / useOnline / useDevicePixelRatio
+import { innerWidth, scrollY, online, devicePixelRatio } from 'svelte/reactivity/window';
+
+// useMediaQuery / usePreferred* — MediaQuery and the named presets.
+import { MediaQuery, prefersReducedMotion } from 'svelte/reactivity';
+import { prefersReducedMotion } from 'svelte/motion';
+
+const isDark = new MediaQuery('(prefers-color-scheme: dark)');
+$effect(() => {
+	theme.set(isDark.current ? 'dark' : 'light');
+});
+```
+
+```ts
+// useMounted — an $effect body IS mount.
+$effect(() => {
+	mounted = true;
+	return () => (mounted = false);
+});
+
+// useTransition — svelte/motion owns tweening.
+import { Tween, tweened } from 'svelte/motion';
+import { cubicOut } from 'svelte/easing';
+const progress = tweened(0, { duration: 400, easing: cubicOut });
+
+// useAnimate — svelte/animate, svelte/transition, or raw WAAPI.
+$effect(() => {
+	const animation = node.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+	return () => animation.cancel();
+});
+```
+
+`online` and `devicePixelRatio` come from `svelte/reactivity/window`, which
+ships SSR-safe `undefined` fallbacks and cleans up on destroy. The full
+delegation table — `MediaQuery`, `SvelteSet`/`SvelteMap`/`SvelteDate`/
+`SvelteURL`, and `createSubscriber` — is in
+[scope.md](../.agents/rules/scope.md) §5.
 
 ## Dates (deferred to `date-fns`)
 
@@ -58,15 +392,26 @@ const ago = $derived(formatDistanceToNow(timestamp, { addSuffix: true }));
 `useTemporalNow` maps to the Temporal API docs (still stabilizing — no wrapper
 until it settles).
 
+## Virtual lists (deferred to `@tanstack/svelte-virtual`)
+
+```bash
+bun add @tanstack/svelte-virtual
+```
+
+Windowing, overscan, dynamic measurement, and list a11y belong to the
+dedicated lib; pair it with `bind:clientHeight` on the scroll frame for
+container measurement.
+
 ## Drag and drop
 
 Two questions decide this, and they lead to different answers.
 
 **Is `@neodrag/svelte` enough?** If you want free-form dragging of an element
 or a handle, yes — it is ~2KB, SSR-friendly, and a single `use:draggable`
-action. This package also ships **`useDraggable`**, a dependency-free port of
-VueUse's element/handle dragging, for the cases where you would otherwise
-hand-roll `pointerdown` → `pointermove` → `pointerup` with a transform.
+action. This package also plans **`useDraggable`** (feat-020), a
+dependency-free port of VueUse's element/handle dragging, for the cases where
+you would otherwise hand-roll `pointerdown` → `pointermove` → `pointerup` with
+a transform.
 
 **Do you need a full DnD engine?** Windowing, multi-container support,
 sensors, and keyboard accessibility are not problems worth solving here:
@@ -79,17 +424,7 @@ sensors, and keyboard accessibility are not problems worth solving here:
   `items.slice()`, `move()` runs in `onDragOver`, `onDragEnd` restores on
   cancel) — never reorder DOM outside Svelte's reconciler.
 
-`useSortable` is a `deferred` integration adapter, not core scope.
-
-## Virtual lists (deferred to `@tanstack/svelte-virtual`)
-
-```bash
-bun add @tanstack/svelte-virtual
-```
-
-Windowing, overscan, dynamic measurement, and list a11y belong to the
-dedicated lib; pair it with `useElementSize` (feat-017) for container
-measurement.
+`useSortable` is an integration adapter, not core scope.
 
 ## Files, codes, tokens (deferred; libs used directly)
 
@@ -155,66 +490,11 @@ Note the `$app/navigation` import in the `useNProgress` recipe: that is
 **user-land** code in a SvelteKit app. Core never imports `$app/*` — see
 [scope.md](../.agents/rules/scope.md) §1.
 
-## Svelte-native skips (guidance, no port)
-
-Svelte 5 already ships these. Do not wrap them; a wrapper costs an import, a
-type, a README, and a test to save two lines, and it _loses_ composability,
-because a caller cannot spread a util's return into their own `$derived`.
-
-```svelte
-<!-- useTitle: -->
-<svelte:head><title>{title()}</title></svelte:head>
-
-<!-- useTransition: svelte/motion owns tweening -->
-<script lang="ts">
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
-	const progress = tweened(0, { duration: 400, easing: cubicOut });
-</script>
-
-<!-- useAnimate: svelte/animate, svelte/transition, or raw WAAPI -->
-<script lang="ts">
-	$effect(() => {
-		const animation = node.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
-		return () => animation.cancel();
-	});
-</script>
-```
-
-```ts
-// useMounted: an $effect body IS mount — no composable needed.
-$effect(() => {
-	mounted = true;
-	return () => (mounted = false);
-});
-```
-
-`online` and `devicePixelRatio` come from `svelte/reactivity/window`, which
-ships SSR-safe `undefined` fallbacks and cleans up on destroy:
-
-```ts
-import { online, devicePixelRatio } from 'svelte/reactivity/window';
-
-// Already a reactive value — no wrapper, no listener of your own.
-$effect(() => {
-	if (!online.current) pause();
-});
-$effect(() => {
-	zoom.set(devicePixelRatio.current);
-});
-```
-
-`useOnline` and `useDevicePixelRatio` are therefore **`svelte-native`**, not
-cut: the capability exists, it just is not ours. The full delegation table —
-`MediaQuery`, `SvelteSet`/`SvelteMap`/`SvelteDate`/`SvelteURL`, and
-`createSubscriber` — is in
-[scope.md](../.agents/rules/scope.md) §5.
-
 ## Integration adapters (in `@wynn-dev/svelte-use-integrations`)
 
 `useAxios` (`peer: axios`), `useFuse` (`peer: fuse.js`), and `useIDBKeyval`
-(`peer: idb-keyval`) arrive as thin ports in `@wynn-dev/svelte-use-integrations`, after
-everything else. Until then:
+(`peer: idb-keyval`) arrive as thin ports in
+`@wynn-dev/svelte-use-integrations`, after everything else. Until then:
 
 ```ts
 // useFuse shape today: rebuild on data change, cap results.

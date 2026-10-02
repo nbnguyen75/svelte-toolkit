@@ -14,11 +14,11 @@ bringing the reactivity, power, and developer experience of **VueUse** (`$VUEUSE
 
 - This package root (`packages/svelte-use/`) — the publishable library (`src/lib`, `prepack`/`publint`) and its self-contained harness (this AGENTS.md, `.agents/`, `.claude/`, `init.*`, `feature_list.json`, `skills-lock.json`, `eslint`/`oxfmt`/`oxlint` configs). Strict relative imports only within `src/lib/`. Sibling package `svelte-use-integrations/` follows the same contracts; repo-root and `packages/` AGENTS.md files are refer-only pointers to this file.
 - `src/lib/` — categorized composables and utilities:
-  - `src/lib/browser/` — Browser/DOM utilities (`useEventListener`, `useDark`, `useClipboard`, `useScrollToTop`, etc.)
-  - `src/lib/elements/` — Element measurement, visibility, focus, and observers (`useElementSize`, `useIntersectionObserver`, `useActiveElement`, etc.)
-  - `src/lib/state/` — Reactive state helpers (`useStorage`, `useRefHistory`, `useAsyncState`, etc.)
-  - `src/lib/utilities/` — Timing and control helpers (`useDebounceFn`, `useThrottleFn`, `useInterval`, etc.)
-  - `src/lib/shared/` — Type guards, predicates, math, and core helpers (`is.ts`, etc.)
+  - `src/lib/browser/` — Browser/DOM utilities (`useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`, etc.)
+  - `src/lib/elements/` — Element measurement, visibility, focus, and observers (`useIntersectionObserver`, `useResizeObserver`, `useFocus`, etc.)
+  - `src/lib/state/` — Reactive state helpers (`useStorage`, `useToggle`, `useCloned`, `refAutoReset`, `until`, etc.)
+  - `src/lib/utilities/` — Timing and control helpers (`useDebounceFn`, `useThrottleFn`, `useTimeoutFn`, `useCountdown`, etc.)
+  - `src/lib/shared/` — Internal helpers only (`is.ts`, `getter.ts`); nothing here is a util, and nothing is exported as one
 - Source of truth for Vue original logic: `$VUEUSE_SRC/packages/`
   — resolved from the `$VUEUSE_SRC` env var, else `../../vueuse/packages`
   relative to this package root. Never commit a machine-specific absolute
@@ -85,7 +85,7 @@ Always use the standard npm/bun scripts configured in `package.json` for validat
 - **Formatting & Linting First**: Use `bun run format:fix` and `bun run lint:fix` during editing.
 - **Verification Required**: Never claim a task is complete without running `.\init.ps1` (or `bun run check && bun run format && bun run lint && bun run test && bun run prepack`).
 - **Never Commit Absolute Paths**: Reference an external checkout as `$VUEUSE_SRC` or a repo-relative path. Gate 6 enforces it.
-- **Update Artifacts**: Update `feature_list.json` and `progress.md` at each milestone.
+- **Update Artifacts**: Update `feature_list.json` (implement-only) and `progress.md` at each milestone; anything not ported goes in `docs/recipes.md`, never in `feature_list.json`.
 
 ---
 
@@ -119,7 +119,12 @@ Load the most specific skill for the task:
 
 ## Required Artifacts
 
-- `feature_list.json` — Source of truth for roadmap and feature completion
+- `feature_list.json` — Implementation status only: every function in it ships.
+  Carries `tier` (`T1` / `T2` / `niche` / `extra`) for roadmap order. It holds
+  **no** `cut` / `deferred` / `svelte-native` entries.
+- `docs/recipes.md` — Source of truth for everything deliberately not ported,
+  with the Svelte-native replacement for each. Also the source the Astro
+  migration docs render from, so keep one row per VueUse hook.
 - `progress.md` — Session log with verifiable checkmarks and status
 - `init.sh` / `init.ps1` — Standard baseline verification scripts
 - `session-handoff.md` — Context handoff for next agent session

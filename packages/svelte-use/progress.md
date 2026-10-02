@@ -38,6 +38,47 @@
 
 - Pick the first feature from `feature_list.json` and follow `.agents/rules/batch-workflow.md`.
 
+### Scope re-curation — roadmap rebuild + `useSmoothScroll`
+
+- [x] Re-curated the roadmap against the maintainer's T1 / T2 / niche / extras
+      tiers. `feature_list.json` is now **implement-only** (27 features, 141
+      functions): no `cut` / `deferred` / `svelte-native` statuses, per-function
+      `tier` where the roadmap named a function directly.
+- [x] Removed 19 shipped modules that fall on the Vue-specific list (13
+      `useArray*` + `useSorted` under `shared/`, `watchIgnorable`, `watchTriggerable`,
+      `watchAtMost`, `watchArray`, `computedWithControl`, `createSharedComposable`)
+      plus their 19 barrel lines. 203 tests deleted. Each one has a Svelte-native
+      replacement, verified per module: `$effect` teardown / `untrack` for the
+      watchers, `$state` revision + `$derived` for `computedWithControl`, context
+      for `createSharedComposable`, template expressions + `$derived` for arrays.
+- [x] `until` **kept** — Svelte has no await-a-reactive-condition primitive, so
+      it is the only member of that group with no Svelte-native replacement.
+- [x] Recipes moved wholesale into `docs/recipes.md` and grew 55 → **95 entries**
+      with a new "Use instead" column per hook, since that file is the source the
+      Astro migration docs render from. No `feature_list.recipe.json`: one source,
+      not two. Includes the 19 removed modules, `useBoolean` → `useToggle`, and
+      `useDebouncedCallback` → `useDebounceFn`.
+- [x] Resurrected `useNow` / `useTimestamp` / `useTimeAgo` as Tier 2 (cut earlier
+      in feat-011 / deferred in feat-012, wanted by the new roadmap).
+- [x] Dropped 21 todo entries onto the Svelte-native list (`useElementSize`,
+      `useMediaQuery`, `useWindowSize`, `useActiveElement`, …) and 9 Vue-specific
+      ones (`toReactive`, `reactiveOmit`/`Pick`, `mergeProps`, `composeHandlers`,
+      `createProjection`/`createGenericProjection`, …).
+- [x] `feat-031` added for the extras (`Selection`, `useControllableState`,
+      `useHotkeys`, `usePagination`); it is **not** `feat-030`, which belongs to the
+      integrations package.
+- [x] `useScrollToTop` → **`useSmoothScroll`**: `scrollToTop()` becomes
+      `scrollTo(target, options)` taking `number | Element`, plus a `container`
+      override per call, `interruptOnUserScroll` (default on) cancelling on
+      `wheel` / `touchstart` / `keydown`, and `prefersReducedMotion` forcing
+      `duration: 0`. Element targets resolve against the container's own rect and
+      `scrollTop`, so they land correctly inside a scrolled frame.
+- [x] Corrected a wrong assumption: `prefersReducedMotion` lives in
+      `svelte/motion`, not a `svelte/reactivity/media-query` subpath (5.57.1 has no
+      such export).
+- [x] Gates: test 293/293 across 46 files (was 489/84), `svelte-check` 0/0,
+      lint 0/0, format clean, prepack publint clean, no path leaks.
+
 ### feat-001 close-out (2026-10-01)
 
 - [x] Ran full `init.ps1` gate sequence from `packages/svelte-use/`: `check` 0 errors/0 warnings, `format` clean (31 files), `lint` 0 errors, `test` 6/6, `prepack` publint clean, path-leak scan clean.

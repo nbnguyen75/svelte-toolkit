@@ -1,23 +1,15 @@
 {
 	"features": [
 		{
-			"dependencies": [],
-			"description": "Svelte 5 + SvelteKit library package harness with bun, typescript, svelte-check, oxlint, oxfmt, eslint, publint, and .agents workspace configuration.",
-			"evidence": "init green 2026-10-01: check 0 errors/0 warnings, format clean (31 files), lint 0 errors, test 6/6, prepack publint clean, path-leak scan clean. Fix: tsconfig include now covers test/fixtures/** so svelte-check has inputs (was 0 errors/1 warning on pure-library src with zero .svelte files).",
-			"id": "feat-001",
-			"name": "Project Setup & Agent Harness",
-			"status": "done"
-		},
-		{
 			"dependencies": ["feat-001"],
 			"description": "Port of core browser utilities with runes and SSR safety. Retrofit (docs/tests/fixes) tracked in feat-008.",
 			"evidence": "useScrollToTop, useEventListener, useDark, useClipboard all ported 2026-10-01 from the sv-utils reference. Shared helpers: src/lib/shared/is.ts (isBrowser), src/lib/shared/getter.ts (MaybeGetter, resolveGetter). Barrel verified at runtime: 9 exports. Gates: check 0/0, format clean, lint 0 errors 0 warnings, test 60/60, prepack publint clean, path-leak clean.",
 			"functions": [
 				{
-					"name": "useEventListener",
-					"source": "vueuse/core/useEventListener",
+					"name": "useClipboard",
+					"source": "vueuse/core/useClipboard",
 					"status": "done",
-					"target": "src/lib/browser/useEventListener/"
+					"target": "src/lib/browser/useClipboard/"
 				},
 				{
 					"name": "useDark",
@@ -26,16 +18,16 @@
 					"target": "src/lib/browser/useDark/"
 				},
 				{
-					"name": "useClipboard",
-					"source": "vueuse/core/useClipboard",
+					"name": "useEventListener",
+					"source": "vueuse/core/useEventListener",
 					"status": "done",
-					"target": "src/lib/browser/useClipboard/"
+					"target": "src/lib/browser/useEventListener/"
 				},
 				{
-					"name": "useScrollToTop",
-					"source": "custom (no VueUse equivalent)",
+					"name": "useSmoothScroll",
+					"source": "custom:useSmoothScroll",
 					"status": "done",
-					"target": "src/lib/browser/useScrollToTop/"
+					"target": "src/lib/browser/useSmoothScroll/"
 				}
 			],
 			"id": "feat-002",
@@ -98,16 +90,16 @@
 			"evidence": "Verified satisfied, not re-implemented: vitest ^5.0.2 + jsdom ^30.1.1 installed; package.json scripts.test = vitest run; packaging excludes !dist/**/*.test.* and !dist/**/*.spec.*; test/setup.ts plus 8 fixtures (mount, box, counter, observers, raf, run, effect-fixture, reactive-reader); 2 harness self-tests (test/harness.test.ts, test/harness.jsdom.test.ts); both init.ps1 and init.sh run bun run test. Docs convention: .agents/rules/docs-contract.md (54 lines) + docs/module-readme-template.md, and all 5 shipped modules carry README.md.",
 			"functions": [
 				{
-					"name": "test-harness",
-					"source": "internal",
-					"status": "done",
-					"target": "vitest.config + package.json#test + init scripts"
-				},
-				{
 					"name": "docs-convention",
 					"source": "internal (.agents/rules/module-contract.md + docs-contract.md)",
 					"status": "done",
 					"target": "per-module README.md template"
+				},
+				{
+					"name": "test-harness",
+					"source": "internal",
+					"status": "done",
+					"target": "vitest.config + package.json#test + init scripts"
 				}
 			],
 			"id": "feat-005",
@@ -186,10 +178,10 @@
 			"evidence": "Shipped 8/8 modules under src/lib/state/ (useToggle, useCounter, usePrevious, useLastChanged, useCloned, useCycleList, useStepper, useOffsetPagination), each with index.svelte.ts + index.ts, README.md, a jsdom suite and an SSR probe. 91 new state tests; suite is 266/266 across 42 files. Barrel exports all 8 plus their option/return interfaces. Zero assertions and zero suppressions despite no-unsafe-type-assertion: (1) useToggle avoids pushing a boolean literal into the generic slot by giving valuesToggle() the two values as arguments and calling it with an explicit T; arity-vs-explicit-undefined is carried in the type via rest args `[] | [T]` instead of arguments.length. (2) useCloned cannot structuredClone a reactive proxy (DOMException, pinned by a probe), so the default clone runs over $state.snapshot; the snapshot type is named with ReturnType<typeof defaultClone<T>> because Svelte does not export Snapshot, which keeps value exactly T for plain data with no cast. (3) useCycleList reads list items with a non-null assertion justified by the wraparound bounds check. Documented divergences: usePrevious returns T | undefined before the first change; useCycleList returns T (and -1 index) for an empty list, matching VueUse. Gates green.",
 			"functions": [
 				{
-					"name": "useToggle",
-					"source": "vueuse/shared/useToggle",
+					"name": "useCloned",
+					"source": "vueuse/core/useCloned",
 					"status": "done",
-					"target": "src/lib/state/useToggle/"
+					"target": "src/lib/state/useCloned/"
 				},
 				{
 					"name": "useCounter",
@@ -198,10 +190,10 @@
 					"target": "src/lib/state/useCounter/"
 				},
 				{
-					"name": "usePrevious",
-					"source": "vueuse/core/usePrevious",
+					"name": "useCycleList",
+					"source": "vueuse/core/useCycleList",
 					"status": "done",
-					"target": "src/lib/state/usePrevious/"
+					"target": "src/lib/state/useCycleList/"
 				},
 				{
 					"name": "useLastChanged",
@@ -210,16 +202,16 @@
 					"target": "src/lib/state/useLastChanged/"
 				},
 				{
-					"name": "useCloned",
-					"source": "vueuse/core/useCloned",
+					"name": "useOffsetPagination",
+					"source": "vueuse/core/useOffsetPagination",
 					"status": "done",
-					"target": "src/lib/state/useCloned/"
+					"target": "src/lib/state/useOffsetPagination/"
 				},
 				{
-					"name": "useCycleList",
-					"source": "vueuse/core/useCycleList",
+					"name": "usePrevious",
+					"source": "vueuse/core/usePrevious",
 					"status": "done",
-					"target": "src/lib/state/useCycleList/"
+					"target": "src/lib/state/usePrevious/"
 				},
 				{
 					"name": "useStepper",
@@ -228,10 +220,10 @@
 					"target": "src/lib/state/useStepper/"
 				},
 				{
-					"name": "useOffsetPagination",
-					"source": "vueuse/core/useOffsetPagination",
+					"name": "useToggle",
+					"source": "vueuse/shared/useToggle",
 					"status": "done",
-					"target": "src/lib/state/useOffsetPagination/"
+					"target": "src/lib/state/useToggle/"
 				}
 			],
 			"id": "feat-009",
@@ -240,139 +232,9 @@
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
-			"description": "Pure reactive array transforms. All synchronous/pure — high test coverage without compiler; shared/ category.",
-			"functions": [
-				{
-					"name": "useArrayMap",
-					"source": "vueuse/shared/useArrayMap",
-					"status": "done",
-					"target": "src/lib/shared/useArrayMap/"
-				},
-				{
-					"name": "useArrayFilter",
-					"source": "vueuse/shared/useArrayFilter",
-					"status": "done",
-					"target": "src/lib/shared/useArrayFilter/"
-				},
-				{
-					"name": "useArrayUnique",
-					"source": "vueuse/shared/useArrayUnique",
-					"status": "done",
-					"target": "src/lib/shared/useArrayUnique/"
-				},
-				{
-					"name": "useArraySome",
-					"source": "vueuse/shared/useArraySome",
-					"status": "done",
-					"target": "src/lib/shared/useArraySome/"
-				},
-				{
-					"name": "useArrayEvery",
-					"source": "vueuse/shared/useArrayEvery",
-					"status": "done",
-					"target": "src/lib/shared/useArrayEvery/"
-				},
-				{
-					"name": "useArrayIncludes",
-					"source": "vueuse/shared/useArrayIncludes",
-					"status": "done",
-					"target": "src/lib/shared/useArrayIncludes/"
-				},
-				{
-					"name": "useArrayJoin",
-					"source": "vueuse/shared/useArrayJoin",
-					"status": "done",
-					"target": "src/lib/shared/useArrayJoin/"
-				},
-				{
-					"name": "useArrayReduce",
-					"source": "vueuse/shared/useArrayReduce",
-					"status": "done",
-					"target": "src/lib/shared/useArrayReduce/"
-				},
-				{
-					"name": "useArrayFind",
-					"source": "vueuse/shared/useArrayFind",
-					"status": "done",
-					"target": "src/lib/shared/useArrayFind/"
-				},
-				{
-					"name": "useArrayFindIndex",
-					"source": "vueuse/shared/useArrayFindIndex",
-					"status": "done",
-					"target": "src/lib/shared/useArrayFindIndex/"
-				},
-				{
-					"name": "useArrayFindLast",
-					"source": "vueuse/shared/useArrayFindLast",
-					"status": "done",
-					"target": "src/lib/shared/useArrayFindLast/"
-				},
-				{
-					"name": "useArrayDifference",
-					"source": "vueuse/shared/useArrayDifference",
-					"status": "done",
-					"target": "src/lib/shared/useArrayDifference/"
-				},
-				{
-					"name": "useSorted",
-					"source": "vueuse/core/useSorted",
-					"status": "done",
-					"target": "src/lib/shared/useSorted/"
-				}
-			],
-			"id": "feat-010",
-			"name": "Reactive array utils",
-			"status": "done",
-			"evidence": "Shipped 13/13 modules under src/lib/shared/ (useArrayMap, useArrayFilter, useArrayUnique, useArraySome, useArrayEvery, useArrayIncludes, useArrayJoin, useArrayReduce, useArrayFind, useArrayFindIndex, useArrayFindLast, useArrayDifference, useSorted), each with index.svelte.ts + index.ts, README.md, a jsdom suite and an SSR probe. 158 new tests across 26 files; suite is 424/424 across 68 files. Barrel resolves all 13 functions plus 22 option/return interfaces (verified with a throwaway type-level guard, since a symbol exported from two paths is dropped silently). Zero type assertions and zero suppressions in the whole batch: (1) overload dispatch uses the implementation signature's parameter UNION plus typeof narrowing, so useArrayIncludes/useArrayDifference/useSorted read a comparator function, a keyof T key, or an options bag without casting the unknown third argument; useArrayIncludes narrows with a declared isOptions type guard rather than isObject, whose Record<PropertyKey, unknown> predicate collapses the union into '{} | null'. (2) useArrayReduce keeps a single-generic implementation signature under two public overloads, so both native reduce paths are called with no cast - the accumulator type coincides with the element type only in the no-seed case, which types cannot express across the overload boundary. (3) useSorted's default comparator uses Number(a) - Number(b), which is the same ToNumber conversion the subtraction operator performs and keeps the function assignable to UseSortedCompareFn<T> without a cast. (4) useArrayFindLast and useArrayUnique delegate to native findLast and Set instead of hand-rolled reverse scans and O(n^2) loops. Documented divergences: useArrayUnique's default is Set semantics (SameValueZero) so 0 and -0 collapse, matching the reference's stated intent; useArrayIncludes defaults to SameValueZero (like native includes) and key comparisons use Object.is; useSorted's default comparator is numeric, so strings need compareFn; useSorted dirty mode is client-only and the SSR probe covers copy mode only. Gates green."
-		},
-		{
-			"dependencies": ["feat-005", "feat-008"],
 			"description": "Core timers and clock primitives; fake-timer tests. Pausable controls per architecture rules. (useTimeout/useInterval/useNow/useTimestamp cut as recipes.)",
 			"evidence": "Hand-rolled: svelte/reactivity has no timer primitive (7 exports, none of them a clock). Ships useTimeoutFn, useIntervalFn, useCountdown, useRafFn, useFps under src/lib/utilities/, each with README.md, a jsdom suite and an SSR probe. 54 new tests; suite is now 175/175 across 26 files. All five arm inside `$effect`, so nothing starts on the server and every timer/frame is released on unmount. useTimeout/useInterval/useNow/useTimestamp remain cut as recipes (docs/recipes.md).",
 			"functions": [
-				{
-					"name": "useTimeoutFn",
-					"source": "vueuse/shared/useTimeoutFn",
-					"status": "done",
-					"target": "src/lib/utilities/useTimeoutFn/"
-				},
-				{
-					"name": "useTimeout",
-					"source": "vueuse/shared/useTimeout",
-					"status": "cut",
-					"target": "src/lib/utilities/useTimeout/"
-				},
-				{
-					"name": "useIntervalFn",
-					"source": "vueuse/shared/useIntervalFn",
-					"status": "done",
-					"target": "src/lib/utilities/useIntervalFn/"
-				},
-				{
-					"name": "useInterval",
-					"source": "vueuse/shared/useInterval",
-					"status": "cut",
-					"target": "src/lib/utilities/useInterval/"
-				},
-				{
-					"name": "useRafFn",
-					"source": "vueuse/core/useRafFn",
-					"status": "done",
-					"target": "src/lib/utilities/useRafFn/"
-				},
-				{
-					"name": "useNow",
-					"source": "vueuse/core/useNow",
-					"status": "cut",
-					"target": "src/lib/utilities/useNow/"
-				},
-				{
-					"name": "useTimestamp",
-					"source": "vueuse/core/useTimestamp",
-					"status": "cut",
-					"target": "src/lib/utilities/useTimestamp/"
-				},
 				{
 					"name": "useCountdown",
 					"source": "vueuse/core/useCountdown",
@@ -384,45 +246,44 @@
 					"source": "vueuse/core/useFps",
 					"status": "done",
 					"target": "src/lib/utilities/useFps/"
+				},
+				{
+					"name": "useIntervalFn",
+					"source": "vueuse/shared/useIntervalFn",
+					"status": "done",
+					"target": "src/lib/utilities/useIntervalFn/"
+				},
+				{
+					"name": "useNow",
+					"source": "vueuse/core/useNow",
+					"status": "todo",
+					"target": "src/lib/utilities/useNow/",
+					"tier": "T2"
+				},
+				{
+					"name": "useRafFn",
+					"source": "vueuse/core/useRafFn",
+					"status": "done",
+					"target": "src/lib/utilities/useRafFn/"
+				},
+				{
+					"name": "useTimeoutFn",
+					"source": "vueuse/shared/useTimeoutFn",
+					"status": "done",
+					"target": "src/lib/utilities/useTimeoutFn/"
+				},
+				{
+					"name": "useTimestamp",
+					"source": "vueuse/core/useTimestamp",
+					"status": "todo",
+					"target": "src/lib/utilities/useTimestamp/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-011",
 			"name": "Timing core (timeouts, intervals, clock)",
-			"status": "done"
-		},
-		{
-			"dependencies": ["feat-005", "feat-008"],
-			"description": "Date/time display — DEFERRED to date-fns entirely. Recipes only (ticker, Intl.RelativeTimeFormat); no code in this batch.",
-			"evidence": "",
-			"functions": [
-				{
-					"name": "useDateFormat",
-					"source": "vueuse/shared/useDateFormat",
-					"status": "deferred",
-					"target": "src/lib/utilities/useDateFormat/"
-				},
-				{
-					"name": "useTimeAgo",
-					"source": "vueuse/core/useTimeAgo",
-					"status": "deferred",
-					"target": "src/lib/utilities/useTimeAgo/"
-				},
-				{
-					"name": "useTimeAgoIntl",
-					"source": "vueuse/core/useTimeAgoIntl",
-					"status": "deferred",
-					"target": "src/lib/utilities/useTimeAgoIntl/"
-				},
-				{
-					"name": "useTemporalNow",
-					"source": "vueuse/core/useTemporalNow",
-					"status": "deferred",
-					"target": "src/lib/utilities/useTemporalNow/"
-				}
-			],
-			"id": "feat-012",
-			"name": "Date/time display",
-			"status": "todo"
+			"status": "done",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -430,87 +291,16 @@
 			"evidence": "Ported 5 watchers to src/lib/state: until (promised one-time watches: toMatch/changed/changedTimes, toBe/toContains plus truthy/null/undefined/NaN and .not, timeout/throwOnTimeout, getter-target tracking), watchIgnorable (ignoreUpdates/ignorePrevAsyncUpdates/stop), watchTriggerable (manual trigger returning the callback result), watchAtMost (count limit with reactive count, pause/resume/stop), watchArray (duplicate-safe identity diff of added/removed). Cast-free ports of the sv-utils reference via $effect + untrack, with an effect teardown so pending cleanup runs on unmount (the reference only cleaned on explicit stop). The other 8 one-liner watchers are cut as recipes in docs/recipes.md. Tests: 45 new (10 files); full suite 469 passed; svelte-check 0 errors/0 warnings; lint 0 errors/0 warnings; format clean; prepack publint clean.",
 			"functions": [
 				{
-					"name": "watchOnce",
-					"source": "vueuse/shared/watchOnce",
-					"status": "cut",
-					"target": "src/lib/state/watchOnce/"
-				},
-				{
-					"name": "watchAtMost",
-					"source": "vueuse/shared/watchAtMost",
-					"status": "done",
-					"target": "src/lib/state/watchAtMost/"
-				},
-				{
-					"name": "watchImmediate",
-					"source": "vueuse/shared/watchImmediate",
-					"status": "cut",
-					"target": "src/lib/state/watchImmediate/"
-				},
-				{
-					"name": "watchDeep",
-					"source": "vueuse/shared/watchDeep",
-					"status": "cut",
-					"target": "src/lib/state/watchDeep/"
-				},
-				{
-					"name": "watchArray",
-					"source": "vueuse/shared/watchArray",
-					"status": "done",
-					"target": "src/lib/state/watchArray/"
-				},
-				{
-					"name": "whenever",
-					"source": "vueuse/shared/whenever",
-					"status": "cut",
-					"target": "src/lib/state/whenever/"
-				},
-				{
 					"name": "until",
 					"source": "vueuse/shared/until",
 					"status": "done",
 					"target": "src/lib/state/until/"
-				},
-				{
-					"name": "watchDebounced",
-					"source": "vueuse/shared/watchDebounced",
-					"status": "cut",
-					"target": "src/lib/state/watchDebounced/"
-				},
-				{
-					"name": "watchThrottled",
-					"source": "vueuse/shared/watchThrottled",
-					"status": "cut",
-					"target": "src/lib/state/watchThrottled/"
-				},
-				{
-					"name": "watchPausable",
-					"source": "vueuse/shared/watchPausable",
-					"status": "cut",
-					"target": "src/lib/state/watchPausable/"
-				},
-				{
-					"name": "watchIgnorable",
-					"source": "vueuse/shared/watchIgnorable",
-					"status": "done",
-					"target": "src/lib/state/watchIgnorable/"
-				},
-				{
-					"name": "watchTriggerable",
-					"source": "vueuse/shared/watchTriggerable",
-					"status": "done",
-					"target": "src/lib/state/watchTriggerable/"
-				},
-				{
-					"name": "watchWithFilter",
-					"source": "vueuse/shared/watchWithFilter",
-					"status": "cut",
-					"target": "src/lib/state/watchWithFilter/"
 				}
 			],
 			"id": "feat-013",
 			"name": "Reactive watchers",
-			"status": "done"
+			"status": "done",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -518,87 +308,16 @@
 			"evidence": "Shipped 3 state utils under src/lib/state/: refAutoReset (quiet-period reset, getter defaultValue/afterMs re-resolved per write, timer cleared on unmount, no timer armed on the server), computedWithControl (memoized per revision with manual trigger(), read-only and writable get/set overloads, fn reads untracked, undefined T cached correctly), createSharedComposable (client singleton held in a wrapper cell so an undefined-returning composable is still invoked once; server returns the composable untouched so requests stay isolated). Re-scoped this batch from 8 kept to 3: refManualReset, refWithControl, createEventHook, createGlobalState and syncRef are cut as recipes per scope.md section 3. Tests: 20 new (6 files); full suite 489 passed; svelte-check 0 errors/0 warnings; lint 0 errors/0 warnings; format clean; prepack publint clean; runtime exports 55 to 58.",
 			"functions": [
 				{
-					"name": "refDefault",
-					"source": "vueuse/shared/refDefault",
-					"status": "cut",
-					"target": "src/lib/state/refDefault/"
-				},
-				{
-					"name": "refDebounced",
-					"source": "vueuse/shared/refDebounced",
-					"status": "cut",
-					"target": "src/lib/state/refDebounced/"
-				},
-				{
-					"name": "refThrottled",
-					"source": "vueuse/shared/refThrottled",
-					"status": "cut",
-					"target": "src/lib/state/refThrottled/"
-				},
-				{
 					"name": "refAutoReset",
 					"source": "vueuse/shared/refAutoReset",
 					"status": "done",
 					"target": "src/lib/state/refAutoReset/"
-				},
-				{
-					"name": "refManualReset",
-					"source": "vueuse/shared/refManualReset",
-					"status": "cut",
-					"target": "src/lib/state/refManualReset/"
-				},
-				{
-					"name": "refWithControl",
-					"source": "vueuse/shared/refWithControl",
-					"status": "cut",
-					"target": "src/lib/state/refWithControl/"
-				},
-				{
-					"name": "createEventHook",
-					"source": "vueuse/shared/createEventHook",
-					"status": "cut",
-					"target": "src/lib/state/createEventHook/"
-				},
-				{
-					"name": "createGlobalState",
-					"source": "vueuse/shared/createGlobalState",
-					"status": "cut",
-					"target": "src/lib/state/createGlobalState/"
-				},
-				{
-					"name": "createSharedComposable",
-					"source": "vueuse/shared/createSharedComposable",
-					"status": "done",
-					"target": "src/lib/state/createSharedComposable/"
-				},
-				{
-					"name": "syncRef",
-					"source": "vueuse/shared/syncRef",
-					"status": "cut",
-					"target": "src/lib/state/syncRef/"
-				},
-				{
-					"name": "syncRefs",
-					"source": "vueuse/shared/syncRefs",
-					"status": "cut",
-					"target": "src/lib/state/syncRefs/"
-				},
-				{
-					"name": "computedEager",
-					"source": "vueuse/shared/computedEager",
-					"status": "cut",
-					"target": "src/lib/state/computedEager/"
-				},
-				{
-					"name": "computedWithControl",
-					"source": "vueuse/shared/computedWithControl",
-					"status": "done",
-					"target": "src/lib/state/computedWithControl/"
 				}
 			],
 			"id": "feat-014",
 			"name": "Ref variants & shared state",
-			"status": "done"
+			"status": "done",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -606,69 +325,73 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useAsyncState",
-					"source": "vueuse/core/useAsyncState",
-					"status": "todo",
-					"target": "src/lib/state/useAsyncState/"
-				},
-				{
 					"name": "computedAsync",
 					"source": "vueuse/core/computedAsync",
 					"status": "todo",
-					"target": "src/lib/state/computedAsync/"
+					"target": "src/lib/state/computedAsync/",
+					"tier": "niche"
 				},
 				{
 					"name": "useAsyncQueue",
 					"source": "vueuse/core/useAsyncQueue",
 					"status": "todo",
-					"target": "src/lib/state/useAsyncQueue/"
+					"target": "src/lib/state/useAsyncQueue/",
+					"tier": "niche"
 				},
 				{
-					"name": "useStorageAsync",
-					"source": "vueuse/core/useStorageAsync",
+					"name": "useAsyncState",
+					"source": "vueuse/core/useAsyncState",
 					"status": "todo",
-					"target": "src/lib/state/useStorageAsync/"
-				},
-				{
-					"name": "useMemoize",
-					"source": "vueuse/core/useMemoize",
-					"status": "todo",
-					"target": "src/lib/state/useMemoize/"
-				},
-				{
-					"name": "useCached",
-					"source": "vueuse/core/useCached",
-					"status": "cut",
-					"target": "src/lib/state/useCached/"
-				},
-				{
-					"name": "useRefHistory",
-					"source": "vueuse/core/useRefHistory",
-					"status": "todo",
-					"target": "src/lib/state/useRefHistory/"
-				},
-				{
-					"name": "useManualRefHistory",
-					"source": "vueuse/core/useManualRefHistory",
-					"status": "todo",
-					"target": "src/lib/state/useManualRefHistory/"
+					"target": "src/lib/state/useAsyncState/",
+					"tier": "niche"
 				},
 				{
 					"name": "useDebouncedRefHistory",
 					"source": "vueuse/core/useDebouncedRefHistory",
 					"status": "todo",
-					"target": "src/lib/state/useDebouncedRefHistory/"
+					"target": "src/lib/state/useDebouncedRefHistory/",
+					"tier": "niche"
+				},
+				{
+					"name": "useManualRefHistory",
+					"source": "vueuse/core/useManualRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useManualRefHistory/",
+					"tier": "niche"
+				},
+				{
+					"name": "useMemoize",
+					"source": "vueuse/core/useMemoize",
+					"status": "todo",
+					"target": "src/lib/state/useMemoize/",
+					"tier": "niche"
+				},
+				{
+					"name": "useRefHistory",
+					"source": "vueuse/core/useRefHistory",
+					"status": "todo",
+					"target": "src/lib/state/useRefHistory/",
+					"tier": "niche"
+				},
+				{
+					"name": "useStorageAsync",
+					"source": "vueuse/core/useStorageAsync",
+					"status": "todo",
+					"target": "src/lib/state/useStorageAsync/",
+					"tier": "niche"
 				},
 				{
 					"name": "useThrottledRefHistory",
 					"source": "vueuse/core/useThrottledRefHistory",
 					"status": "todo",
-					"target": "src/lib/state/useThrottledRefHistory/"
+					"target": "src/lib/state/useThrottledRefHistory/",
+					"tier": "niche"
 				}
 			],
 			"id": "feat-015",
 			"name": "Async & history state",
-			"status": "todo"
+			"status": "todo",
+			"tier": "niche"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -676,52 +399,17 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useMediaQuery",
-					"source": "vueuse/core/useMediaQuery",
-					"status": "todo",
-					"target": "src/lib/browser/useMediaQuery/"
-				},
-				{
-					"name": "usePreferredDark",
-					"source": "vueuse/core/usePreferredDark",
-					"status": "todo",
-					"target": "src/lib/browser/usePreferredDark/"
-				},
-				{
-					"name": "usePreferredColorScheme",
-					"source": "vueuse/core/usePreferredColorScheme",
-					"status": "todo",
-					"target": "src/lib/browser/usePreferredColorScheme/"
-				},
-				{
 					"name": "useBreakpoints",
 					"source": "vueuse/core/useBreakpoints",
 					"status": "todo",
-					"target": "src/lib/browser/useBreakpoints/"
-				},
-				{
-					"name": "useWindowSize",
-					"source": "vueuse/core/useWindowSize",
-					"status": "todo",
-					"target": "src/lib/browser/useWindowSize/"
-				},
-				{
-					"name": "usePreferredReducedMotion",
-					"source": "vueuse/core/usePreferredReducedMotion",
-					"status": "todo",
-					"target": "src/lib/browser/usePreferredReducedMotion/"
+					"target": "src/lib/browser/useBreakpoints/",
+					"tier": "T1"
 				},
 				{
 					"name": "usePreferredLanguages",
 					"source": "vueuse/core/usePreferredLanguages",
 					"status": "todo",
 					"target": "src/lib/browser/usePreferredLanguages/"
-				},
-				{
-					"name": "usePreferredContrast",
-					"source": "vueuse/core/usePreferredContrast",
-					"status": "todo",
-					"target": "src/lib/browser/usePreferredContrast/"
 				},
 				{
 					"name": "usePreferredReducedTransparency",
@@ -734,17 +422,12 @@
 					"source": "vueuse/core/useTextDirection",
 					"status": "todo",
 					"target": "src/lib/browser/useTextDirection/"
-				},
-				{
-					"name": "useSSRWidth",
-					"source": "vueuse/core/useSSRWidth",
-					"status": "cut",
-					"target": "src/lib/browser/useSSRWidth/"
 				}
 			],
 			"id": "feat-016",
 			"name": "Viewport & media preferences",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -752,63 +435,59 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useElementSize",
-					"source": "vueuse/core/useElementSize",
-					"status": "todo",
-					"target": "src/lib/elements/useElementSize/"
-				},
-				{
 					"name": "useElementBounding",
 					"source": "vueuse/core/useElementBounding",
 					"status": "todo",
-					"target": "src/lib/elements/useElementBounding/"
+					"target": "src/lib/elements/useElementBounding/",
+					"tier": "T2"
 				},
 				{
 					"name": "useElementVisibility",
 					"source": "vueuse/core/useElementVisibility",
 					"status": "todo",
-					"target": "src/lib/elements/useElementVisibility/"
-				},
-				{
-					"name": "useIntersectionObserver",
-					"source": "vueuse/core/useIntersectionObserver",
-					"status": "todo",
-					"target": "src/lib/elements/useIntersectionObserver/"
-				},
-				{
-					"name": "useResizeObserver",
-					"source": "vueuse/core/useResizeObserver",
-					"status": "todo",
-					"target": "src/lib/elements/useResizeObserver/"
-				},
-				{
-					"name": "useMutationObserver",
-					"source": "vueuse/core/useMutationObserver",
-					"status": "todo",
-					"target": "src/lib/elements/useMutationObserver/"
-				},
-				{
-					"name": "useActiveElement",
-					"source": "vueuse/core/useActiveElement",
-					"status": "todo",
-					"target": "src/lib/elements/useActiveElement/"
+					"target": "src/lib/elements/useElementVisibility/",
+					"tier": "T1"
 				},
 				{
 					"name": "useFocus",
 					"source": "vueuse/core/useFocus",
 					"status": "todo",
-					"target": "src/lib/elements/useFocus/"
+					"target": "src/lib/elements/useFocus/",
+					"tier": "T2"
 				},
 				{
 					"name": "useFocusWithin",
 					"source": "vueuse/core/useFocusWithin",
 					"status": "todo",
-					"target": "src/lib/elements/useFocusWithin/"
+					"target": "src/lib/elements/useFocusWithin/",
+					"tier": "T2"
+				},
+				{
+					"name": "useIntersectionObserver",
+					"source": "vueuse/core/useIntersectionObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useIntersectionObserver/",
+					"tier": "T1"
+				},
+				{
+					"name": "useMutationObserver",
+					"source": "vueuse/core/useMutationObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useMutationObserver/",
+					"tier": "T1"
+				},
+				{
+					"name": "useResizeObserver",
+					"source": "vueuse/core/useResizeObserver",
+					"status": "todo",
+					"target": "src/lib/elements/useResizeObserver/",
+					"tier": "T1"
 				}
 			],
 			"id": "feat-017",
 			"name": "Elements: size, visibility, focus",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T2"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -816,16 +495,11 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useDocumentVisibility",
-					"source": "vueuse/core/useDocumentVisibility",
+					"name": "useFullscreen",
+					"source": "vueuse/core/useFullscreen",
 					"status": "todo",
-					"target": "src/lib/browser/useDocumentVisibility/"
-				},
-				{
-					"name": "useWindowFocus",
-					"source": "vueuse/core/useWindowFocus",
-					"status": "todo",
-					"target": "src/lib/browser/useWindowFocus/"
+					"target": "src/lib/browser/useFullscreen/",
+					"tier": "T2"
 				},
 				{
 					"name": "usePageLeave",
@@ -834,27 +508,16 @@
 					"target": "src/lib/browser/usePageLeave/"
 				},
 				{
-					"name": "useTitle",
-					"source": "vueuse/core/useTitle",
-					"status": "svelte-native",
-					"target": "src/lib/browser/useTitle/"
-				},
-				{
-					"name": "useFavicon",
-					"source": "vueuse/core/useFavicon",
+					"name": "useWindowFocus",
+					"source": "vueuse/core/useWindowFocus",
 					"status": "todo",
-					"target": "src/lib/browser/useFavicon/"
-				},
-				{
-					"name": "useFullscreen",
-					"source": "vueuse/core/useFullscreen",
-					"status": "todo",
-					"target": "src/lib/browser/useFullscreen/"
+					"target": "src/lib/browser/useWindowFocus/"
 				}
 			],
 			"id": "feat-018",
 			"name": "Document & page UI",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T2"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -862,40 +525,32 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useWindowScroll",
-					"source": "vueuse/core/useWindowScroll",
+					"name": "useElementHover",
+					"source": "vueuse/core/useElementHover",
 					"status": "todo",
-					"target": "src/lib/browser/useWindowScroll/"
-				},
-				{
-					"name": "useScroll",
-					"source": "vueuse/core/useScroll",
-					"status": "todo",
-					"target": "src/lib/browser/useScroll/"
-				},
-				{
-					"name": "useScrollLock",
-					"source": "vueuse/core/useScrollLock",
-					"status": "todo",
-					"target": "src/lib/browser/useScrollLock/"
+					"target": "src/lib/browser/useElementHover/",
+					"tier": "T2"
 				},
 				{
 					"name": "useInfiniteScroll",
 					"source": "vueuse/core/useInfiniteScroll",
 					"status": "todo",
-					"target": "src/lib/browser/useInfiniteScroll/"
+					"target": "src/lib/browser/useInfiniteScroll/",
+					"tier": "T2"
 				},
 				{
 					"name": "useMouse",
 					"source": "vueuse/core/useMouse",
 					"status": "todo",
-					"target": "src/lib/browser/useMouse/"
+					"target": "src/lib/browser/useMouse/",
+					"tier": "T1"
 				},
 				{
 					"name": "useMouseInElement",
 					"source": "vueuse/core/useMouseInElement",
 					"status": "todo",
-					"target": "src/lib/browser/useMouseInElement/"
+					"target": "src/lib/browser/useMouseInElement/",
+					"tier": "T2"
 				},
 				{
 					"name": "useMousePressed",
@@ -904,56 +559,63 @@
 					"target": "src/lib/browser/useMousePressed/"
 				},
 				{
-					"name": "useElementHover",
-					"source": "vueuse/core/useElementHover",
+					"name": "useScroll",
+					"source": "vueuse/core/useScroll",
 					"status": "todo",
-					"target": "src/lib/browser/useElementHover/"
+					"target": "src/lib/browser/useScroll/",
+					"tier": "T1"
+				},
+				{
+					"name": "useScrollLock",
+					"source": "vueuse/core/useScrollLock",
+					"status": "todo",
+					"target": "src/lib/browser/useScrollLock/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-019",
 			"name": "Scroll & mouse",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
-			"description": "Touch/drag interactions and outside/long-press handlers. (useDraggable reopened as real scope: a zero-dep port of VueUse\u0027s element/handle dragging, shipped alongside @neodrag/svelte rather than deferring to it; useParallax moved to feat-026 — needs useDeviceOrientation + useScreenOrientation.) Touch + mouse event mocks in tests.",
+			"description": "Touch/drag interactions and outside/long-press handlers. (useDraggable reopened as real scope: a zero-dep port of VueUse's element/handle dragging, shipped alongside @neodrag/svelte rather than deferring to it; useParallax moved to feat-026 — needs useDeviceOrientation + useScreenOrientation.) Touch + mouse event mocks in tests.",
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useSwipe",
-					"source": "vueuse/core/useSwipe",
+					"name": "onClickOutside",
+					"source": "vueuse/core/onClickOutside",
 					"status": "todo",
-					"target": "src/lib/browser/useSwipe/"
+					"target": "src/lib/browser/onClickOutside/",
+					"tier": "T1"
 				},
 				{
-					"name": "usePointerSwipe",
-					"source": "vueuse/core/usePointerSwipe",
+					"name": "onElementRemoval",
+					"source": "vueuse/core/onElementRemoval",
 					"status": "todo",
-					"target": "src/lib/browser/usePointerSwipe/"
+					"target": "src/lib/browser/onElementRemoval/"
+				},
+				{
+					"name": "onLongPress",
+					"source": "vueuse/core/onLongPress",
+					"status": "todo",
+					"target": "src/lib/browser/onLongPress/",
+					"tier": "T1"
 				},
 				{
 					"name": "useDraggable",
 					"source": "vueuse/core/useDraggable",
 					"status": "todo",
-					"target": "src/lib/browser/useDraggable/"
+					"target": "src/lib/browser/useDraggable/",
+					"tier": "T2"
 				},
 				{
 					"name": "useDropZone",
 					"source": "vueuse/core/useDropZone",
 					"status": "todo",
-					"target": "src/lib/browser/useDropZone/"
-				},
-				{
-					"name": "usePointer",
-					"source": "vueuse/core/usePointer",
-					"status": "todo",
-					"target": "src/lib/browser/usePointer/"
-				},
-				{
-					"name": "usePointerLock",
-					"source": "vueuse/core/usePointerLock",
-					"status": "todo",
-					"target": "src/lib/browser/usePointerLock/"
+					"target": "src/lib/browser/useDropZone/",
+					"tier": "T2"
 				},
 				{
 					"name": "useElementByPoint",
@@ -962,27 +624,36 @@
 					"target": "src/lib/browser/useElementByPoint/"
 				},
 				{
-					"name": "onClickOutside",
-					"source": "vueuse/core/onClickOutside",
+					"name": "usePointer",
+					"source": "vueuse/core/usePointer",
 					"status": "todo",
-					"target": "src/lib/browser/onClickOutside/"
+					"target": "src/lib/browser/usePointer/",
+					"tier": "T2"
 				},
 				{
-					"name": "onLongPress",
-					"source": "vueuse/core/onLongPress",
+					"name": "usePointerLock",
+					"source": "vueuse/core/usePointerLock",
 					"status": "todo",
-					"target": "src/lib/browser/onLongPress/"
+					"target": "src/lib/browser/usePointerLock/"
 				},
 				{
-					"name": "onElementRemoval",
-					"source": "vueuse/core/onElementRemoval",
+					"name": "usePointerSwipe",
+					"source": "vueuse/core/usePointerSwipe",
 					"status": "todo",
-					"target": "src/lib/browser/onElementRemoval/"
+					"target": "src/lib/browser/usePointerSwipe/"
+				},
+				{
+					"name": "useSwipe",
+					"source": "vueuse/core/useSwipe",
+					"status": "todo",
+					"target": "src/lib/browser/useSwipe/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-020",
 			"name": "Gestures & drag",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T2"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -993,19 +664,8 @@
 					"name": "onKeyStroke",
 					"source": "vueuse/core/onKeyStroke",
 					"status": "todo",
-					"target": "src/lib/browser/onKeyStroke/"
-				},
-				{
-					"name": "useMagicKeys",
-					"source": "vueuse/core/useMagicKeys",
-					"status": "todo",
-					"target": "src/lib/browser/useMagicKeys/"
-				},
-				{
-					"name": "useKeyModifier",
-					"source": "vueuse/core/useKeyModifier",
-					"status": "todo",
-					"target": "src/lib/browser/useKeyModifier/"
+					"target": "src/lib/browser/onKeyStroke/",
+					"tier": "T1"
 				},
 				{
 					"name": "onStartTyping",
@@ -1014,15 +674,30 @@
 					"target": "src/lib/browser/onStartTyping/"
 				},
 				{
+					"name": "useKeyModifier",
+					"source": "vueuse/core/useKeyModifier",
+					"status": "todo",
+					"target": "src/lib/browser/useKeyModifier/"
+				},
+				{
+					"name": "useMagicKeys",
+					"source": "vueuse/core/useMagicKeys",
+					"status": "todo",
+					"target": "src/lib/browser/useMagicKeys/",
+					"tier": "T2"
+				},
+				{
 					"name": "useTextareaAutosize",
 					"source": "vueuse/core/useTextareaAutosize",
 					"status": "todo",
-					"target": "src/lib/browser/useTextareaAutosize/"
+					"target": "src/lib/browser/useTextareaAutosize/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-021",
 			"name": "Keyboard & typing",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1030,22 +705,35 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useClipboardItems",
-					"source": "vueuse/core/useClipboardItems",
-					"status": "todo",
-					"target": "src/lib/browser/useClipboardItems/"
-				},
-				{
 					"name": "useBase64",
 					"source": "vueuse/core/useBase64",
 					"status": "todo",
 					"target": "src/lib/browser/useBase64/"
 				},
 				{
-					"name": "useObjectUrl",
-					"source": "vueuse/core/useObjectUrl",
+					"name": "useClipboardItems",
+					"source": "vueuse/core/useClipboardItems",
 					"status": "todo",
-					"target": "src/lib/browser/useObjectUrl/"
+					"target": "src/lib/browser/useClipboardItems/"
+				},
+				{
+					"name": "useColorMode",
+					"source": "vueuse/core/useColorMode",
+					"status": "todo",
+					"target": "src/lib/browser/useColorMode/",
+					"tier": "T1"
+				},
+				{
+					"name": "useCssSupports",
+					"source": "vueuse/core/useCssSupports",
+					"status": "todo",
+					"target": "src/lib/browser/useCssSupports/"
+				},
+				{
+					"name": "useCssVar",
+					"source": "vueuse/core/useCssVar",
+					"status": "todo",
+					"target": "src/lib/browser/useCssVar/"
 				},
 				{
 					"name": "useFileDialog",
@@ -1060,22 +748,10 @@
 					"target": "src/lib/browser/useImage/"
 				},
 				{
-					"name": "useColorMode",
-					"source": "vueuse/core/useColorMode",
+					"name": "useObjectUrl",
+					"source": "vueuse/core/useObjectUrl",
 					"status": "todo",
-					"target": "src/lib/browser/useColorMode/"
-				},
-				{
-					"name": "useCssVar",
-					"source": "vueuse/core/useCssVar",
-					"status": "todo",
-					"target": "src/lib/browser/useCssVar/"
-				},
-				{
-					"name": "useStyleTag",
-					"source": "vueuse/core/useStyleTag",
-					"status": "todo",
-					"target": "src/lib/browser/useStyleTag/"
+					"target": "src/lib/browser/useObjectUrl/"
 				},
 				{
 					"name": "useScriptTag",
@@ -1084,15 +760,16 @@
 					"target": "src/lib/browser/useScriptTag/"
 				},
 				{
-					"name": "useCssSupports",
-					"source": "vueuse/core/useCssSupports",
+					"name": "useStyleTag",
+					"source": "vueuse/core/useStyleTag",
 					"status": "todo",
-					"target": "src/lib/browser/useCssSupports/"
+					"target": "src/lib/browser/useStyleTag/"
 				}
 			],
 			"id": "feat-022",
 			"name": "Clipboard extras, files, theming",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T1"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1100,16 +777,23 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useOnline",
-					"source": "vueuse/core/useOnline",
-					"status": "svelte-native",
-					"target": "src/lib/network/useOnline/"
+					"name": "useBroadcastChannel",
+					"source": "vueuse/core/useBroadcastChannel",
+					"status": "todo",
+					"target": "src/lib/network/useBroadcastChannel/"
 				},
 				{
-					"name": "useNetwork",
-					"source": "vueuse/core/useNetwork",
+					"name": "useBrowserLocation",
+					"source": "vueuse/core/useBrowserLocation",
 					"status": "todo",
-					"target": "src/lib/network/useNetwork/"
+					"target": "src/lib/network/useBrowserLocation/"
+				},
+				{
+					"name": "useEventSource",
+					"source": "vueuse/core/useEventSource",
+					"status": "todo",
+					"target": "src/lib/network/useEventSource/",
+					"tier": "T2"
 				},
 				{
 					"name": "useFetch",
@@ -1118,28 +802,17 @@
 					"target": "src/lib/network/useFetch/"
 				},
 				{
-					"name": "useWebSocket",
-					"source": "vueuse/core/useWebSocket",
+					"name": "useNetwork",
+					"source": "vueuse/core/useNetwork",
 					"status": "todo",
-					"target": "src/lib/network/useWebSocket/"
-				},
-				{
-					"name": "useEventSource",
-					"source": "vueuse/core/useEventSource",
-					"status": "todo",
-					"target": "src/lib/network/useEventSource/"
-				},
-				{
-					"name": "useBroadcastChannel",
-					"source": "vueuse/core/useBroadcastChannel",
-					"status": "todo",
-					"target": "src/lib/network/useBroadcastChannel/"
+					"target": "src/lib/network/useNetwork/"
 				},
 				{
 					"name": "useShare",
 					"source": "vueuse/core/useShare",
 					"status": "todo",
-					"target": "src/lib/network/useShare/"
+					"target": "src/lib/network/useShare/",
+					"tier": "T2"
 				},
 				{
 					"name": "useUrlSearchParams",
@@ -1148,15 +821,17 @@
 					"target": "src/lib/network/useUrlSearchParams/"
 				},
 				{
-					"name": "useBrowserLocation",
-					"source": "vueuse/core/useBrowserLocation",
+					"name": "useWebSocket",
+					"source": "vueuse/core/useWebSocket",
 					"status": "todo",
-					"target": "src/lib/network/useBrowserLocation/"
+					"target": "src/lib/network/useWebSocket/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-023",
 			"name": "Network & connectivity",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T2"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1168,12 +843,6 @@
 					"source": "vueuse/core/useBattery",
 					"status": "todo",
 					"target": "src/lib/sensors/useBattery/"
-				},
-				{
-					"name": "useGeolocation",
-					"source": "vueuse/core/useGeolocation",
-					"status": "todo",
-					"target": "src/lib/sensors/useGeolocation/"
 				},
 				{
 					"name": "useDeviceMotion",
@@ -1188,10 +857,24 @@
 					"target": "src/lib/sensors/useDeviceOrientation/"
 				},
 				{
-					"name": "useDevicePixelRatio",
-					"source": "vueuse/core/useDevicePixelRatio",
-					"status": "svelte-native",
-					"target": "src/lib/sensors/useDevicePixelRatio/"
+					"name": "useDevicesList",
+					"source": "vueuse/core/useDevicesList",
+					"status": "todo",
+					"target": "src/lib/sensors/useDevicesList/"
+				},
+				{
+					"name": "useGeolocation",
+					"source": "vueuse/core/useGeolocation",
+					"status": "todo",
+					"target": "src/lib/sensors/useGeolocation/",
+					"tier": "T2"
+				},
+				{
+					"name": "useIdle",
+					"source": "vueuse/core/useIdle",
+					"status": "todo",
+					"target": "src/lib/sensors/useIdle/",
+					"tier": "T2"
 				},
 				{
 					"name": "useMemory",
@@ -1209,24 +892,14 @@
 					"name": "usePermission",
 					"source": "vueuse/core/usePermission",
 					"status": "todo",
-					"target": "src/lib/sensors/usePermission/"
-				},
-				{
-					"name": "useIdle",
-					"source": "vueuse/core/useIdle",
-					"status": "todo",
-					"target": "src/lib/sensors/useIdle/"
-				},
-				{
-					"name": "useDevicesList",
-					"source": "vueuse/core/useDevicesList",
-					"status": "todo",
-					"target": "src/lib/sensors/useDevicesList/"
+					"target": "src/lib/sensors/usePermission/",
+					"tier": "T2"
 				}
 			],
 			"id": "feat-024",
 			"name": "Sensors & device",
-			"status": "todo"
+			"status": "todo",
+			"tier": "niche"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1234,57 +907,28 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "useEventBus",
-					"source": "vueuse/core/useEventBus",
-					"status": "todo",
-					"target": "src/lib/browser/useEventBus/"
-				},
-				{
 					"name": "useConfirmDialog",
 					"source": "vueuse/core/useConfirmDialog",
 					"status": "todo",
 					"target": "src/lib/browser/useConfirmDialog/"
 				},
 				{
-					"name": "useMounted",
-					"source": "vueuse/core/useMounted",
-					"status": "svelte-native",
-					"target": "src/lib/browser/useMounted/"
+					"name": "useElementOverflow",
+					"source": "vueuse/core/useElementOverflow",
+					"status": "todo",
+					"target": "src/lib/elements/useElementOverflow/"
 				},
 				{
 					"name": "useSupported",
 					"source": "vueuse/core/useSupported",
 					"status": "todo",
 					"target": "src/lib/shared/useSupported/"
-				},
-				{
-					"name": "useTransition",
-					"source": "vueuse/core/useTransition",
-					"status": "svelte-native",
-					"target": "src/lib/utilities/useTransition/"
-				},
-				{
-					"name": "useAnimate",
-					"source": "vueuse/core/useAnimate",
-					"status": "svelte-native",
-					"target": "src/lib/browser/useAnimate/"
-				},
-				{
-					"name": "useVirtualList",
-					"source": "vueuse/core/useVirtualList",
-					"status": "deferred",
-					"target": "src/lib/browser/useVirtualList/"
-				},
-				{
-					"name": "useElementOverflow",
-					"source": "vueuse/core/useElementOverflow",
-					"status": "todo",
-					"target": "src/lib/elements/useElementOverflow/"
 				}
 			],
 			"id": "feat-025",
 			"name": "Events, dialogs, animation",
-			"status": "todo"
+			"status": "todo",
+			"tier": "niche"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1292,10 +936,28 @@
 			"evidence": "",
 			"functions": [
 				{
+					"name": "useBluetooth",
+					"source": "vueuse/core/useBluetooth",
+					"status": "todo",
+					"target": "src/lib/browser/useBluetooth/"
+				},
+				{
+					"name": "useDisplayMedia",
+					"source": "vueuse/core/useDisplayMedia",
+					"status": "todo",
+					"target": "src/lib/browser/useDisplayMedia/"
+				},
+				{
 					"name": "useEyeDropper",
 					"source": "vueuse/core/useEyeDropper",
 					"status": "todo",
 					"target": "src/lib/browser/useEyeDropper/"
+				},
+				{
+					"name": "useFileSystemAccess",
+					"source": "vueuse/core/useFileSystemAccess",
+					"status": "todo",
+					"target": "src/lib/browser/useFileSystemAccess/"
 				},
 				{
 					"name": "useGamepad",
@@ -1304,22 +966,22 @@
 					"target": "src/lib/browser/useGamepad/"
 				},
 				{
-					"name": "useVibrate",
-					"source": "vueuse/core/useVibrate",
+					"name": "useParallax",
+					"source": "vueuse/core/useParallax",
 					"status": "todo",
-					"target": "src/lib/browser/useVibrate/"
+					"target": "src/lib/browser/useParallax/"
 				},
 				{
-					"name": "useWakeLock",
-					"source": "vueuse/core/useWakeLock",
+					"name": "useScreenOrientation",
+					"source": "vueuse/core/useScreenOrientation",
 					"status": "todo",
-					"target": "src/lib/browser/useWakeLock/"
+					"target": "src/lib/browser/useScreenOrientation/"
 				},
 				{
-					"name": "useWebNotification",
-					"source": "vueuse/core/useWebNotification",
+					"name": "useScreenSafeArea",
+					"source": "vueuse/core/useScreenSafeArea",
 					"status": "todo",
-					"target": "src/lib/browser/useWebNotification/"
+					"target": "src/lib/browser/useScreenSafeArea/"
 				},
 				{
 					"name": "useSpeechRecognition",
@@ -1340,40 +1002,29 @@
 					"target": "src/lib/browser/useUserMedia/"
 				},
 				{
-					"name": "useDisplayMedia",
-					"source": "vueuse/core/useDisplayMedia",
+					"name": "useVibrate",
+					"source": "vueuse/core/useVibrate",
 					"status": "todo",
-					"target": "src/lib/browser/useDisplayMedia/"
+					"target": "src/lib/browser/useVibrate/"
 				},
 				{
-					"name": "useBluetooth",
-					"source": "vueuse/core/useBluetooth",
+					"name": "useWakeLock",
+					"source": "vueuse/core/useWakeLock",
 					"status": "todo",
-					"target": "src/lib/browser/useBluetooth/"
+					"target": "src/lib/browser/useWakeLock/",
+					"tier": "T2"
 				},
 				{
-					"name": "useScreenOrientation",
-					"source": "vueuse/core/useScreenOrientation",
+					"name": "useWebMCP",
+					"source": "vueuse/core/useWebMCP",
 					"status": "todo",
-					"target": "src/lib/browser/useScreenOrientation/"
+					"target": "src/lib/browser/useWebMCP/"
 				},
 				{
-					"name": "useParallax",
-					"source": "vueuse/core/useParallax",
+					"name": "useWebNotification",
+					"source": "vueuse/core/useWebNotification",
 					"status": "todo",
-					"target": "src/lib/browser/useParallax/"
-				},
-				{
-					"name": "useScreenSafeArea",
-					"source": "vueuse/core/useScreenSafeArea",
-					"status": "todo",
-					"target": "src/lib/browser/useScreenSafeArea/"
-				},
-				{
-					"name": "useFileSystemAccess",
-					"source": "vueuse/core/useFileSystemAccess",
-					"status": "todo",
-					"target": "src/lib/browser/useFileSystemAccess/"
+					"target": "src/lib/browser/useWebNotification/"
 				},
 				{
 					"name": "useWebWorker",
@@ -1386,17 +1037,12 @@
 					"source": "vueuse/core/useWebWorkerFn",
 					"status": "todo",
 					"target": "src/lib/browser/useWebWorkerFn/"
-				},
-				{
-					"name": "useWebMCP",
-					"source": "vueuse/core/useWebMCP",
-					"status": "todo",
-					"target": "src/lib/browser/useWebMCP/"
 				}
 			],
 			"id": "feat-026",
 			"name": "Niche device & media APIs",
-			"status": "todo"
+			"status": "todo",
+			"tier": "niche"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1410,111 +1056,16 @@
 					"target": "src/lib/shared/useClamp/"
 				},
 				{
-					"name": "useMin",
-					"source": "vueuse/math/useMin",
-					"status": "cut",
-					"target": "src/lib/shared/useMin/"
-				},
-				{
-					"name": "useMax",
-					"source": "vueuse/math/useMax",
-					"status": "cut",
-					"target": "src/lib/shared/useMax/"
-				},
-				{
-					"name": "useAverage",
-					"source": "vueuse/math/useAverage",
-					"status": "cut",
-					"target": "src/lib/shared/useAverage/"
-				},
-				{
-					"name": "useSum",
-					"source": "vueuse/math/useSum",
-					"status": "cut",
-					"target": "src/lib/shared/useSum/"
-				},
-				{
 					"name": "usePrecision",
 					"source": "vueuse/math/usePrecision",
 					"status": "todo",
 					"target": "src/lib/shared/usePrecision/"
-				},
-				{
-					"name": "useRound",
-					"source": "vueuse/math/useRound",
-					"status": "cut",
-					"target": "src/lib/shared/useRound/"
-				},
-				{
-					"name": "useCeil",
-					"source": "vueuse/math/useCeil",
-					"status": "cut",
-					"target": "src/lib/shared/useCeil/"
-				},
-				{
-					"name": "useFloor",
-					"source": "vueuse/math/useFloor",
-					"status": "cut",
-					"target": "src/lib/shared/useFloor/"
-				},
-				{
-					"name": "useTrunc",
-					"source": "vueuse/math/useTrunc",
-					"status": "cut",
-					"target": "src/lib/shared/useTrunc/"
-				},
-				{
-					"name": "useAbs",
-					"source": "vueuse/math/useAbs",
-					"status": "cut",
-					"target": "src/lib/shared/useAbs/"
-				},
-				{
-					"name": "useMath",
-					"source": "vueuse/math/useMath",
-					"status": "cut",
-					"target": "src/lib/shared/useMath/"
-				},
-				{
-					"name": "logicAnd",
-					"source": "vueuse/math/logicAnd",
-					"status": "cut",
-					"target": "src/lib/shared/logicAnd/"
-				},
-				{
-					"name": "logicOr",
-					"source": "vueuse/math/logicOr",
-					"status": "cut",
-					"target": "src/lib/shared/logicOr/"
-				},
-				{
-					"name": "logicNot",
-					"source": "vueuse/math/logicNot",
-					"status": "cut",
-					"target": "src/lib/shared/logicNot/"
-				},
-				{
-					"name": "useProjection",
-					"source": "vueuse/math/useProjection",
-					"status": "cut",
-					"target": "src/lib/shared/useProjection/"
-				},
-				{
-					"name": "createProjection",
-					"source": "vueuse/math/createProjection",
-					"status": "todo",
-					"target": "src/lib/shared/createProjection/"
-				},
-				{
-					"name": "createGenericProjection",
-					"source": "vueuse/math/createGenericProjection",
-					"status": "todo",
-					"target": "src/lib/shared/createGenericProjection/"
 				}
 			],
 			"id": "feat-027",
 			"name": "Reactive math",
-			"status": "todo"
+			"status": "todo",
+			"tier": "recipe-only"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1522,81 +1073,16 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "isDefined",
-					"source": "vueuse/shared/isDefined",
-					"status": "cut",
-					"target": "src/lib/shared/isDefined/"
-				},
-				{
-					"name": "get",
-					"source": "vueuse/shared/get",
-					"status": "cut",
-					"target": "src/lib/shared/get/"
-				},
-				{
-					"name": "set",
-					"source": "vueuse/shared/set",
-					"status": "cut",
-					"target": "src/lib/shared/set/"
-				},
-				{
 					"name": "useToNumber",
 					"source": "vueuse/shared/useToNumber",
 					"status": "todo",
 					"target": "src/lib/shared/useToNumber/"
-				},
-				{
-					"name": "useToString",
-					"source": "vueuse/shared/useToString",
-					"status": "cut",
-					"target": "src/lib/shared/useToString/"
-				},
-				{
-					"name": "reactify",
-					"source": "vueuse/shared/reactify",
-					"status": "cut",
-					"target": "src/lib/shared/reactify/"
-				},
-				{
-					"name": "reactifyObject",
-					"source": "vueuse/shared/reactifyObject",
-					"status": "todo",
-					"target": "src/lib/shared/reactifyObject/"
-				},
-				{
-					"name": "reactiveComputed",
-					"source": "vueuse/shared/reactiveComputed",
-					"status": "cut",
-					"target": "src/lib/shared/reactiveComputed/"
-				},
-				{
-					"name": "reactiveOmit",
-					"source": "vueuse/shared/reactiveOmit",
-					"status": "todo",
-					"target": "src/lib/shared/reactiveOmit/"
-				},
-				{
-					"name": "reactivePick",
-					"source": "vueuse/shared/reactivePick",
-					"status": "todo",
-					"target": "src/lib/shared/reactivePick/"
-				},
-				{
-					"name": "toReactive",
-					"source": "vueuse/shared/toReactive",
-					"status": "todo",
-					"target": "src/lib/shared/toReactive/"
-				},
-				{
-					"name": "makeDestructurable",
-					"source": "vueuse/shared/makeDestructurable",
-					"status": "todo",
-					"target": "src/lib/shared/makeDestructurable/"
 				}
 			],
 			"id": "feat-028",
 			"name": "Shared value & reactivity helpers",
-			"status": "todo"
+			"status": "todo",
+			"tier": "recipe-only"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -1604,16 +1090,16 @@
 			"evidence": "",
 			"functions": [
 				{
-					"name": "composeHandlers",
-					"source": "svbase/utils/compose-handlers.ts",
+					"name": "clickOutside/escapeKey",
+					"source": "svbase/actions/dismiss.ts",
 					"status": "todo",
-					"target": "src/lib/shared/composeHandlers/"
+					"target": "src/lib/browser/dismiss/"
 				},
 				{
-					"name": "mergeProps",
-					"source": "svbase/utils/merge-props.ts",
+					"name": "contextHelpers",
+					"source": "svbase/utils/context.ts",
 					"status": "todo",
-					"target": "src/lib/shared/mergeProps/"
+					"target": "src/lib/shared/context/"
 				},
 				{
 					"name": "generateId/createId/getTabIds",
@@ -1628,16 +1114,16 @@
 					"target": "src/lib/shared/stateAttrs/"
 				},
 				{
-					"name": "sliderMath",
-					"source": "svbase/utils/slider-math.ts",
-					"status": "todo",
-					"target": "src/lib/shared/sliderMath/"
-				},
-				{
 					"name": "nextRovingTarget",
 					"source": "svbase/utils/roving.ts",
 					"status": "todo",
 					"target": "src/lib/shared/roving/"
+				},
+				{
+					"name": "sliderMath",
+					"source": "svbase/utils/slider-math.ts",
+					"status": "todo",
+					"target": "src/lib/shared/sliderMath/"
 				},
 				{
 					"name": "tooltipDelay",
@@ -1646,31 +1132,55 @@
 					"target": "src/lib/shared/tooltipDelay/"
 				},
 				{
-					"name": "clickOutside/escapeKey",
-					"source": "svbase/actions/dismiss.ts",
-					"status": "todo",
-					"target": "src/lib/browser/dismiss/"
-				},
-				{
 					"name": "trackOutsidePress",
 					"source": "svbase/utils/outside.ts",
 					"status": "todo",
 					"target": "src/lib/browser/trackOutsidePress/"
-				},
-				{
-					"name": "contextHelpers",
-					"source": "svbase/utils/context.ts",
-					"status": "todo",
-					"target": "src/lib/shared/context/"
 				}
 			],
 			"id": "feat-029",
 			"name": "svbase ports",
-			"status": "todo"
+			"status": "todo",
+			"tier": "T1"
+		},
+		{
+			"dependencies": ["feat-005", "feat-008"],
+			"description": "Not in VueUse. Some have Base UI equivalents already written in Svelte — decide per function whether to port from Base UI or write fresh, and record the choice in evidence.",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "Selection",
+					"source": "base-ui:Selection",
+					"status": "todo",
+					"target": "src/lib/state/Selection/"
+				},
+				{
+					"name": "useControllableState",
+					"source": "base-ui:useControlled",
+					"status": "todo",
+					"target": "src/lib/state/useControllableState/"
+				},
+				{
+					"name": "useHotkeys",
+					"source": "base-ui:useHotkeys",
+					"status": "todo",
+					"target": "src/lib/browser/useHotkeys/"
+				},
+				{
+					"name": "usePagination",
+					"source": "custom:usePagination",
+					"status": "todo",
+					"target": "src/lib/state/usePagination/"
+				}
+			],
+			"id": "feat-031",
+			"name": "Extras (non-VueUse)",
+			"status": "todo",
+			"tier": "extra"
 		}
 	],
-	"notPortedRef": "docs/recipes.md",
 	"rulesRef": ".agents/rules/",
-	"note": "Status index only. Scope/module/docs/test/workflow contracts live in rulesRef; the rationale for every cut/deferred/svelte-native status, plus copy-paste patterns, lives in notPortedRef. Neither is duplicated here.",
-	"version": "1.0.0"
+	"note": "IMPLEMENTATION STATUS ONLY. Every function here is something this package ships. Anything deliberately not ported (Vue-specific, already a Svelte primitive, or lower value than its own recipe) lives in notPortedRef with the Svelte-native replacement — that file is also the source for the Astro migration docs.",
+	"version": "1.0.0",
+	"recipeRef": "docs/recipes.md"
 }
