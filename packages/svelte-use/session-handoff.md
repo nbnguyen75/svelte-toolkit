@@ -3,21 +3,26 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-009` and `feat-011` are `done` (gates green 2026-10-02).
+- `feat-001` through `feat-011` are `done` (gates green 2026-10-02).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
   `useStorage`/`useLocalStorage`/`useSessionStorage` plus `useToggle`/`useCounter`/`usePrevious`/`useLastChanged`/`useCloned`/`useCycleList`/`useStepper`/`useOffsetPagination` (state),
   `useDebounceFn`/`useThrottleFn`/`useTimeoutFn`/`useIntervalFn`/`useCountdown`/
-  `useRafFn`/`useFps` (utilities), plus shared `is.ts` (14 guard/predicate
-  exports) / `getter.ts`. Barrel exports 37 symbols. Suite: 266 tests / 42 files.
+  `useRafFn`/`useFps` (utilities), the 13 reactive array transforms
+  `useArrayMap`/`useArrayFilter`/`useArrayUnique`/`useArraySome`/`useArrayEvery`/
+  `useArrayIncludes`/`useArrayJoin`/`useArrayReduce`/`useArrayFind`/
+  `useArrayFindIndex`/`useArrayFindLast`/`useArrayDifference`/`useSorted` (shared),
+  plus shared `is.ts` (14 guard/predicate exports) / `getter.ts`.
+  Barrel exports 50 runtime symbols. Suite: 424 tests / 68 files.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- **feat-001 through feat-008 and feat-011 are `done`** (gates green 2026-10-01).
-- **feat-009 State essentials is `done`** - `useToggle`, `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`, `useOffsetPagination` (gates green 2026-10-02).
-- **Next unblocked feature is feat-010 Reactive arrays** - `useArrayMap`, `useArrayFilter`, `useArrayUnique`, and friends. Deps (feat-005, feat-008) are done. Pure transforms, `shared/` category, no compiler needed.
+- **feat-011 Timing core is `done`** (gates green 2026-10-02); details below.
+- **feat-010 Reactive arrays is `done`** — all 13 transforms listed above (gates green 2026-10-02).
+- **Next unblocked coding feature is feat-013 Reactive watchers** (`watch`-style runes helpers). feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
+- `feat-014` onward (refs, async/history) are also unblocked; take them in id order unless the roadmap says otherwise.
 - `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` — they are
   recipes in `docs/recipes.md`, not library code.
 
@@ -87,6 +92,39 @@
 - `$effect` cannot be used in a `*.test.ts` file (rune-outside-svelte), and
   `mountUtil` throws when setup returns `undefined`. Read runes through
   `test/fixtures/*.svelte.ts` instead; do not try to inline an effect.
+- **`bun run format` fails hard on any invalid UTF-8 byte in a scanned file**
+  (`oxfmt` reports "binary or inaccessible" and stops). A single mangled em dash
+  in `session-handoff.md` blocked formatting for every session until repaired.
+  If `oxfmt` names one file, scan it for U+FFFD and fix that file only.
+- **A symbol exported from two barrel paths is dropped silently** by
+  `svelte-package`/rollup, and `svelte-check` will not see it. After touching
+  `src/lib/index.ts`, verify the public surface with a throwaway type-level guard
+  (`type Missing = Exclude<Required, keyof typeof barrel>`, assert `never`), then
+  delete it. Do not trust the barrel by eye.
+- **Tests are excluded from `svelte-check` and lint on purpose**
+  (`shared-ignore.config.ts`, tsconfig `exclude`), so a type error written in a
+  `*.test.ts` is never reported. Tests are specification, not shipped surface;
+  their correctness is pinned by vitest at runtime only.
+- **`svelte(prefer-svelte-reactivity)` forbids bare `new Set`/`new Map`.** Use
+  `SvelteSet`/`SvelteMap` from `svelte/reactivity`; on the server they are the
+  native collections, so SSR behaviour is unchanged.
+- **Overloaded third arguments can be dispatched with zero casts.** Declare the
+  implementation parameter as the _union_ of the accepted shapes, then narrow
+  with `typeof x === 'function'` and a hand-written `x is Options` guard. Do
+  **not** use `isObject` for that guard: its `Record<PropertyKey, unknown>`
+  predicate intersects the union into `'{} | null'` and the comparator stops
+  typechecking.
+- **A single-generic implementation signature can satisfy two public overloads**
+  whose type relationship TS cannot express (e.g. `useArrayReduce`'s seeded vs
+  no-seed accumulator). Keep both overloads on the public function; the shared
+  body may collapse to one generic with no assertion.
+- **`Number(a) - Number(b)` is a cast-free generic numeric comparator** — it is
+  the same `ToNumber` conversion the `-` operator performs, so numeric strings
+  still compare numerically and the function assigns to a generic compare type.
+- **V8 does not throw on a `NaN` comparator in `Array#sort`** — it just leaves
+  the order unspecified. Do not write error-path tests that assume a throw.
+- `unicorn/no-array-sort` requires `toSorted`; `unicorn/consistent-function-scoping`
+  requires module-scope helpers. Both are fixable honestly, no suppressions.
 
 ## How to Resume
 
@@ -96,7 +134,7 @@
 
 ## Blockers
 
-- None — baseline verification not run yet in this repo.
+- None. Baseline (`.\init.ps1`) is green as of 2026-10-02.
 
 ## Files
 
@@ -106,16 +144,16 @@
 
 ## Next Session
 
-- **Last Updated**: 2026-10-01
-- **Current Objective**: baseline verification, then first utility port.
-- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`.
+- **Last Updated**: 2026-10-02
+- **Current Objective**: port feat-013 Reactive watchers (feat-012 is deferred to date-fns recipes).
+- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`, then read `feature_list.json` for feat-013's function list.
 
-## State essentials � how feat-009 is built (do not re-derive)
+## State essentials — how feat-009 is built (do not re-derive)
 
 - **Three type problems cost most of the time here. All three are solved without
   a cast or a lint suppression; keep it that way.**
 - **`useToggle`**: never assign a literal into the generic slot. Pass the two
-  values to a private `valuesToggle()` as *arguments* so `T` is inferred as
+  values to a private `valuesToggle()` as _arguments_ so `T` is inferred as
   `boolean` on the boolean overload. The boolean overload takes no options.
 - **`toggle()` vs `toggle(undefined)` differ, and a default parameter cannot
   express that.** The arity is the signal, carried by a rest parameter typed
@@ -126,15 +164,43 @@
   clone is `structuredClone($state.snapshot(source))`.
 - **Svelte exports neither `Snapshot` nor `snapshot`,** so the type is named with
   `ReturnType<typeof defaultClone<T>>` (an instantiation expression). A
-  hand-written conditional alias is rejected � TS cannot prove it matches
+  hand-written conditional alias is rejected — TS cannot prove it matches
   Svelte's for a deferred `T`.
 - **`usePrevious` needs a non-reactive `last`** holding the previous effect run's
-  value. Reading the source inside the effect gives you the *current* value, not
+  value. Reading the source inside the effect gives you the _current_ value, not
   the prior one; that bug shipped in the first draft and the tests caught it.
 - **`noUncheckedIndexedAccess` is on,** so `list[i]` is `T | undefined`.
   `useCycleList` uses `list[wrapped]!` because the wraparound arithmetic already
   proves the index is in range.
 - **`useStepper` works in `unknown` space** on purpose, so array steps (names are
-  the values) and record steps (names are the keys) share one path � and the impl
+  the values) and record steps (names are the keys) share one path — and the impl
   signature declares the widened return, which is why even the final return needs
   no cast.
+
+## Reactive arrays — how feat-010 is built (do not re-derive)
+
+- **The batch is a thin reactive shell over native array methods.** Twelve of the
+  thirteen are one `$derived`; the work was in the overload types, not algorithms.
+- **`useArrayIncludes` / `useArrayDifference` / `useSorted` accept a comparator, a
+  `keyof T` key, or an options bag as the third argument.** The implementation
+  signature declares that parameter as the _union_ of the three shapes and
+  narrows with `typeof === 'function'` plus a hand-written `isOptions` guard.
+  Never reach for `isObject` here — its `Record<PropertyKey, unknown>` predicate
+  intersects the union into `'{} | null'` and breaks the comparator.
+- **`useArrayReduce` is two public overloads over one single-generic body.**
+  Native `reduce` ties the accumulator to the element type only on the no-seed
+  path; TS cannot express that across an overload boundary, so the shared
+  implementation is `<T>` and both paths call native `reduce` directly.
+- **`useSorted`'s default is `Number(a) - Number(b)`**, not a cast. It performs
+  the same `ToNumber` the `-` operator does, so numeric strings sort numerically
+  and the function assigns to `UseSortedCompareFn<T>` with no assertion.
+- **`useArrayFindLast` uses native `findLast`; `useArrayUnique`'s default uses
+  `SvelteSet`.** Both replaced hand-rolled loops in the reference. `Set` applies
+  `SameValueZero`, so `0` and `-0` collapse (the reference's `Object.is` loop
+  contradicted its own comment) and `NaN` self-matches — tests pin this.
+- **`useSorted` `dirty` mode is client-only by construction** (it registers an
+  `$effect` that splices the source only when the order actually changed, which
+  is what makes it settle). Copy mode is pure and is what the SSR probe covers.
+  `defaultSort` uses `toSorted`; the caller's array is never mutated.
+- **`useArrayIncludes` defaults to SameValueZero** (like native `includes`); key
+  comparison uses `Object.is`; `fromIndex` slices the list before `.some`.

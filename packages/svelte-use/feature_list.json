@@ -241,90 +241,90 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Pure reactive array transforms. All synchronous/pure — high test coverage without compiler; shared/ category.",
-			"evidence": "",
 			"functions": [
 				{
 					"name": "useArrayMap",
 					"source": "vueuse/shared/useArrayMap",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayMap/"
 				},
 				{
 					"name": "useArrayFilter",
 					"source": "vueuse/shared/useArrayFilter",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayFilter/"
 				},
 				{
 					"name": "useArrayUnique",
 					"source": "vueuse/shared/useArrayUnique",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayUnique/"
 				},
 				{
 					"name": "useArraySome",
 					"source": "vueuse/shared/useArraySome",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArraySome/"
 				},
 				{
 					"name": "useArrayEvery",
 					"source": "vueuse/shared/useArrayEvery",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayEvery/"
 				},
 				{
 					"name": "useArrayIncludes",
 					"source": "vueuse/shared/useArrayIncludes",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayIncludes/"
 				},
 				{
 					"name": "useArrayJoin",
 					"source": "vueuse/shared/useArrayJoin",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayJoin/"
 				},
 				{
 					"name": "useArrayReduce",
 					"source": "vueuse/shared/useArrayReduce",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayReduce/"
 				},
 				{
 					"name": "useArrayFind",
 					"source": "vueuse/shared/useArrayFind",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayFind/"
 				},
 				{
 					"name": "useArrayFindIndex",
 					"source": "vueuse/shared/useArrayFindIndex",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayFindIndex/"
 				},
 				{
 					"name": "useArrayFindLast",
 					"source": "vueuse/shared/useArrayFindLast",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayFindLast/"
 				},
 				{
 					"name": "useArrayDifference",
 					"source": "vueuse/shared/useArrayDifference",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useArrayDifference/"
 				},
 				{
 					"name": "useSorted",
 					"source": "vueuse/core/useSorted",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/useSorted/"
 				}
 			],
 			"id": "feat-010",
 			"name": "Reactive array utils",
-			"status": "todo"
+			"status": "done",
+			"evidence": "Shipped 13/13 modules under src/lib/shared/ (useArrayMap, useArrayFilter, useArrayUnique, useArraySome, useArrayEvery, useArrayIncludes, useArrayJoin, useArrayReduce, useArrayFind, useArrayFindIndex, useArrayFindLast, useArrayDifference, useSorted), each with index.svelte.ts + index.ts, README.md, a jsdom suite and an SSR probe. 158 new tests across 26 files; suite is 424/424 across 68 files. Barrel resolves all 13 functions plus 22 option/return interfaces (verified with a throwaway type-level guard, since a symbol exported from two paths is dropped silently). Zero type assertions and zero suppressions in the whole batch: (1) overload dispatch uses the implementation signature's parameter UNION plus typeof narrowing, so useArrayIncludes/useArrayDifference/useSorted read a comparator function, a keyof T key, or an options bag without casting the unknown third argument; useArrayIncludes narrows with a declared isOptions type guard rather than isObject, whose Record<PropertyKey, unknown> predicate collapses the union into '{} | null'. (2) useArrayReduce keeps a single-generic implementation signature under two public overloads, so both native reduce paths are called with no cast - the accumulator type coincides with the element type only in the no-seed case, which types cannot express across the overload boundary. (3) useSorted's default comparator uses Number(a) - Number(b), which is the same ToNumber conversion the subtraction operator performs and keeps the function assignable to UseSortedCompareFn<T> without a cast. (4) useArrayFindLast and useArrayUnique delegate to native findLast and Set instead of hand-rolled reverse scans and O(n^2) loops. Documented divergences: useArrayUnique's default is Set semantics (SameValueZero) so 0 and -0 collapse, matching the reference's stated intent; useArrayIncludes defaults to SameValueZero (like native includes) and key comparisons use Object.is; useSorted's default comparator is numeric, so strings need compareFn; useSorted dirty mode is client-only and the SSR probe covers copy mode only. Gates green."
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
@@ -916,7 +916,7 @@
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
-			"description": "Touch/drag interactions and outside/long-press handlers. (useDraggable reopened as real scope: a zero-dep port of VueUse's element/handle dragging, shipped alongside @neodrag/svelte rather than deferring to it; useParallax moved to feat-026 — needs useDeviceOrientation + useScreenOrientation.) Touch + mouse event mocks in tests.",
+			"description": "Touch/drag interactions and outside/long-press handlers. (useDraggable reopened as real scope: a zero-dep port of VueUse\u0027s element/handle dragging, shipped alongside @neodrag/svelte rather than deferring to it; useParallax moved to feat-026 — needs useDeviceOrientation + useScreenOrientation.) Touch + mouse event mocks in tests.",
 			"evidence": "",
 			"functions": [
 				{
