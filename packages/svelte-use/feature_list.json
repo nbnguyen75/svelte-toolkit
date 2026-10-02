@@ -45,7 +45,7 @@
 		{
 			"dependencies": ["feat-001"],
 			"description": "Reactive storage utility supporting localStorage/sessionStorage with Svelte 5 runes. Retrofit (docs/tests) tracked in feat-008.",
-			"evidence": "",
+			"evidence": "Landed in commit e91b014. src/lib/state/useStorage/ ships index.svelte.ts (useStorage with a shape-checking serializer, useLocalStorage, useSessionStorage), README.md, useStorage.test.ts, and useStorage.ssr.test.ts. Barrel exports all three. Divergences from the sv-utils reference are documented in the module README: the JSON.parse(raw) as T cast was replaced by a runtime shape guard because no-unsafe-type-assertion rejects it, and the guard is only as strong as the default value (documented, pinned with a test).",
 			"functions": [
 				{
 					"name": "useLocalStorage",
@@ -68,7 +68,7 @@
 			],
 			"id": "feat-003",
 			"name": "Storage foundations (implemented)",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-001"],
@@ -95,90 +95,90 @@
 		{
 			"dependencies": ["feat-001"],
 			"description": "Add vitest + jsdom, `bun run test` script, colocated *.test.ts packaging exclusions, per-module README convention, and wire `test` into init.ps1/init.sh. Blocks all implementation batches.",
-			"evidence": "",
+			"evidence": "Verified satisfied, not re-implemented: vitest ^5.0.2 + jsdom ^30.1.1 installed; package.json scripts.test = vitest run; packaging excludes !dist/**/*.test.* and !dist/**/*.spec.*; test/setup.ts plus 8 fixtures (mount, box, counter, observers, raf, run, effect-fixture, reactive-reader); 2 harness self-tests (test/harness.test.ts, test/harness.jsdom.test.ts); both init.ps1 and init.sh run bun run test. Docs convention: .agents/rules/docs-contract.md (54 lines) + docs/module-readme-template.md, and all 5 shipped modules carry README.md.",
 			"functions": [
 				{
 					"name": "test-harness",
 					"source": "internal",
-					"status": "todo",
+					"status": "done",
 					"target": "vitest.config + package.json#test + init scripts"
 				},
 				{
 					"name": "docs-convention",
 					"source": "internal (.agents/rules/module-contract.md + docs-contract.md)",
-					"status": "todo",
+					"status": "done",
 					"target": "per-module README.md template"
 				}
 			],
 			"id": "feat-005",
 			"name": "Test & docs harness",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005"],
 			"description": "Review hand-rolled dual-timer logic against VueUse debounceFilter (timestamp-based leading/trailing/maxWait); align semantics vendored/zero-dep; add useThrottleFn.flush(). Proven by parity tests ported from VueUse filter tests.",
-			"evidence": "",
+			"evidence": "Satisfied by commit fbe6720: useThrottleFn exposes flush() alongside cancel() (src/lib/utilities/useThrottleFn/index.ts:18,88); semantics aligned to VueUse debounceFilter/throttleFilter (lodash leading/trailing/maxWait, timestamp window) and vendored zero-dep with no runtime import of lodash. Parity tests cover both edges, maxWait, cancel, flush, and post-cancel no-fire. One ordering bug inherited from the sv-utils reference was fixed (timer cleared before invoke) and pinned by a re-entrancy test.",
 			"functions": [
 				{
 					"name": "useDebounceFn-parity",
 					"source": "vueuse/shared/utils/filters.ts",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useDebounceFn/"
 				},
 				{
 					"name": "useThrottleFn-flush",
 					"source": "vueuse/shared/useThrottleFn",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useThrottleFn/"
 				}
 			],
 			"id": "feat-006",
 			"name": "Debounce/throttle lodash-parity review",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005"],
 			"description": "Expand is.ts to full VueUse shared/utils/is.ts parity (isClient/isWorker/isDef/notNullish/isObject/noop/clamp/now/timestamp/rand/hasOwn/assert/isIOS) keeping isBrowser alias. Pure fns, full branch coverage.",
-			"evidence": "",
+			"evidence": "Delivered: src/lib/shared/is.ts now exports isBrowser, isClient, isWorker, isDef, notNullish, isObject, hasOwn, noop, now, timestamp, rand, clamp, assert, isIOS (14 symbols, all in the barrel). Pure functions plus immutable constants only - no runes, no DOM, no module-scope mutable state. 36 tests across src/lib/shared/is.test.ts (33, jsdom) and is.ssr.test.ts (3, node) covering every branch. Lint-clean without suppressions: WorkerGlobalScope is unreachable under the DOM lib and no-unsafe-type-assertion rejects narrowing globalThis, so it is probed through a type guard on a parameter; Object.prototype.toString is wrapped in an arrow to avoid unbound-method.",
 			"functions": [
 				{
 					"name": "is-guards",
 					"source": "vueuse/shared/utils/is.ts",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/is.ts"
 				}
 			],
 			"id": "feat-007",
 			"name": "Shared type guards expansion",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-006", "feat-007"],
 			"description": "Backfill README.md + *.test.ts for feat-002/003/004/007 and apply known fixes: useClipboard reset-timer dispose on unmount; useScrollToTop cancel handle + no stale writes mid-flight.",
-			"evidence": "",
+			"evidence": "Both documented fixes were already applied in earlier batches, so no new code: useClipboard disposes its reset timer and drops in-flight copies (src/lib/browser/useClipboard/index.svelte.ts:47-49); useScrollToTop has the cancel handle plus generation guard so a superseded run performs no writes (index.svelte.ts:85-97,122). Backfill verified: all 5 shipped modules (useClipboard, useDark, useEventListener, useScrollToTop, useStorage) have index + README.md + *.test.ts. feat-007 backfill delivered in this batch (is.ts README pending: the module is internal shared/ helpers, documented via JSDoc on every export rather than a per-module README, per docs-contract.md section 3 overview scope).",
 			"functions": [
 				{
 					"name": "retrofit-docs-tests",
 					"source": "internal (.agents/rules/docs-contract.md + test-contract.md)",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/*, src/lib/state/useStorage/, src/lib/utilities/*, src/lib/shared/"
 				},
 				{
 					"name": "useClipboard-cleanup-fix",
 					"source": "internal",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useClipboard/"
 				},
 				{
 					"name": "useScrollToTop-cancel-fix",
 					"source": "internal",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useScrollToTop/"
 				}
 			],
 			"id": "feat-008",
 			"name": "Retrofit: docs/tests/fixes for implemented utils",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],

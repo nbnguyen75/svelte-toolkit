@@ -3,27 +3,31 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-004` are `done` (gates green 2026-10-01).
+- `feat-001` through `feat-008` are `done` (gates green 2026-10-01).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
   `useStorage`/`useLocalStorage`/`useSessionStorage` (state),
-  `useDebounceFn`/`useThrottleFn` (utilities), plus shared `is.ts`/`getter.ts`.
-  Barrel exports 11 symbols.
+  `useDebounceFn`/`useThrottleFn` (utilities), plus shared
+  `is.ts` (14 guard/predicate exports) / `getter.ts`.
+  Barrel exports 24 symbols.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- **feat-005 (Test & docs harness) is already satisfied** — verify, flip to
-  `done`, record evidence. Same for **feat-006** (satisfied by commit `fbe6720`)
-  and **feat-008** (both known fixes already applied: `useClipboard` timer
-  disposal, `useScrollToTop` cancel handle + generation guard). Remaining real
-  work is **feat-007** (`is.ts` expansion to VueUse parity).
-- `useCountdown` etc. live in **feat-011**, not feat-004, and feat-011 depends on
-  feat-008. Full order: `feat-005 → feat-006/007 → feat-008 → feat-011`.
+- **Two features are unblocked; both depend only on feat-005 + feat-008 (done):**
+  - **feat-009 State essentials** — `useToggle`, `useCounter`, `usePrevious`,
+    `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`,
+    `useOffsetPagination`
+  - **feat-011 Timing core** — `useTimeoutFn` → `useIntervalFn` → `useCountdown`
+    → `useRafFn` → `useFps` (that order; countdown composes `useIntervalFn`)
+- `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` in feat-011 —
+  they are recipes in `docs/recipes.md`, not library code.
 - **feat-011 must be hand-rolled.** `svelte/reactivity` exports 7 symbols and
   **none is a timer** — there is no interval/timeout/raf/countdown primitive.
-  `useTimeoutFn` → `useIntervalFn` → `useCountdown` → `useRafFn` → `useFps`.
+- Test fixtures are ready: `mountUtil()` for effect context, `createBox()` for
+  reactive sources, `mockRaf()` for deterministic frames, and fake timers for
+  the timer-driven utils. The sv-utils reference suites port nearly verbatim.
 
 ## Harness Notes (learned this session — do not rediscover)
 
@@ -52,6 +56,14 @@
   `window.matchMedia` inside a `useEventListener` getter — a getter re-resolves
   every effect run, so that rebuilt the `MediaQueryList` and rebound each time.
   Full rationale in `.agents/rules/scope.md` §5.4.
+- `WorkerGlobalScope` is unreachable under this package's DOM lib, and neither
+  `globalThis as { WorkerGlobalScope }` nor a type-guard on `globalThis` itself
+  satisfies the linter (TS does not narrow a _global identifier_). Pass it into
+  a guard **function** and narrow the parameter instead — see
+  `workerScopeOf()` in `src/lib/shared/is.ts`.
+- `vi.spyOn(navigator, 'maxTouchPoints', 'get')` throws in jsdom: `Navigator`
+  omits the property entirely. Use `Object.defineProperty` for it (and for
+  `userAgent`), then restore the original descriptors.
 
 ## How to Resume
 
