@@ -20,6 +20,7 @@ export * from './shared/useArraySome/index.ts';
 export * from './shared/useArrayUnique/index.ts';
 export * from './shared/useSorted/index.ts';
 // * State
+export * from './state/until/index.ts';
 export * from './state/useCloned/index.ts';
 export * from './state/useCounter/index.ts';
 export * from './state/useCycleList/index.ts';
@@ -29,6 +30,10 @@ export * from './state/usePrevious/index.ts';
 export * from './state/useStepper/index.ts';
 export * from './state/useStorage/index.ts';
 export * from './state/useToggle/index.ts';
+export * from './state/watchArray/index.ts';
+export * from './state/watchAtMost/index.ts';
+export * from './state/watchIgnorable/index.ts';
+export * from './state/watchTriggerable/index.ts';
 // * Utilities
 export * from './utilities/useCountdown/index.ts';
 export * from './utilities/useDebounceFn/index.ts';

@@ -3,26 +3,28 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-011` are `done` (gates green 2026-10-02).
+- `feat-001` through `feat-011` and `feat-013` are `done`; `feat-012` is
+  `deferred` (gates green 2026-10-02).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
   `useStorage`/`useLocalStorage`/`useSessionStorage` plus `useToggle`/`useCounter`/`usePrevious`/`useLastChanged`/`useCloned`/`useCycleList`/`useStepper`/`useOffsetPagination` (state),
+  the watchers `watchIgnorable`/`watchTriggerable`/`watchAtMost`/`watchArray`/
+  `until` (state),
   `useDebounceFn`/`useThrottleFn`/`useTimeoutFn`/`useIntervalFn`/`useCountdown`/
   `useRafFn`/`useFps` (utilities), the 13 reactive array transforms
   `useArrayMap`/`useArrayFilter`/`useArrayUnique`/`useArraySome`/`useArrayEvery`/
   `useArrayIncludes`/`useArrayJoin`/`useArrayReduce`/`useArrayFind`/
   `useArrayFindIndex`/`useArrayFindLast`/`useArrayDifference`/`useSorted` (shared),
   plus shared `is.ts` (14 guard/predicate exports) / `getter.ts`.
-  Barrel exports 50 runtime symbols. Suite: 424 tests / 68 files.
+  Barrel exports 55 runtime symbols. Suite: 469 tests / 78 files.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- **feat-011 Timing core is `done`** (gates green 2026-10-02); details below.
-- **feat-010 Reactive arrays is `done`** — all 13 transforms listed above (gates green 2026-10-02).
-- **Next unblocked coding feature is feat-013 Reactive watchers** (`watch`-style runes helpers). feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
-- `feat-014` onward (refs, async/history) are also unblocked; take them in id order unless the roadmap says otherwise.
+- **feat-013 Reactive watchers is `done`** — the 5 kept watchers listed above; the 8 one-liners are `cut` as recipes in `docs/recipes.md` (gates green 2026-10-02); details below.
+- **Next unblocked coding feature is feat-014** (ref variants). feat-012 Date/time display is `deferred` (date-fns recipes only, no code).
+- `feat-015` onward (async/history) are also unblocked; take them in id order unless the roadmap says otherwise.
 - `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` — they are
   recipes in `docs/recipes.md`, not library code.
 
@@ -145,8 +147,8 @@
 ## Next Session
 
 - **Last Updated**: 2026-10-02
-- **Current Objective**: port feat-013 Reactive watchers (feat-012 is deferred to date-fns recipes).
-- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`, then read `feature_list.json` for feat-013's function list.
+- **Current Objective**: start feat-014 (ref variants) — feat-012 is deferred to date-fns recipes.
+- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from `packages/svelte-use/`, then read `feature_list.json` for feat-014's function list.
 
 ## State essentials — how feat-009 is built (do not re-derive)
 
@@ -204,3 +206,35 @@
   `defaultSort` uses `toSorted`; the caller's array is never mutated.
 - **`useArrayIncludes` defaults to SameValueZero** (like native `includes`); key
   comparison uses `Object.is`; `fromIndex` slices the list before `.some`.
+
+## Reactive watchers — how feat-013 is built (do not re-derive)
+
+- **Svelte has no `watch`; every watcher wraps `$effect` + `untrack`.** Vue's
+  `flush`/`deep`/`once`/multi-source arrays and `WatchHandle` do not exist here.
+  Public shape is `MaybeGetter<T>` source plus a `(value, oldValue, onCleanup)`
+  callback; `deep` is meaningless because `$state` proxies track nested reads.
+- **`watchIgnorable` syncs `lastSeen` synchronously inside `ignoreUpdates`,** not a
+  boolean skip flag. Svelte batches effects, so a flag set around a no-op or
+  same-value write would stay armed and swallow the _next_ real change. Setting
+  `lastSeen = resolveGetter(source)` after the updater is the fix. Keep it.
+- **`ignoreUpdates` is generic (`<R>(updater) => R`) so `watchTriggerable.trigger`
+  returns the callback result with no `as R`.** The reference needed the cast
+  because its updater returned `void`.
+- **Every `$effect` returns a teardown, so unmount flushes the pending cleanup.**
+  The reference only cleaned on explicit `stop()`. `watchTriggerable` gets one
+  dedicated teardown `$effect` because its `watchIgnorable` receives a wrapper
+  that owns no cleanup.
+- **`until` must be called during component init (or inside `$effect.root`);** it
+  constructs a `$effect`. On the server the effect is inert, so an
+  already-matching matcher resolves synchronously while a waiting one cannot.
+- **`until` is cast-free by construction:** the impl returns
+  `UntilValueInstance<T> | UntilArrayInstance<T>` and `createArrayUntil` narrows
+  with `Array.isArray` inside `toContains` — no `as unknown as` dispatch.
+- **The 8 one-liner watchers are `cut`, not stubs** (`watchOnce`,
+  `watchImmediate`, `watchDeep`, `whenever`, `watchDebounced`, `watchThrottled`,
+  `watchPausable`, `watchWithFilter`) — plain `$effect` covers them; see
+  `docs/recipes.md`. Do not add them as library code.
+- **`method-signature-style` is enforced on exported interfaces** — use property
+  function types (`stop: () => void`), not methods. `unicorn/no-new-array` bans
+  `new Array(n)`; use `.map(() => false)`. `unbound-method` bans passing a
+  method reference unbound — wrap forwarded controls in arrows.

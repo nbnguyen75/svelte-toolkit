@@ -427,7 +427,7 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Reactive watchers kept: until, watchIgnorable, watchTriggerable, watchArray, watchAtMost. (One-liner aliases cut as recipes.)",
-			"evidence": "",
+			"evidence": "Ported 5 watchers to src/lib/state: until (promised one-time watches: toMatch/changed/changedTimes, toBe/toContains plus truthy/null/undefined/NaN and .not, timeout/throwOnTimeout, getter-target tracking), watchIgnorable (ignoreUpdates/ignorePrevAsyncUpdates/stop), watchTriggerable (manual trigger returning the callback result), watchAtMost (count limit with reactive count, pause/resume/stop), watchArray (duplicate-safe identity diff of added/removed). Cast-free ports of the sv-utils reference via $effect + untrack, with an effect teardown so pending cleanup runs on unmount (the reference only cleaned on explicit stop). The other 8 one-liner watchers are cut as recipes in docs/recipes.md. Tests: 45 new (10 files); full suite 469 passed; svelte-check 0 errors/0 warnings; lint 0 errors/0 warnings; format clean; prepack publint clean.",
 			"functions": [
 				{
 					"name": "watchOnce",
@@ -438,7 +438,7 @@
 				{
 					"name": "watchAtMost",
 					"source": "vueuse/shared/watchAtMost",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/watchAtMost/"
 				},
 				{
@@ -456,7 +456,7 @@
 				{
 					"name": "watchArray",
 					"source": "vueuse/shared/watchArray",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/watchArray/"
 				},
 				{
@@ -468,7 +468,7 @@
 				{
 					"name": "until",
 					"source": "vueuse/shared/until",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/until/"
 				},
 				{
@@ -492,13 +492,13 @@
 				{
 					"name": "watchIgnorable",
 					"source": "vueuse/shared/watchIgnorable",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/watchIgnorable/"
 				},
 				{
 					"name": "watchTriggerable",
 					"source": "vueuse/shared/watchTriggerable",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/watchTriggerable/"
 				},
 				{
@@ -510,7 +510,7 @@
 			],
 			"id": "feat-013",
 			"name": "Reactive watchers",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
