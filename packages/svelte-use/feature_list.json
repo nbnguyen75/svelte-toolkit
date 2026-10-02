@@ -329,12 +329,12 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Core timers and clock primitives; fake-timer tests. Pausable controls per architecture rules. (useTimeout/useInterval/useNow/useTimestamp cut as recipes.)",
-			"evidence": "",
+			"evidence": "Hand-rolled: svelte/reactivity has no timer primitive (7 exports, none of them a clock). Ships useTimeoutFn, useIntervalFn, useCountdown, useRafFn, useFps under src/lib/utilities/, each with README.md, a jsdom suite and an SSR probe. 54 new tests; suite is now 175/175 across 26 files. All five arm inside , so nothing starts on the server and every timer/frame is released on unmount. useTimeout/useInterval/useNow/useTimestamp remain cut as recipes (docs/recipes.md).",
 			"functions": [
 				{
 					"name": "useTimeoutFn",
 					"source": "vueuse/shared/useTimeoutFn",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useTimeoutFn/"
 				},
 				{
@@ -346,7 +346,7 @@
 				{
 					"name": "useIntervalFn",
 					"source": "vueuse/shared/useIntervalFn",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useIntervalFn/"
 				},
 				{
@@ -358,7 +358,7 @@
 				{
 					"name": "useRafFn",
 					"source": "vueuse/core/useRafFn",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useRafFn/"
 				},
 				{
@@ -376,19 +376,19 @@
 				{
 					"name": "useCountdown",
 					"source": "vueuse/core/useCountdown",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useCountdown/"
 				},
 				{
 					"name": "useFps",
 					"source": "vueuse/core/useFps",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useFps/"
 				}
 			],
 			"id": "feat-011",
 			"name": "Timing core (timeouts, intervals, clock)",
-			"status": "todo"
+			"status": "done"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],

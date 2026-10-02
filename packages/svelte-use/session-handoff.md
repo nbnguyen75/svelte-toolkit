@@ -3,31 +3,41 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- `feat-001` through `feat-008` are `done` (gates green 2026-10-01).
+- `feat-001` through `feat-008` and `feat-011` are `done` (gates green 2026-10-01).
 - Pure library package (no SvelteKit shell). Shipped utils:
   `useScrollToTop`, `useEventListener`, `useDark`, `useClipboard` (browser),
   `useStorage`/`useLocalStorage`/`useSessionStorage` (state),
-  `useDebounceFn`/`useThrottleFn` (utilities), plus shared
-  `is.ts` (14 guard/predicate exports) / `getter.ts`.
-  Barrel exports 24 symbols.
+  `useDebounceFn`/`useThrottleFn`/`useTimeoutFn`/`useIntervalFn`/`useCountdown`/
+  `useRafFn`/`useFps` (utilities), plus shared `is.ts` (14 guard/predicate
+  exports) / `getter.ts`. Barrel exports 29 symbols. Suite: 175 tests / 26 files.
 - `feature_list.json` work queue: `cut`/`deferred`/`svelte-native` entries encode
   scope decisions (see `scope.md`, `docs/recipes.md`).
 
 ## Immediate Next Task
 
-- **Two features are unblocked; both depend only on feat-005 + feat-008 (done):**
-  - **feat-009 State essentials** — `useToggle`, `useCounter`, `usePrevious`,
-    `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`,
-    `useOffsetPagination`
-  - **feat-011 Timing core** — `useTimeoutFn` → `useIntervalFn` → `useCountdown`
-    → `useRafFn` → `useFps` (that order; countdown composes `useIntervalFn`)
-- `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` in feat-011 —
-  they are recipes in `docs/recipes.md`, not library code.
-- **feat-011 must be hand-rolled.** `svelte/reactivity` exports 7 symbols and
-  **none is a timer** — there is no interval/timeout/raf/countdown primitive.
-- Test fixtures are ready: `mountUtil()` for effect context, `createBox()` for
-  reactive sources, `mockRaf()` for deterministic frames, and fake timers for
-  the timer-driven utils. The sv-utils reference suites port nearly verbatim.
+- **feat-001 through feat-008 and feat-011 are `done`** (gates green 2026-10-01).
+- **Next unblocked feature is feat-009 State essentials** — `useToggle`, `useCounter`,
+  `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`, `useStepper`,
+  `useOffsetPagination`. Deps (feat-005, feat-008) are done.
+- Still open after that: feat-010, feat-012 … feat-029.
+- `useTimeout`, `useInterval`, `useNow`, `useTimestamp` are `cut` — they are
+  recipes in `docs/recipes.md`, not library code.
+
+## Timing core — how feat-011 is built (do not re-derive)
+
+- **Nothing here is delegated.** `svelte/reactivity` has no timer primitive, so
+  all five utils are hand-rolled.
+- **Every timer is armed inside `$effect`.** That single decision covers both
+  requirements: SSR-safe (effects never run on the server, so no server-side
+  timer holds the process open) and leak-free (the effect teardown clears the
+  timer / cancels the pending frame on unmount). No `tryOnScopeDispose` needed.
+- `useIntervalFn` watches a getter `interval` in a **second `$effect` with no
+  cleanup** — folding it into the lifecycle effect would let unmount be misread
+  as a stop request.
+- `useCountdown` takes a `scheduler` factory rather than hard-coding
+  `setInterval`, so its logic holds no real timer and tests can step it directly.
+- `useFps` samples on `performance.now()`, not the rAF timestamp (matches
+  VueUse; backgrounded tabs throttle frames).
 
 ## Harness Notes (learned this session — do not rediscover)
 
@@ -64,6 +74,21 @@
 - `vi.spyOn(navigator, 'maxTouchPoints', 'get')` throws in jsdom: `Navigator`
   omits the property entirely. Use `Object.defineProperty` for it (and for
   `userAgent`), then restore the original descriptors.
+- **`oxlint`'s `no-unnecessary-condition` flagged VueUse's `if (isActive)`
+  re-check in `useIntervalFn`** as always-truthy. It is not: a user callback can
+  call `pause()`. Do not suppress it — `resume()` arms the interval _before_
+  invoking `immediateCallback`, so a nested `pause()` clears the timer and the
+  branch disappears. Check whether the same collapse is possible before adding a
+  suppression.
+- **VueUse's `useTimeoutFn` uses `AnyFn` (`(...args: any[]) => any`) and a
+  `(...args: Args | [])` signature** only so its no-argument immediate edge
+  typechecks. Neither works under this package's zero-`any` rules. Route
+  mount-driven arming through an `arm(fire: () => void)` helper instead of
+  widening the public signature — `Args | []` breaks `cb(...args)` on the
+  delayed edge.
+- `$effect` cannot be used in a `*.test.ts` file (rune-outside-svelte), and
+  `mountUtil` throws when setup returns `undefined`. Read runes through
+  `test/fixtures/*.svelte.ts` instead; do not try to inline an effect.
 
 ## How to Resume
 
