@@ -3,11 +3,13 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **31 util modules shipped**:
+- Pure library package (no SvelteKit shell). **36 util modules shipped**:
   - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
     `useBreakpoints`, `usePreferredLanguages`,
     `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
-    `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`
+    `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`,
+    `onKeyStroke`, `onStartTyping`, `useKeyModifier`, `useMagicKeys`,
+    `useTextareaAutosize`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -15,10 +17,10 @@
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
   - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
     internal helpers, **not** utils.
-- Suite: **547 tests / 64 files**. `dist` builds, `publint` clean.
+- Suite: **700 tests / 74 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   131 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 13 features done, 12 todo; 41 functions done, 90 todo.
+  `package:` markers. 14 features done, 11 todo; 46 functions done, 85 todo.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -27,10 +29,12 @@
 
 ## Immediate Next Task
 
-- `feat-016` and `feat-019` are **done** (2026-10-03). Roadmap order is by tier,
-  not by feature id. Tier 1 left:
-  - `feat-021` keyboard — `onKeyStroke`, `useMagicKeys`, `onStartTyping`.
-  - `feat-022` — `useColorMode`, `useCssVar`, `useTextareaAutosize`.
+- `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). Roadmap order
+  is by tier, not by feature id. Tier 1 left:
+  - `feat-022` — `useColorMode` (T1), `useCssVar`, `useTextareaAutosize`
+    (`useTextareaAutosize` already shipped with feat-021; do not re-port it),
+    `useBase64`, `useClipboardItems`, `useCssSupports`, `useScriptTag`,
+    `useStyleTag`, `useHead`, `useFuse` (T2).
   - `feat-017` elements — `useElementVisibility` (T1) + `useElementBounding`,
     `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
     `useElementHover` moved out of feat-019 and **already shipped** — it is
@@ -281,6 +285,34 @@ fail to clear the bar alone, cut them rather than padding.
   function; the shared body may collapse to one generic with no assertion.
 - `unicorn/no-array-sort` requires `toSorted`; `unicorn/consistent-function-scoping`
   requires module-scope helpers. Both are fixable honestly, no suppressions.
+- **`init.ps1` writes with `Write-Host`, so redirecting it to a file yields an
+  empty log** (exit code is still the truth). To read the gate output run
+  `powershell -NoProfile -ExecutionPolicy Bypass -File .\init.ps1 2>&1`.
+- **`PowerShell > file.log` swallows `bun`/`vitest` output when piped through
+  `Select-String`.** Prefer running the command directly; if a file is needed,
+  write it with `Out-File -Encoding utf8` from the command itself.
+- **A `$state` object subscribes to nothing for a property that has never been
+  set.** A util whose reads are keyed by an arbitrary string (`magicKeys.ctrl_k`)
+  must not be a `$state` record: the first read of an unset key is untracked, so
+  the effect never re-runs. `SvelteMap`/`SvelteSet` read the collection version
+  even for a missing key. Root-caused by a failing test; see feat-021.
+- **`mountReactive` creates the util _inside_ the reading effect,** which suits
+  lazy `createSubscriber` utils but makes a util that owns its own reactive state
+  unobservable from that same effect. Use the new `mountInitialized`
+  (`test/fixtures/init-reader.svelte`) when the util under test builds its own
+  state — it creates at init and reads from a separate effect, like a component.
+- **`mountUtil` throws "setup did not produce an API" on a `void` factory.** The
+  three listener utils (`onKeyStroke`, `onStartTyping`, and any future `void`
+  util) need `mountSetup` instead; the SSR probes just call the factory directly.
+- **Do not re-serialize `feature_list.json`.** `JSON.stringify(_, null, 2)`
+  reflows every array in the file and buries a 7-line change in ~120 lines of
+  whitespace (and switches tabs to spaces). Splice by line number / targeted edit,
+  then check `git diff --stat` before moving on. This supersedes the
+  `ConvertTo-Json` warning above for this file.
+- **jsdom has no `ResizeObserver` and no `KeyboardEvent` constructor in the
+  `node` environment.** Use `MockResizeObserver.install()` from
+  `test/fixtures/observers.ts`, and stub `scrollHeight` with
+  `Object.defineProperty` when testing anything that measures.
 
 ## How to Resume
 
@@ -295,6 +327,11 @@ fail to clear the bar alone, cut them rather than padding.
   one previously-open maintainer question (which Base UI extras to port vs. write
   fresh) is answered: `useId` + `useControllableState` shipped here as `feat-032`,
   the rest stayed with svelte-base.
+- **Open maintainer question, non-blocking:** want a
+  `packages/svelte-base/feature_list.json` holding the 11 hooks removed from this
+  list on 2026-10-03 (the same way `feat-030` lives in the integrations list), or
+  leave svelte-base untracked until the package is scaffolded? Left untracked for
+  now; it does not block any core feature.
 
 ## Files
 
@@ -306,11 +343,13 @@ fail to clear the bar alone, cut them rather than padding.
 ## Next Session
 
 - **Last Updated**: 2026-10-03
-- **Current Objective**: `feat-016` and `feat-019` are both done. Next by tier is
-  `feat-021` (keyboard: `onKeyStroke`, `useKeyModifier`, `onStartTyping`,
-  `useMagicKeys`, `useTextareaAutosize`), then `feat-017` (observers — worth
-  early because it unblocks 11 functions once you count its own 7 plus
-  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019), then
-  `feat-022`. `feat-015` is tier `niche` and deliberately last.
-- **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from
-  `packages/svelte-use/`, then take the lowest-id Tier 1 feature.
+- **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done.
+  Next by tier is `feat-022` (only `useColorMode` is T1 there; `useTextareaAutosize`
+  already shipped with feat-021), then `feat-017` (observers — worth early
+  because it unblocks 11 functions once you count its own 7 plus
+  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019), then the
+  rest of `feat-022`. `feat-015` is tier `niche` and deliberately last.
+- **Recommended Next Step**: run `.\init.ps1` from `packages/svelte-use/`, then
+  take `feat-017` (observers) — it is the highest-leverage feature left, and
+  `useTextareaAutosize` already carries a `ponytail:` marker pointing at
+  `useResizeObserver` for consolidation.

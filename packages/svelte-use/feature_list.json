@@ -658,45 +658,45 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Keyboard shortcuts and typing detection plus auto-growing textareas. KeyboardEvent mocks in tests.",
-			"evidence": "",
+			"evidence": "5/5 functions (onKeyStroke + onKeyDown/onKeyPressed/onKeyUp, onStartTyping, useKeyModifier, useMagicKeys, useTextareaAutosize). 153 new tests across 10 files; full suite 700/700 across 74 files. check 0/0, format clean, lint 0/0, prepack + publint All good!, init.ps1 path-leak scan clean. README per util, exported from src/lib/index.ts, no assertions / DOM instanceof / module-scope mutable state.",
 			"functions": [
 				{
 					"name": "onKeyStroke",
 					"source": "vueuse/core/onKeyStroke",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/onKeyStroke/",
 					"tier": "T1"
 				},
 				{
 					"name": "onStartTyping",
 					"source": "vueuse/core/onStartTyping",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/onStartTyping/"
 				},
 				{
 					"name": "useKeyModifier",
 					"source": "vueuse/core/useKeyModifier",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useKeyModifier/"
 				},
 				{
 					"name": "useMagicKeys",
 					"source": "vueuse/core/useMagicKeys",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useMagicKeys/",
 					"tier": "T2"
 				},
 				{
 					"name": "useTextareaAutosize",
 					"source": "vueuse/core/useTextareaAutosize",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useTextareaAutosize/",
 					"tier": "T2"
 				}
 			],
 			"id": "feat-021",
 			"name": "Keyboard & typing",
-			"status": "todo",
+			"status": "done",
 			"tier": "T1"
 		},
 		{

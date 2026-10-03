@@ -1,9 +1,13 @@
 // * Browser
+export * from './browser/onKeyStroke/index.ts';
+export * from './browser/onStartTyping/index.ts';
 export * from './browser/useBreakpoints/index.ts';
 export * from './browser/useClipboard/index.ts';
 export * from './browser/useDark/index.ts';
 export * from './browser/useElementHover/index.ts';
 export * from './browser/useEventListener/index.ts';
+export * from './browser/useKeyModifier/index.ts';
+export * from './browser/useMagicKeys/index.ts';
 export * from './browser/useMouse/index.ts';
 export * from './browser/useMousePressed/index.ts';
 export * from './browser/usePreferredLanguages/index.ts';
@@ -12,6 +16,7 @@ export * from './browser/useScroll/index.ts';
 export * from './browser/useScrollLock/index.ts';
 export * from './browser/useSmoothScroll/index.ts';
 export * from './browser/useTextDirection/index.ts';
+export * from './browser/useTextareaAutosize/index.ts';
 // * Shared
 export * from './shared/getter.ts';
 export * from './shared/is.ts';

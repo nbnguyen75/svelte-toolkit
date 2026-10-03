@@ -5,6 +5,7 @@
  */
 import { mount, tick, unmount } from 'svelte';
 
+import InitReader from './init-reader.svelte';
 import ReactiveReader from './reactive-reader.svelte';
 import Run from './run.svelte';
 
@@ -57,6 +58,47 @@ export async function mountReactive<T>(
 	const target = document.createElement('div');
 	document.body.appendChild(target);
 	const app = mount(ReactiveReader, {
+		props: {
+			setup: create,
+			observe: (value: unknown) => {
+				api = value as T;
+				read(value as T);
+			}
+		},
+		target
+	});
+	await tick();
+	if (api === undefined) throw new Error('setup did not produce an API');
+	return {
+		api,
+		async dispose() {
+			unmount(app);
+			await tick();
+			target.remove();
+		}
+	};
+}
+
+/**
+ * Mount a util created during component *init*, then read it from a separate
+ * effect — the real usage shape.
+ *
+ * Prefer this over {@link mountReactive} for a util that owns its own reactive
+ * state (`useMagicKeys`): there, state created *inside* the reading effect is
+ * not observable from that same effect, which `reactive-reader.svelte` does by
+ * construction.
+ */
+export async function mountInitialized<T>(
+	create: () => T,
+	read: (api: T) => void
+): Promise<{
+	api: T;
+	dispose: () => Promise<void>;
+}> {
+	let api: T | undefined;
+	const target = document.createElement('div');
+	document.body.append(target);
+	const app = mount(InitReader, {
 		props: {
 			setup: create,
 			observe: (value: unknown) => {
