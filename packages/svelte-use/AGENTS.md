@@ -124,7 +124,9 @@ Load the most specific skill for the task:
   `deferred` / `svelte-native` entries. One exception: functions carrying
   `package: "svelte-base"` ship in the future `svelte-base` primitives
   package, not here. They are listed only to keep the core/base split
-  settled — never implement them in this package.
+  settled — never implement them in this package. **`svelte-base` does not
+  depend on `svelte-use`**; it carries its own copy of shared logic on
+  purpose, so core/base overlap is not a defect to report or dedupe.
 - `docs/recipes.md` — Source of truth for everything deliberately not ported,
   with the Svelte-native replacement for each. Also the source the Astro
   migration docs render from, so keep one row per VueUse hook.

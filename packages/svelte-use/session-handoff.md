@@ -76,6 +76,19 @@ All 11 were rejected for `svelte-use` against `scope.md` §3:
 (`Selection`, `useHotkeys`, `usePagination`) or promoted to `feat-032`
 (`useControllableState`). `feat-030` still belongs to the integrations package.
 
+**`svelte-base` does not depend on `svelte-use` — maintainer decision, 2026-10-02.**
+The packages are independent and `svelte-base` carries its **own copy** of any logic it
+shares with this package. Consequences, all deliberate:
+
+- **Do not** import from `@wynn-dev/svelte-use` in `svelte-base`, and **do not** propose a
+  shared internal package to remove the overlap. A shared dependency would also mean a shared
+  release cadence and peer floor, which is the coupling the split exists to avoid.
+- **Core/base duplication is sanctioned**, so it is never a defect to report or dedupe. This is
+  the reason `clickOutside`/`escapeKey` still sit on `feat-029` even though core has
+  `onClickOutside`/`onKeyStroke`, and the reason `sliderMath.clamp` does not suppress core's
+  `useClamp`.
+- The overlap table above is therefore a record of _intent_, not a to-do list.
+
 ## Re-tiering done 2026-10-02
 
 `feat-027` + `feat-028` were merged into `feat-027` "Reactive math & value
