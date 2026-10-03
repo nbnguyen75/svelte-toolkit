@@ -13,10 +13,11 @@
   - `shared/`: `is.ts` (14 guard/predicate exports) and `getter.ts` — internal
     helpers, **not** utils.
 - Suite: **293 tests / 46 files**. `dist` builds, `publint` clean.
-- `feature_list.json` is **implement-only**: 27 features, 141 functions, no
+- `feature_list.json` is **implement-only**: 26 features, 142 functions, no
   `cut`/`deferred`/`svelte-native` statuses. Per-function `tier`
   (`T1`/`T2`/`niche`/`extra`) where the roadmap named a function directly;
-  otherwise the feature's `tier` applies.
+  otherwise the feature's `tier` applies. The one carve-out is `feat-029`:
+  11 functions carry `package: "svelte-base"` and **do not ship here**.
 - `docs/recipes.md` holds **all 95** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
@@ -35,14 +36,52 @@
     `useElementHover`, `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
 - `feat-015` (async + history) is tier **`niche`** — deliberately last, not
   next. `feat-012` is `useTimeAgo` only, tier T2.
-- `feat-031` is the extras feature (`Selection`, `useControllableState`,
-  `useHotkeys`, `usePagination`). **Some of these have Base UI equivalents
-  already written in Svelte and are meant to be ported from there, not written
-  fresh** — which ones is still an open question for the maintainer. Do not
-  start it without that answer. Note it is `feat-031`, **not** `feat-030`;
-  `feat-030` belongs to the integrations package.
-- `useNow` / `useTimestamp` / `useTimeAgo` are `todo` again (tier T2) after
-  being cut/deferred earlier.
+- `useNow` / `useTimestamp` are `todo` again (tier T2, on `feat-011`) after
+  being cut earlier. **`useTimeAgo` was NOT resurrected** — it stays a recipe on
+  the strength of native `Intl.RelativeTimeFormat`. Do not re-add it.
+
+## The core / svelte-base split (settled — do not re-open)
+
+`feat-029` "svelte-base ports" is tier **`extra`** and holds **11** functions that
+ship in the future `svelte-base` UI-primitives package, not here. Each carries
+`package: "svelte-base"`; `target` points at `packages/svelte-base/src/lib/...`.
+The package does not exist yet, so the feature is blocked until it does.
+
+All 11 were rejected for `svelte-use` against `scope.md` §3:
+
+| Function                     | Why not core                                                                                                                                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clickOutside`, `escapeKey`  | Attachments, not composables, and both duplicate planned core: `onClickOutside` (`feat-020`) and `onKeyStroke` (`feat-021`).                                                                    |
+| `contextHelpers`             | A `setContext`/`getContext` wrapper. A recipe already points at the natives.                                                                                                                    |
+| `getCheckableDataAttributes` | Presentational `data-*` mapping for checkbox/switch only.                                                                                                                                       |
+| `nextRovingTarget`           | A real algorithm (§3.4), but its only consumer is a composite primitive (radio group, accordion, menu). Exposes a `RovingEntry` type no app-level caller wants.                                 |
+| `sliderMath`                 | Six exports that only make sense to a slider. Core gets its own `useClamp` on `feat-027`.                                                                                                       |
+| `tooltipDelay`               | Needs module-shared mutable state, which `scope.md` §2 bans in core.                                                                                                                            |
+| `trackOutsidePress`          | Exists for nested overlay dismissal (ignore presses starting on the trigger, skip `[role="menu"]` subtrees) which core `onClickOutside` deliberately does not do. Shipping both is duplication. |
+| `Selection`, `useHotkeys`    | Base UI state managers whose consumers are primitives. `useHotkeys` also overlaps `useMagicKeys`.                                                                                               |
+| `usePagination`              | Overlaps shipped `useOffsetPagination`.                                                                                                                                                         |
+
+**The two promotions — `feat-032` "Ids & controllable state", tier T2:**
+
+- `useId` — env branching (ids must match across SSR and hydration, §3.2) plus
+  being a building block (§3.4). Implement on `$props.id()` where a component is
+  available; the svbase counter + `Math.random()` form is **not** portable as
+  written (module-scope mutable state, §2, and unstable across server/client).
+  README must document `$props.id()` as the first choice for component-level ids.
+- `useControllableState` — non-trivial reactive state core lacks, which
+  `useToggle` / `useCounter` / `useStorage` each re-invent. Svelte has no
+  controlled/uncontrolled primitive. Building block (§3.4).
+
+`feat-031` no longer exists; its Base UI extras were folded into `feat-029`
+(`Selection`, `useHotkeys`, `usePagination`) or promoted to `feat-032`
+(`useControllableState`). `feat-030` still belongs to the integrations package.
+
+## Re-tiering done 2026-10-02
+
+`feat-027` + `feat-028` were merged into `feat-027` "Reactive math & value
+coercion" (**T2**, was an invalid `recipe-only` tier): `useClamp`,
+`usePrecision`, `useToNumber`. All three are one-expression wrappers — if any
+fail to clear the bar alone, cut them rather than padding.
 
 ## Timing core — how feat-011 is built (do not re-derive)
 

@@ -1045,142 +1045,153 @@
 			"tier": "niche"
 		},
 		{
-			"dependencies": ["feat-005", "feat-008"],
-			"description": "Reactive math kept: useClamp, usePrecision, createProjection, createGenericProjection. (One-liner wrappers cut as recipes.) Pure/SSR-trivial; full branch coverage.",
+			"dependencies": [],
+			"description": "Three small VueUse math/coercion helpers that were left stranded in a \"recipe-only\" bucket which was never part of the tier scheme. useClamp is the common one and sliderMath.clamp moves out to svelte-base, so core needs its own. All three are one-expression wrappers; if any prove too thin to clear the bar on its own, cut them rather than padding.",
 			"evidence": "",
 			"functions": [
 				{
 					"name": "useClamp",
 					"source": "vueuse/math/useClamp",
 					"status": "todo",
-					"target": "src/lib/shared/useClamp/"
+					"target": "src/lib/shared/useClamp/",
+					"tier": "T2"
 				},
 				{
 					"name": "usePrecision",
 					"source": "vueuse/math/usePrecision",
 					"status": "todo",
-					"target": "src/lib/shared/usePrecision/"
-				}
-			],
-			"id": "feat-027",
-			"name": "Reactive math",
-			"status": "todo",
-			"tier": "recipe-only"
-		},
-		{
-			"dependencies": ["feat-005", "feat-008"],
-			"description": "Shared helpers kept: useToNumber, reactifyObject, reactiveOmit, reactivePick, toReactive, makeDestructurable. (Trivial accessors cut as recipes.) Pure and fully testable.",
-			"evidence": "",
-			"functions": [
+					"target": "src/lib/shared/usePrecision/",
+					"tier": "T2"
+				},
 				{
 					"name": "useToNumber",
 					"source": "vueuse/shared/useToNumber",
 					"status": "todo",
-					"target": "src/lib/shared/useToNumber/"
+					"target": "src/lib/shared/useToNumber/",
+					"tier": "T2"
 				}
 			],
-			"id": "feat-028",
-			"name": "Shared value & reactivity helpers",
+			"id": "feat-027",
+			"name": "Reactive math & value coercion",
 			"status": "todo",
-			"tier": "recipe-only"
+			"tier": "T2"
 		},
 		{
-			"dependencies": ["feat-005", "feat-008"],
-			"description": "Ports of 11 svbase utilities ( Tier A pure helpers + Tier B Svelte attachments): composeHandlers, mergeProps, id utilities (generateId/createId/getTabIds), stateAttrs, sliderMath, roving, tooltip grace-delay, clickOutside/escapeKey attachments (browser/dismiss/), trackOutsidePress, context helpers. Specs are written fresh per test-contract.md.",
+			"dependencies": [],
+			"description": "NOTHING IN THIS FEATURE SHIPS IN svelte-use. It is a recorded backlog for the future svelte-base UI-primitives package, kept here only so the core/base split is settled and not re-litigated. Every item is either a primitive-internal helper that is meaningless outside a component library, or is already covered by a core util or a Svelte native: clickOutside/escapeKey duplicate core onClickOutside + onKeyStroke and are attachments, not composables; contextHelpers is a setContext/getContext wrapper; getCheckableDataAttributes and sliderMath are presentational mapping/math for one primitive each; tooltipDelay needs module-shared mutable state (banned by scope.md §2); trackOutsidePress exists for nested overlay dismissal, which core onClickOutside deliberately does not do; nextRovingTarget is a WAI-ARIA composite-widget algorithm whose only consumer is a composite primitive; Selection/useHotkeys/ usePagination are Base UI state managers (usePagination also overlaps shipped useOffsetPagination). Blocked until the svelte-base package exists.",
 			"evidence": "",
 			"functions": [
 				{
-					"name": "clickOutside/escapeKey",
+					"name": "clickOutside",
 					"source": "svbase/actions/dismiss.ts",
 					"status": "todo",
-					"target": "src/lib/browser/dismiss/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/primitives/overlay/"
+				},
+				{
+					"name": "escapeKey",
+					"source": "svbase/actions/dismiss.ts",
+					"status": "todo",
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/primitives/overlay/"
 				},
 				{
 					"name": "contextHelpers",
 					"source": "svbase/utils/context.ts",
 					"status": "todo",
-					"target": "src/lib/shared/context/"
-				},
-				{
-					"name": "generateId/createId/getTabIds",
-					"source": "svbase/utils/id.ts + tabs/context.ts",
-					"status": "todo",
-					"target": "src/lib/shared/id/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/context/"
 				},
 				{
 					"name": "getCheckableDataAttributes",
 					"source": "svbase/utils/state-attrs.ts",
 					"status": "todo",
-					"target": "src/lib/shared/stateAttrs/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/state-attrs/"
 				},
 				{
 					"name": "nextRovingTarget",
 					"source": "svbase/utils/roving.ts",
 					"status": "todo",
-					"target": "src/lib/shared/roving/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/roving/"
 				},
 				{
 					"name": "sliderMath",
 					"source": "svbase/utils/slider-math.ts",
 					"status": "todo",
-					"target": "src/lib/shared/sliderMath/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/slider-math/"
 				},
 				{
 					"name": "tooltipDelay",
 					"source": "svbase/primitives/tooltip/delay.ts",
 					"status": "todo",
-					"target": "src/lib/shared/tooltipDelay/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/primitives/tooltip/"
 				},
 				{
 					"name": "trackOutsidePress",
 					"source": "svbase/utils/outside.ts",
 					"status": "todo",
-					"target": "src/lib/browser/trackOutsidePress/"
-				}
-			],
-			"id": "feat-029",
-			"name": "svbase ports",
-			"status": "todo",
-			"tier": "T1"
-		},
-		{
-			"dependencies": ["feat-005", "feat-008"],
-			"description": "Not in VueUse. Some have Base UI equivalents already written in Svelte — decide per function whether to port from Base UI or write fresh, and record the choice in evidence.",
-			"evidence": "",
-			"functions": [
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/outside/"
+				},
 				{
 					"name": "Selection",
 					"source": "base-ui:Selection",
 					"status": "todo",
-					"target": "src/lib/state/Selection/"
-				},
-				{
-					"name": "useControllableState",
-					"source": "base-ui:useControlled",
-					"status": "todo",
-					"target": "src/lib/state/useControllableState/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/selection/"
 				},
 				{
 					"name": "useHotkeys",
 					"source": "base-ui:useHotkeys",
 					"status": "todo",
-					"target": "src/lib/browser/useHotkeys/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/hotkeys/"
 				},
 				{
 					"name": "usePagination",
 					"source": "custom:usePagination",
 					"status": "todo",
-					"target": "src/lib/state/usePagination/"
+					"package": "svelte-base",
+					"target": "packages/svelte-base/src/lib/utils/pagination/"
 				}
 			],
-			"id": "feat-031",
-			"name": "Extras (non-VueUse)",
+			"id": "feat-029",
+			"name": "svelte-base ports (ships in the other package)",
 			"status": "todo",
 			"tier": "extra"
+		},
+		{
+			"id": "feat-032",
+			"name": "Ids & controllable state",
+			"status": "todo",
+			"tier": "T2",
+			"dependencies": [],
+			"description": "The only two items promoted out of the svelte-base sweep, both qualifying under scope.md §3. useId: ids must match between the server render and hydration, which is a genuine env-branching problem (3.2), and every util that needs an id depends on it (3.4). Implement on top of $props.id() where a component is available; the module counter + Math.random() form in svbase is NOT portable as written (module-scope mutable state, scope.md §2, plus non-stable across server/client). README documents $props.id() as the first choice for component-level ids. useControllableState: non-trivial reactive state (internal value overridden by an external prop, with a setter) that core lacks and that useToggle/useCounter/useStorage each re-invent; Svelte has no controlled/uncontrolled primitive. Kept as a building block (3.4).",
+			"evidence": "",
+			"functions": [
+				{
+					"name": "useId",
+					"source": "svbase/utils/id.ts (generateId/createId)",
+					"status": "todo",
+					"target": "src/lib/state/useId/",
+					"tier": "T2"
+				},
+				{
+					"name": "useControllableState",
+					"source": "base-ui:useControlled",
+					"status": "todo",
+					"target": "src/lib/state/useControllableState/",
+					"tier": "T2"
+				}
+			]
 		}
 	],
 	"rulesRef": ".agents/rules/",
-	"note": "IMPLEMENTATION STATUS ONLY. Every function here is something this package ships. Anything deliberately not ported (Vue-specific, already a Svelte primitive, or lower value than its own recipe) lives in notPortedRef with the Svelte-native replacement — that file is also the source for the Astro migration docs.",
+	"note": "IMPLEMENTATION STATUS ONLY. Every function here is something this package ships, except entries carrying package: \"svelte-base\", which are a recorded backlog for the future svelte-base package and are documented here so the core/base split stays settled. Anything deliberately not ported (Vue-specific, already a Svelte primitive, or lower value than its own recipe) lives in recipeRef with the Svelte-native replacement; that file is also the source for the Astro migration docs.",
 	"version": "1.0.0",
 	"recipeRef": "docs/recipes.md"
 }

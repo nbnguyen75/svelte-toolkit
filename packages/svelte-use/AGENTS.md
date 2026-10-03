@@ -119,9 +119,12 @@ Load the most specific skill for the task:
 
 ## Required Artifacts
 
-- `feature_list.json` — Implementation status only: every function in it ships.
-  Carries `tier` (`T1` / `T2` / `niche` / `extra`) for roadmap order. It holds
-  **no** `cut` / `deferred` / `svelte-native` entries.
+- `feature_list.json` — Implementation status only. Carries `tier`
+  (`T1` / `T2` / `niche` / `extra`) for roadmap order. It holds **no** `cut` /
+  `deferred` / `svelte-native` entries. One exception: functions carrying
+  `package: "svelte-base"` ship in the future `svelte-base` primitives
+  package, not here. They are listed only to keep the core/base split
+  settled — never implement them in this package.
 - `docs/recipes.md` — Source of truth for everything deliberately not ported,
   with the Svelte-native replacement for each. Also the source the Astro
   migration docs render from, so keep one row per VueUse hook.
