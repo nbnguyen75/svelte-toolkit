@@ -522,12 +522,12 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Scroll position/lock/infinite lists plus pointer position primitives. Passive listeners; SSR fallbacks.",
-			"evidence": "",
+			"evidence": "Ships 5 utils: useScroll, useMouse, useMousePressed, useScrollLock, useElementHover. 189 new tests across 10 files (33+30+25+20+20 browser, 7+16+16+13+7 SSR); suite is now 547/547 across 64 files. All five expose getter- or writable-getter-backed state, so destructuring keeps reactivity and bind: works on the two writable ones (useScroll.x/y, useScrollLock.locked). All useEventListener calls are passive; the one deliberate exception is useScrollLock's iOS touchmove guard, which must be non-passive to preventDefault and is attached per lock rather than per component. Every timer/listener/observer is released on unmount; the unmount teardowns restore scroll-lock overflow and cancel a pending hover delay from plain variables, because a $state read in a teardown sees the pre-destroy value. Parity notes recorded per util: useScroll drops VueUse's no-op RTL multiplier (Math.abs(x * -1) === Math.abs(x)) and resolves a Document target to documentElement for both read and write; useScrollLock drops VueUse's module-scope WeakMap (unsafe under SSR request sharing) and restores an author's own inline overflow instead of clearing it; useElementHover narrows the target to Element and cancels its pending delay on unmount, which VueUse leaks; useMouse/useMousePressed replace every DOM assertion with a structural predicate. useInfiniteScroll and useMouseInElement are DEFERRED to feat-017, not cut - both are thin wrappers over the IntersectionObserver / ResizeObserver+MutationObserver that feat-017 ships first, with the Svelte-native recipe and the reason recorded in docs/recipes.md (Scroll & pointer). Two inline MutationObservers are marked ponytail for consolidation into feat-017's useMutationObserver (useScroll observe.mutation, useElementHover triggerOnRemoval).",
 			"functions": [
 				{
 					"name": "useElementHover",
 					"source": "vueuse/core/useElementHover",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useElementHover/",
 					"tier": "T2"
 				},
@@ -541,7 +541,7 @@
 				{
 					"name": "useMouse",
 					"source": "vueuse/core/useMouse",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useMouse/",
 					"tier": "T1"
 				},
@@ -555,27 +555,27 @@
 				{
 					"name": "useMousePressed",
 					"source": "vueuse/core/useMousePressed",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useMousePressed/"
 				},
 				{
 					"name": "useScroll",
 					"source": "vueuse/core/useScroll",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useScroll/",
 					"tier": "T1"
 				},
 				{
 					"name": "useScrollLock",
 					"source": "vueuse/core/useScrollLock",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useScrollLock/",
 					"tier": "T2"
 				}
 			],
 			"id": "feat-019",
 			"name": "Scroll & mouse",
-			"status": "todo",
+			"status": "done",
 			"tier": "T1"
 		},
 		{

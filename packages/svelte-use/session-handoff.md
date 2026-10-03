@@ -3,10 +3,11 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **26 util modules shipped**:
+- Pure library package (no SvelteKit shell). **31 util modules shipped**:
   - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
     `useBreakpoints`, `usePreferredLanguages`,
-    `usePreferredReducedTransparency`, `useTextDirection`
+    `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
+    `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -14,27 +15,34 @@
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
   - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
     internal helpers, **not** utils.
-- Suite: **358 tests / 54 files**. `dist` builds, `publint` clean.
+- Suite: **547 tests / 64 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only**: 26 features, 142 functions, no
-  `cut`/`deferred`/`svelte-native` statuses. 12 features done, 14 todo; 36
-  functions done, 106 todo. Per-function `tier`
+  `cut`/`deferred`/`svelte-native` statuses. 13 features done, 13 todo; 41
+  functions done, 101 todo. Per-function `tier`
   (`T1`/`T2`/`niche`/`extra`) where the roadmap named a function directly;
   otherwise the feature's `tier` applies. The one carve-out is `feat-029`:
   11 functions carry `package: "svelte-base"` and **do not ship here**.
-- `docs/recipes.md` holds **all 95** deliberately-not-ported hooks with a
+- `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
 
 ## Immediate Next Task
 
-- `feat-016` is **done** (2026-10-03). Roadmap order is by tier, not by feature
-  id. Tier 1 left:
-  - `feat-019` scroll & mouse — `useScroll`, `useScrollLock`,
-    `useInfiniteScroll`, `useMouse`, `useMouseInElement`, `useMousePressed`.
+- `feat-016` and `feat-019` are **done** (2026-10-03). Roadmap order is by tier,
+  not by feature id. Tier 1 left:
   - `feat-021` keyboard — `onKeyStroke`, `useMagicKeys`, `onStartTyping`.
   - `feat-022` — `useColorMode`, `useCssVar`, `useTextareaAutosize`.
   - `feat-017` elements — `useElementVisibility` (T1) + `useElementBounding`,
-    `useElementHover`, `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
+    `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
+    `useElementHover` moved out of feat-019 and **already shipped** — it is
+    listed in feat-017 for provenance only; do not re-port it.
+- `feat-019` shipped 5 of its 7 functions. `useInfiniteScroll` and
+  `useMouseInElement` stay `todo` and land with **feat-017**, which owns the
+  observers they wrap (`useIntersectionObserver`, `useResizeObserver`,
+  `useMutationObserver`). The reason and the Svelte-native recipe are in
+  `docs/recipes.md` § "Scroll & pointer" — do not port them on an inline
+  observer, and do not add `getBoundingClientRect()` per `pointermove` to
+  `useMouseInElement`.
 - `feat-015` (async + history) is tier **`niche`** — deliberately last, not
   next. `feat-012` is `useTimeAgo` only, tier T2.
 - `useNow` / `useTimestamp` are `todo` again (tier T2, on `feat-011`) after

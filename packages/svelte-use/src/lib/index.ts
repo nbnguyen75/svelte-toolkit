@@ -2,9 +2,14 @@
 export * from './browser/useBreakpoints/index.ts';
 export * from './browser/useClipboard/index.ts';
 export * from './browser/useDark/index.ts';
+export * from './browser/useElementHover/index.ts';
 export * from './browser/useEventListener/index.ts';
+export * from './browser/useMouse/index.ts';
+export * from './browser/useMousePressed/index.ts';
 export * from './browser/usePreferredLanguages/index.ts';
 export * from './browser/usePreferredReducedTransparency/index.ts';
+export * from './browser/useScroll/index.ts';
+export * from './browser/useScrollLock/index.ts';
 export * from './browser/useSmoothScroll/index.ts';
 export * from './browser/useTextDirection/index.ts';
 // * Shared

@@ -90,6 +90,9 @@ Two kinds of entry live here:
 | **Deferred to a library**                                                                                       |                                                                                        |
 | `useDateFormat` `useTimeAgo` `useTimeAgoIntl` `useTemporalNow`                                                  | [`date-fns` / `Intl` / Temporal](#dates-deferred-to-date-fns)                          |
 | `useVirtualList`                                                                                                | [`@tanstack/svelte-virtual`](#virtual-lists-deferred-to-tanstack)                      |
+| **Deferred to a sibling feature**                                                                               |                                                                                        |
+| `useInfiniteScroll`                                                                                             | [`IntersectionObserver` — feat-017](#scroll--pointer-feat-017)                         |
+| `useMouseInElement`                                                                                             | [`ResizeObserver` + `pointermove` — feat-017](#scroll--pointer-feat-017)               |
 
 ---
 
@@ -401,6 +404,39 @@ bun add @tanstack/svelte-virtual
 Windowing, overscan, dynamic measurement, and list a11y belong to the
 dedicated lib; pair it with `bind:clientHeight` on the scroll frame for
 container measurement.
+
+## Scroll & pointer (feat-017)
+
+The other two hooks in this batch are held back, not cut, because they are thin
+wrappers over the observers that feat-017 ships first. Both arrive with it.
+
+**`useInfiniteScroll`** — the shipped `useScroll` already covers the mechanics:
+
+```ts
+const { y, yDirection, arrivedState, measure } = useScroll(scroller);
+// yDirection.bottom + arrivedState.bottom === 'bottom' is the "load more" edge;
+// call measure() to re-arm after new rows render.
+```
+
+Reaching that edge still needs an `IntersectionObserver` sentinel. feat-017 ships
+`useIntersectionObserver`; when it lands, `useInfiniteScroll` is a thin
+composition of the two and nothing more. It is deliberately not ported now on an
+inline observer, because the sentinel logic is the interesting half and it wants
+`useElementVisibility` (which needs it too, for pause/resume).
+
+**`useMouseInElement`** — position maths minus the bookkeeping:
+
+```ts
+const { x, y, elementX, elementY, elementPositionX, elementPositionY } = useMouse(() => card);
+```
+
+What is missing is the live box: `elementX`/`elementY` are only correct if the
+element is re-measured when it moves or resizes. That is a `ResizeObserver` plus
+a `MutationObserver` on layout-affecting attributes, which is feat-017's
+`useResizeObserver` / `useMutationObserver`. Without them the port would ship a
+number that silently rots on any layout change. Do not reach for
+`getBoundingClientRect()` on every `pointermove` — that is a forced layout per
+event.
 
 ## Drag and drop
 
