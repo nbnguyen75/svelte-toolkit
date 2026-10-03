@@ -31,10 +31,14 @@
 
 - `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). Roadmap order
   is by tier, not by feature id. Tier 1 left:
-  - `feat-022` — `useColorMode` (T1), `useCssVar`, `useTextareaAutosize`
-    (`useTextareaAutosize` already shipped with feat-021; do not re-port it),
-    `useBase64`, `useClipboardItems`, `useCssSupports`, `useScriptTag`,
-    `useStyleTag`, `useHead`, `useFuse` (T2).
+  - `feat-022` "Clipboard extras, files, theming" — 10 functions, the **last T1
+    feature**: `useColorMode` (T1), `useBase64`, `useClipboardItems`,
+    `useCssSupports`, `useCssVar`, `useFileDialog`, `useImage`, `useObjectUrl`,
+    `useScriptTag`, `useStyleTag`. Do **not** invent extra members for it:
+    `useTextareaAutosize` is listed in feat-022 for provenance and already
+    shipped with feat-021, and `useHead` / `useFuse` are **not in the list at
+    all** (`<svelte:head>` and a `fuse.js` peer dep respectively — both already
+    recipes in `docs/recipes.md`).
   - `feat-017` elements — `useElementVisibility` (T1) + `useElementBounding`,
     `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
     `useElementHover` moved out of feat-019 and **already shipped** — it is
@@ -344,11 +348,11 @@ fail to clear the bar alone, cut them rather than padding.
 
 - **Last Updated**: 2026-10-03
 - **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done.
-  Next by tier is `feat-022` (only `useColorMode` is T1 there; `useTextareaAutosize`
-  already shipped with feat-021), then `feat-017` (observers — worth early
+  Next by tier is `feat-022` "Clipboard extras, files, theming" (T1, 10
+  functions, the last T1 feature), then `feat-017` (observers - worth early
   because it unblocks 11 functions once you count its own 7 plus
-  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019), then the
-  rest of `feat-022`. `feat-015` is tier `niche` and deliberately last.
+  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019).
+  `feat-015` is tier `niche` and deliberately last.
 - **Recommended Next Step**: run `.\init.ps1` from `packages/svelte-use/`, then
   take `feat-017` (observers) — it is the highest-leverage feature left, and
   `useTextareaAutosize` already carries a `ponytail:` marker pointing at
