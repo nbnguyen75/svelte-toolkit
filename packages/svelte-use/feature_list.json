@@ -396,37 +396,37 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Most-used responsive primitives. (useSSRWidth cut as recipe.) matchMedia mocks in tests; SSR returns fallback values (no hydration mismatch).",
-			"evidence": "",
+			"evidence": "All four ported 2026-10-03. useBreakpoints collapses VueUse's ref + is* families into plain reactive booleans (MediaQuery.current is already reactive), ships breakpointsTailwind, and resolves keys via an Object.hasOwn type guard (no `as` assertion) so inherited names are excluded. New shared/units.ts (increaseWithUnit, pxValue) with its own test. usePreferredReducedTransparency + useTextDirection reuse svelte/reactivity MediaQuery and add no deps. useTextDirection validates the dir attribute instead of VueUse's blind cast, and preserves 'auto'. Each util has a jsdom suite plus a node-environment .ssr.test.ts. Harness fix: test/setup.ts mediaStubs became Map<string, MediaStub[]> because two live MediaQuery instances on one query previously left all but the newest unnotified by setMediaMatches. Gates: check 0/0, format clean, lint 0/0, test 358/358 (54 files), prepack publint clean, path-leak clean.",
 			"functions": [
 				{
 					"name": "useBreakpoints",
 					"source": "vueuse/core/useBreakpoints",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useBreakpoints/",
 					"tier": "T1"
 				},
 				{
 					"name": "usePreferredLanguages",
 					"source": "vueuse/core/usePreferredLanguages",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/usePreferredLanguages/"
 				},
 				{
 					"name": "usePreferredReducedTransparency",
 					"source": "vueuse/core/usePreferredReducedTransparency",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/usePreferredReducedTransparency/"
 				},
 				{
 					"name": "useTextDirection",
 					"source": "vueuse/core/useTextDirection",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useTextDirection/"
 				}
 			],
 			"id": "feat-016",
 			"name": "Viewport & media preferences",
-			"status": "todo",
+			"status": "done",
 			"tier": "T1"
 		},
 		{

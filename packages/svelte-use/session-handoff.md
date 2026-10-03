@@ -3,18 +3,21 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **22 util modules shipped**:
-  - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`
+- Pure library package (no SvelteKit shell). **26 util modules shipped**:
+  - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
+    `useBreakpoints`, `usePreferredLanguages`,
+    `usePreferredReducedTransparency`, `useTextDirection`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
   - `utilities/`: `useDebounceFn`, `useThrottleFn`, `useTimeoutFn`,
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
-  - `shared/`: `is.ts` (14 guard/predicate exports) and `getter.ts` — internal
-    helpers, **not** utils.
-- Suite: **293 tests / 46 files**. `dist` builds, `publint` clean.
+  - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
+    internal helpers, **not** utils.
+- Suite: **358 tests / 54 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only**: 26 features, 142 functions, no
-  `cut`/`deferred`/`svelte-native` statuses. Per-function `tier`
+  `cut`/`deferred`/`svelte-native` statuses. 12 features done, 14 todo; 36
+  functions done, 106 todo. Per-function `tier`
   (`T1`/`T2`/`niche`/`extra`) where the roadmap named a function directly;
   otherwise the feature's `tier` applies. The one carve-out is `feat-029`:
   11 functions carry `package: "svelte-base"` and **do not ship here**.
@@ -24,10 +27,8 @@
 
 ## Immediate Next Task
 
-- **Roadmap order is by tier, not by feature id.** Tier 1 first:
-  - `feat-016` viewport/media — only `useBreakpoints` (plus `useTextDirection`,
-    `usePreferredLanguages`, `usePreferredReducedTransparency`) earns code.
-    Everything else on that feature is `svelte-native` and is in recipes.
+- `feat-016` is **done** (2026-10-03). Roadmap order is by tier, not by feature
+  id. Tier 1 left:
   - `feat-019` scroll & mouse — `useScroll`, `useScrollLock`,
     `useInfiniteScroll`, `useMouse`, `useMouseInElement`, `useMousePressed`.
   - `feat-021` keyboard — `onKeyStroke`, `useMagicKeys`, `onStartTyping`.

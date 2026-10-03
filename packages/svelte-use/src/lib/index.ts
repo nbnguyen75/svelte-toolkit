@@ -1,8 +1,12 @@
 // * Browser
+export * from './browser/useBreakpoints/index.ts';
 export * from './browser/useClipboard/index.ts';
 export * from './browser/useDark/index.ts';
 export * from './browser/useEventListener/index.ts';
+export * from './browser/usePreferredLanguages/index.ts';
+export * from './browser/usePreferredReducedTransparency/index.ts';
 export * from './browser/useSmoothScroll/index.ts';
+export * from './browser/useTextDirection/index.ts';
 // * Shared
 export * from './shared/getter.ts';
 export * from './shared/is.ts';
