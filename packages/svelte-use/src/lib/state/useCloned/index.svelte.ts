@@ -9,7 +9,8 @@ import { resolveGetter } from '../../shared/getter.ts';
  * reactive proxies. For plain data this resolves to `T` itself, which is why
  * {@link useCloned} exposes it instead of asserting a snapshot back to `T`.
  */
-export type ClonedSnapshot<T> = ReturnType<typeof defaultClone<T>>;
+// export type ClonedSnapshot<T> = ReturnType<typeof defaultClone<T>>; => TS7056
+export type ClonedSnapshot<T> = ReturnType<typeof $state.snapshot<T>>;
 
 /** Options for {@link useCloned}. */
 export interface UseClonedOptions<T> {
@@ -117,7 +118,8 @@ export function useCloned<T>(
 	};
 }
 
+
 /** `structuredClone` cannot read a reactive proxy, so unwrap first. */
-function defaultClone<T>(source: T) {
+function defaultClone<T>(source: T): ClonedSnapshot<T> {
 	return structuredClone($state.snapshot(source));
 }
