@@ -13,11 +13,14 @@ export * from './browser/useKeyModifier/index.ts';
 export * from './browser/useMagicKeys/index.ts';
 export * from './browser/useMouse/index.ts';
 export * from './browser/useMousePressed/index.ts';
+export * from './browser/useObjectUrl/index.ts';
 export * from './browser/usePreferredLanguages/index.ts';
 export * from './browser/usePreferredReducedTransparency/index.ts';
+export * from './browser/useScriptTag/index.ts';
 export * from './browser/useScroll/index.ts';
 export * from './browser/useScrollLock/index.ts';
 export * from './browser/useSmoothScroll/index.ts';
+export * from './browser/useStyleTag/index.ts';
 export * from './browser/useTextDirection/index.ts';
 export * from './browser/useTextareaAutosize/index.ts';
 // * Shared

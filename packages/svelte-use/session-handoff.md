@@ -3,13 +3,14 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **39 util modules shipped**:
+- Pure library package (no SvelteKit shell). **42 util modules shipped**:
   - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
     `useBreakpoints`, `usePreferredLanguages`,
     `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
     `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`,
     `onKeyStroke`, `onStartTyping`, `useKeyModifier`, `useMagicKeys`,
-    `useTextareaAutosize`, `useColorMode`, `useCssSupports`, `useCssVar`
+    `useTextareaAutosize`, `useColorMode`, `useCssSupports`, `useCssVar`,
+    `useObjectUrl`, `useScriptTag`, `useStyleTag`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -17,10 +18,10 @@
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
   - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
     internal helpers, **not** utils.
-- Suite: **740 tests / 80 files**. `dist` builds, `publint` clean.
+- Suite: **789 tests / 86 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   131 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 14 features done, 11 todo; 49 functions done, 82 todo.
+  `package:` markers. 14 features done, 11 todo; 52 functions done, 79 todo.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -30,15 +31,19 @@
 ## Immediate Next Task
 
 - `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). `feat-022`
-  Batch A is **done** (`useColorMode`, `useCssSupports`, `useCssVar`; 3/10).
+  Batches A **and** B are **done** (`useColorMode`, `useCssSupports`, `useCssVar`,
+  `useObjectUrl`, `useScriptTag`, `useStyleTag`; 6/10).
   Roadmap order is by tier, not by feature id. Tier 1 left:
-  - `feat-022` "Clipboard extras, files, theming" — 7 functions remaining:
-    `useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`,
-    `useObjectUrl`, `useScriptTag`, `useStyleTag`. Do **not** invent extra members for it:
+  - `feat-022` "Clipboard extras, files, theming" — 4 functions remaining:
+    `useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`. Do **not** invent extra members for it:
     `useTextareaAutosize` is listed in feat-022 for provenance and already
     shipped with feat-021, and `useHead` / `useFuse` are **not in the list at
     all** (`<svelte:head>` and a `fuse.js` peer dep respectively — both already
     recipes in `docs/recipes.md`).
+    `useImage` is the **recipe candidate**: `<img onload onerror>` states it
+    directly, so it belongs in `docs/recipes.md`, not a module. `useBase64` and
+    `useFileDialog` clear the library bar; `useClipboardItems` is not a direct
+    swap for `useClipboard`'s `copy`/`paste` and needs its own read.
   - `feat-017` elements — `useElementVisibility` (T1) + `useElementBounding`,
     `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
     `useElementHover` moved out of feat-019 and **already shipped** — it is
@@ -317,6 +322,33 @@ fail to clear the bar alone, cut them rather than padding.
   `node` environment.** Use `MockResizeObserver.install()` from
   `test/fixtures/observers.ts`, and stub `scrollHeight` with
   `Object.defineProperty` when testing anything that measures.
+- **jsdom also has no object-URL registry** (`URL.createObjectURL` /
+  `revokeObjectURL` do not exist). Add them as own properties on the _real_ `URL`
+  with `Object.defineProperty`, and `Reflect.deleteProperty` in `afterEach`.
+  `vi.stubGlobal('URL', { ...URL, … })` also works but replaces the constructor,
+  which breaks anything else in the environment that expects it.
+- **An effect that reads and writes the same `$state` throws
+  `effect_update_depth_exceeded`** — and the symptom is a test file that takes
+  minutes to fail with every value empty, not a clean failure. Any imperative
+  guard called from inside an `$effect` (`load()`, `start()`, `pause()`) must read
+  its own flag through `untrack()`. See `useStyleTag`'s `isLoaded`.
+- **Duck-typing a DOM element with `in` is not a structural check.**
+  `'noModule' in el` is false for jsdom's `HTMLScriptElement`, and `'sheet' in el`
+  depends on the stylesheet having been parsed — both fail silently as "not found".
+  `querySelectorAll('script')` is already typed `NodeListOf<HTMLScriptElement>`,
+  so no guard is needed at all; where a guard is, use `el.tagName`.
+- **`CSS.escape` is for identifiers, not quoted attribute values.** VueUse's
+  `querySelector(\`script[src="${CSS.escape(url)}"]\`)`does not match a real URL,
+so its dedupe silently degrades to always-injecting. Filter the elements and
+compare resolved`src`instead (which also matches a relative`src`).
+- **`svelte-package` can silently skip a module's `index.svelte.d.ts`** and
+  `publint` still reports "All good!" — it does not resolve re-export targets.
+  Known case: `dist/state/useCloned/index.d.ts` re-exports `./index.svelte.ts`
+  but no declaration is emitted for it, so `useCloned` ships with `any` types.
+  Reproduces on a clean build. Unfixed — see `progress.md` 2026-10-03 Batch B.
+- **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists) and
+  **`--allowArbitraryExtensions`** for `.svelte.ts` → `.svelte.d.ts` resolution,
+  which is what the `dist` probes need.
 
 ## How to Resume
 
@@ -348,12 +380,20 @@ fail to clear the bar alone, cut them rather than padding.
 
 - **Last Updated**: 2026-10-03
 - **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done, and
-  `feat-022` Batch A is done (`useColorMode`, `useCssSupports`, `useCssVar`).
-  Next by tier is the remaining `feat-022` work (7 functions), then `feat-017`
+  `feat-022` Batches A and B are done (`useColorMode`, `useCssSupports`,
+  `useCssVar`, `useObjectUrl`, `useScriptTag`, `useStyleTag`; 6/10).
+  Next by tier is the last `feat-022` work (4 functions), then `feat-017`
   (observers - worth early because it unblocks 11 functions once you count its
   own 7 plus `useInfiniteScroll` and `useMouseInElement` deferred out of
   feat-019). `feat-015` is tier `niche` and deliberately last.
-- **Recommended Next Step**: adjudicate/implement the remaining `feat-022`
-  functions (`useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`,
-  `useObjectUrl`, `useScriptTag`, `useStyleTag`); `useCssVar.observe` still
-  waits for `feat-017`'s `useMutationObserver`. `.\init.ps1` is currently green.
+- **Recommended Next Step**: finish `feat-022` with `useBase64`,
+  `useClipboardItems`, `useFileDialog`, and `useImage` (the last as a
+  `docs/recipes.md` row, not a module); `useCssVar.observe` still waits for
+  `feat-017`'s `useMutationObserver`. Two things to pick up first because they are
+  independent of feat-022 and both are cheap:
+  1. the `useCloned` `dist` declaration bug above (a published-build defect), and
+  2. `src/lib/state/useStepper/index.svelte.ts:8` and
+     `useOffsetPagination/index.svelte.ts:43-44`, which emit
+     `state_referenced_locally` warnings during `vitest` (they do not fail
+     `svelte-check`, which stays 0/0).
+     `.\init.ps1` is currently green.
