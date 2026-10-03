@@ -283,3 +283,20 @@ Five functions ported, tested, documented, and exported. Suite grew 358 -> 547 t
 - [x] READMEs written for all five, in the 'useDark' house style (signature / options / returns / examples / edge cases & cleanup / parity notes).
 - [x] Gates: 'bun run check' 0 errors 0 warnings, 'bun run format' clean, 'bun run lint' 0 errors, 'bun run test' 547/547 across 64 files, 'bun run prepack' publint clean, no path leaks.
 - [x] Counts updated: 13 features done / 13 todo, 41 functions done / 101 todo (of which 11 are the blocked 'svelte-base' backlog). 'session-handoff.md' hands off to feat-020.
+
+## 2026-10-03 - cross-package scope: this list is svelte-use only
+
+Maintainer ruling: anything belonging to another package comes out of svelte-use's
+eature_list.json, and a hook both packages need is copied into each project's own list.
+
+- [x] **eat-029 deleted (88 lines, 11 functions).** Every entry carried 'package: \"svelte-base\"', and the file now has **zero** 'package' markers. 'packages/svelte-base/' does not exist, so there was no other list to move them into - they are untracked for now rather than carried here as a placeholder.
+- [x] **Counts: 26 features -> 25, 142 functions -> 131, todo 101 -> 90.** No new core copies were needed: the four hooks core actually shares already exist as core functions, so the 'copy to each project' rule was already satisfied.
+- [x] **The sanctioned copies, verified rather than assumed:** 'clickOutside'/'escapeKey' -> core 'onClickOutside' (feat-020) + 'onKeyStroke' (feat-021); 'useHotkeys' -> core 'useMagicKeys' (feat-021); 'usePagination' -> shipped 'useOffsetPagination'; 'sliderMath.clamp' -> core 'useClamp' (feat-027). The other six ('contextHelpers', 'getCheckableDataAttributes', 'nextRovingTarget', 'tooltipDelay', 'trackOutsidePress', 'Selection') stay svelte-base-only and are **not** duplicated into core.
+- [x] **File-level 'note' rewritten.** It promised 'IMPLEMENTATION STATUS ONLY' while carving out 'svelte-base' entries - the contradiction is now gone. It states the one-way rule (other packages' functions live in their own list) and the copy rule (listed in both, implemented twice, never deduped by importing across the boundary).
+- [x] **'AGENTS.md' Required Artifacts entry rewritten** for the same reason: no more 'One exception' clause.
+- [x] **'session-handoff.md': the 'core / svelte-base split' section became 'Cross-package scope'.** The rejection table was kept as a record of intent (it is why a future agent does not re-propose 'nextRovingTarget' or 'tooltipDelay' for core), relabelled as 'Not a core function'. The independence decision is preserved verbatim in substance: no cross-package imports, no shared internal package, overlap is sanctioned and not a defect.
+- [x] **Closed the stale blocker.** 'One open question for the maintainer: which feat-031 extras should be ported from Base UI rather than written fresh' was answered on 2026-10-02 (feat-032 shipped 'useId' + 'useControllableState') and the extras went to svelte-base. Blockers section is now 'None'.
+- [x] **Stale 'recipes.md' count fixed** in the Files list (95 -> 97, matching the two feat-019 deferrals added earlier today) and 'Last Updated' bumped.
+- [x] Historical 'progress.md' entries left alone - they record what was decided on 2026-10-02, and rewriting a session log is how it stops being evidence.
+- [x] Spliced by line number rather than re-serializing the JSON, for the same reason as feat-019: 'JSON.stringify' reflows every array in the file and buries a 7-line change in ~120 lines of whitespace.
+- [ ] **Open question for the maintainer:** want a 'packages/svelte-base/feature_list.json' holding the 11 (the same way 'feat-030' lives in the integrations list), or leave svelte-base untracked until the package is scaffolded?

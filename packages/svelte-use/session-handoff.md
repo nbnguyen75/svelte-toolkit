@@ -16,12 +16,11 @@
   - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
     internal helpers, **not** utils.
 - Suite: **547 tests / 64 files**. `dist` builds, `publint` clean.
-- `feature_list.json` is **implement-only**: 26 features, 142 functions, no
-  `cut`/`deferred`/`svelte-native` statuses. 13 features done, 13 todo; 41
-  functions done, 101 todo. Per-function `tier`
-  (`T1`/`T2`/`niche`/`extra`) where the roadmap named a function directly;
-  otherwise the feature's `tier` applies. The one carve-out is `feat-029`:
-  11 functions carry `package: "svelte-base"` and **do not ship here**.
+- `feature_list.json` is **implement-only, and this package only**: 25 features,
+  131 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
+  `package:` markers. 13 features done, 12 todo; 41 functions done, 90 todo.
+  Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
+  function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
@@ -49,54 +48,55 @@
   being cut earlier. **`useTimeAgo` was NOT resurrected** — it stays a recipe on
   the strength of native `Intl.RelativeTimeFormat`. Do not re-add it.
 
-## The core / svelte-base split (settled — do not re-open)
+## Cross-package scope: this list is svelte-use only
 
-`feat-029` "svelte-base ports" is tier **`extra`** and holds **11** functions that
-ship in the future `svelte-base` UI-primitives package, not here. Each carries
-`package: "svelte-base"`; `target` points at `packages/svelte-base/src/lib/...`.
-The package does not exist yet, so the feature is blocked until it does.
+`feature_list.json` tracks **only what `@wynn-dev/svelte-use` ships**. A function belonging to
+another package is not tracked here at all — it goes in that package's own list:
 
-All 11 were rejected for `svelte-use` against `scope.md` §3:
+- `feat-030` → `packages/svelte-use-integrations/feature_list.json`.
+- The `svelte-base` primitive helpers (the old `feat-029`, 11 functions) were **removed from
+  this file** on 2026-10-03. `packages/svelte-base/` does not exist yet, so they are currently
+  untracked rather than carried here as a placeholder.
 
-| Function                     | Why not core                                                                                                                                                                                    |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `clickOutside`, `escapeKey`  | Attachments, not composables, and both duplicate planned core: `onClickOutside` (`feat-020`) and `onKeyStroke` (`feat-021`).                                                                    |
-| `contextHelpers`             | A `setContext`/`getContext` wrapper. A recipe already points at the natives.                                                                                                                    |
-| `getCheckableDataAttributes` | Presentational `data-*` mapping for checkbox/switch only.                                                                                                                                       |
-| `nextRovingTarget`           | A real algorithm (§3.4), but its only consumer is a composite primitive (radio group, accordion, menu). Exposes a `RovingEntry` type no app-level caller wants.                                 |
-| `sliderMath`                 | Six exports that only make sense to a slider. Core gets its own `useClamp` on `feat-027`.                                                                                                       |
-| `tooltipDelay`               | Needs module-shared mutable state, which `scope.md` §2 bans in core.                                                                                                                            |
-| `trackOutsidePress`          | Exists for nested overlay dismissal (ignore presses starting on the trigger, skip `[role="menu"]` subtrees) which core `onClickOutside` deliberately does not do. Shipping both is duplication. |
-| `Selection`, `useHotkeys`    | Base UI state managers whose consumers are primitives. `useHotkeys` also overlaps `useMagicKeys`.                                                                                               |
-| `usePagination`              | Overlaps shipped `useOffsetPagination`.                                                                                                                                                         |
+**A hook both packages need is listed in both lists and implemented twice.** That is the
+rule, not an oversight:
 
-**The two promotions — `feat-032` "Ids & controllable state", tier T2:**
+- `clickOutside` / `escapeKey` → core ships `onClickOutside` (`feat-020`) and `onKeyStroke`
+  (`feat-021`); the svelte-base copies are attachments, not composables.
+- `useHotkeys` → core ships `useMagicKeys` (`feat-021`).
+- `usePagination` → core ships `useOffsetPagination`.
+- `sliderMath.clamp` → core ships `useClamp` (`feat-027`).
 
-- `useId` — env branching (ids must match across SSR and hydration, §3.2) plus
-  being a building block (§3.4). Implement on `$props.id()` where a component is
-  available; the svbase counter + `Math.random()` form is **not** portable as
-  written (module-scope mutable state, §2, and unstable across server/client).
-  README must document `$props.id()` as the first choice for component-level ids.
-- `useControllableState` — non-trivial reactive state core lacks, which
-  `useToggle` / `useCounter` / `useStorage` each re-invent. Svelte has no
-  controlled/uncontrolled primitive. Building block (§3.4).
+Those four core entries **are** the sanctioned copies. Nothing else from the sweep was
+promoted, and nothing was duplicated into core that core did not already need:
 
-`feat-031` no longer exists; its Base UI extras were folded into `feat-029`
-(`Selection`, `useHotkeys`, `usePagination`) or promoted to `feat-032`
-(`useControllableState`). `feat-030` still belongs to the integrations package.
+| Not a core function          | Why                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `contextHelpers`             | A `setContext`/`getContext` wrapper. A recipe already points at the natives.                                                   |
+| `getCheckableDataAttributes` | Presentational `data-*` mapping for checkbox/switch only.                                                                      |
+| `nextRovingTarget`           | Real algorithm (§3.4), but its only consumer is a composite primitive. Exposes a `RovingEntry` type no app-level caller wants. |
+| `tooltipDelay`               | Needs module-shared mutable state, which `scope.md` §2 bans in core.                                                           |
+| `trackOutsidePress`          | Nested overlay dismissal, which core `onClickOutside` deliberately does not do.                                                |
+| `Selection`                  | Base UI state manager whose consumer is a primitive.                                                                           |
 
-**`svelte-base` does not depend on `svelte-use` — maintainer decision, 2026-10-02.**
-The packages are independent and `svelte-base` carries its **own copy** of any logic it
-shares with this package. Consequences, all deliberate:
+**Packages stay independent — do not "fix" the overlap.** Never import across the package
+boundary, and never propose a shared internal package to remove the duplication: a shared
+dependency would also bind release cadence and peer floor, which is the coupling the split
+exists to avoid. Core/base (or core/integrations) overlap is sanctioned and is not a defect to
+report.
 
-- **Do not** import from `@wynn-dev/svelte-use` in `svelte-base`, and **do not** propose a
-  shared internal package to remove the overlap. A shared dependency would also mean a shared
-  release cadence and peer floor, which is the coupling the split exists to avoid.
-- **Core/base duplication is sanctioned**, so it is never a defect to report or dedupe. This is
-  the reason `clickOutside`/`escapeKey` still sit on `feat-029` even though core has
-  `onClickOutside`/`onKeyStroke`, and the reason `sliderMath.clamp` does not suppress core's
-  `useClamp`.
-- The overlap table above is therefore a record of _intent_, not a to-do list.
+**The two promotions that did land here — `feat-032` "Ids & controllable state", tier T2:**
+
+- `useId` — env branching (ids must match across SSR and hydration, §3.2) plus being a building
+  block (§3.4). Implement on `$props.id()` where a component is available; the svbase counter +
+  `Math.random()` form is **not** portable as written (module-scope mutable state, §2, and unstable
+  across server/client). README must document `$props.id()` as the first choice.
+- `useControllableState` — non-trivial reactive state core lacks, which `useToggle` /
+  `useCounter` / `useStorage` each re-invent. Svelte has no controlled/uncontrolled primitive.
+  Building block (§3.4).
+
+`feat-031` no longer exists; its Base UI extras either shipped in core as `feat-032` or stayed
+with svelte-base.
 
 ## Re-tiering done 2026-10-02
 
@@ -290,21 +290,27 @@ fail to clear the bar alone, cut them rather than padding.
 
 ## Blockers
 
-- **One open question for the maintainer:** which `feat-031` extras should be
-  ported from Base UI rather than written fresh. Everything else is unblocked.
+- **None.** `feat-029`/`feat-031` are resolved — nothing in this list is blocked on
+  another package, and nothing is blocked on the missing `svelte-base` package. The
+  one previously-open maintainer question (which Base UI extras to port vs. write
+  fresh) is answered: `useId` + `useControllableState` shipped here as `feat-032`,
+  the rest stayed with svelte-base.
 
 ## Files
 
 - `packages/svelte-use/AGENTS.md` — canonical harness.
-- `packages/svelte-use/feature_list.json` — implement-only roadmap.
-- `packages/svelte-use/docs/recipes.md` — all 95 not-ported hooks + replacements.
+- `packages/svelte-use/feature_list.json` — implement-only roadmap, this package only.
+- `packages/svelte-use/docs/recipes.md` — all 97 not-ported hooks + replacements.
 - `packages/svelte-use/progress.md` — session log.
 
 ## Next Session
 
-- **Last Updated**: 2026-10-02
-- **Current Objective**: scope re-curation is done and green; next is
-  `feat-016` (Tier 1, `useBreakpoints` et al), then `feat-019` / `feat-021` /
-  `feat-022` / `feat-017`. `feat-015` is tier `niche` and deliberately last.
+- **Last Updated**: 2026-10-03
+- **Current Objective**: `feat-016` and `feat-019` are both done. Next by tier is
+  `feat-021` (keyboard: `onKeyStroke`, `useKeyModifier`, `onStartTyping`,
+  `useMagicKeys`, `useTextareaAutosize`), then `feat-017` (observers — worth
+  early because it unblocks 11 functions once you count its own 7 plus
+  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019), then
+  `feat-022`. `feat-015` is tier `niche` and deliberately last.
 - **Recommended Next Step**: run `.\init.ps1` (or `./init.sh`) from
   `packages/svelte-use/`, then take the lowest-id Tier 1 feature.
