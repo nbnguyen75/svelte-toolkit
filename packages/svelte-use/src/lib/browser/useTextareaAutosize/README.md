@@ -89,6 +89,7 @@ useTextareaAutosize({ element: () => area, input: () => value });
 <script lang="ts">
 	import { useTextareaAutosize } from '@wynn-dev/svelte-use';
 
+	let value = $state('');
 	let area = $state<HTMLTextAreaElement>();
 	const autosize = useTextareaAutosize({
 		element: () => area,

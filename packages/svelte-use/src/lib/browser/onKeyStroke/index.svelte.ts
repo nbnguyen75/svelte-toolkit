@@ -77,7 +77,10 @@ function resolveArgs(
 ): [KeyFilter | KeyStrokeHandler, KeyStrokeHandler, OnKeyStrokeOptions] {
 	const second = handlerOrOptions;
 	if (typeof second === 'function') return [keyOrHandler, second, options ?? {}];
-	if (typeof keyOrHandler === 'function') return [keyOrHandler, keyOrHandler, second ?? {}];
+	// The `(handler, options)` shape carries no filter, so slot one is `true`.
+	// Putting the handler there would wrap it as a predicate as well and run it
+	// twice per keystroke.
+	if (typeof keyOrHandler === 'function') return [true, keyOrHandler, second ?? {}];
 	return [keyOrHandler, noop, second ?? {}];
 }
 

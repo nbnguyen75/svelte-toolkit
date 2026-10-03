@@ -1,28 +1,33 @@
-import { MediaQuery } from 'svelte/reactivity';
+import type {
+	UseColorModeOptions,
+	BasicColorSchema,
+	BasicColorMode
+} from '../useColorMode/index.svelte.ts';
 
-import { isBrowser } from '../../shared/is.ts';
-import { useLocalStorage } from '../../state/useStorage/index.svelte.ts';
-
-const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+import { useColorMode } from '../useColorMode/index.svelte.ts';
 
 /** Options for {@link useDark}. */
-export interface UseDarkOptions {
+export interface UseDarkOptions extends Omit<UseColorModeOptions, 'modes' | 'onChanged'> {
 	/**
-	 * Storage key for the persisted color-scheme mode.
-	 * @default 'svelte-use-color-scheme'
+	 * Called on every mode change, in addition to the default DOM write.
+	 * `mode` is the persisted mode, which may be `'auto'`.
 	 */
-	storageKey?: string;
+	onChanged?: (
+		isDark: boolean,
+		defaultHandler: (mode: BasicColorMode) => void,
+		mode: BasicColorSchema
+	) => void;
 	/**
-	 * Attribute to write on the selector target; `'class'` toggles the
-	 * `dark` class, any other name sets `attribute="dark" | "light"`.
-	 * @default 'class'
+	 * Class written in light mode. The default `''` removes the mode classes
+	 * entirely rather than adding an empty-state class.
+	 * @default ''
 	 */
-	attribute?: string;
+	valueLight?: string;
 	/**
-	 * Element selector receiving the dark-mode marker.
-	 * @default 'html'
+	 * Class written in dark mode.
+	 * @default 'dark'
 	 */
-	selector?: string;
+	valueDark?: string;
 }
 
 /** Color-scheme mode persisted by {@link useDark}. */
@@ -42,52 +47,58 @@ export interface UseDarkReturn {
  * Dark-mode controller. During SSR the value is `false` and no DOM or
  * storage is touched; the client hydrates from storage, then OS preference.
  *
- * @param opts `storageKey`, `attribute`, and `selector` overrides.
+ * A thin boolean view over {@link useColorMode}: the mode class diffing, the
+ * persistence and the OS query all live there, so the two utils cannot drift
+ * into disagreeing about what "light" means on the same machine. Reach for
+ * `useColorMode` directly when the raw `'auto'` state or a custom mode name
+ * matters.
+ *
+ * @param opts `valueDark`, `valueLight`, `onChanged`, plus every `useColorMode` option except `modes`.
  * @returns Getter-backed `value` plus `toggle` and `setMode`.
  * @example
  * ```ts
  * const dark = useDark();
  * dark.toggle(); // light <-> dark (resolves auto first)
+ *
+ * const themed = useDark({ valueDark: 'night', attribute: 'data-theme' });
  * ```
  */
 export function useDark(opts: UseDarkOptions = {}): UseDarkReturn {
-	const storageKey = opts.storageKey ?? 'svelte-use-color-scheme';
-	const selector = opts.selector ?? 'html';
-	const attribute = opts.attribute ?? 'class';
+	const { valueDark = 'dark', valueLight = '', attribute = 'class', onChanged, ...rest } = opts;
 
-	// One `MediaQuery` per caller, built inside the factory so no instance is
-	// shared across callers or requests (scope.md §2). Its constructor touches
-	// `window.matchMedia`, so it cannot be constructed during SSR — `MediaQuery`
-	// resolves to a stub there anyway (scope.md §5.2).
-	const prefersDark = isBrowser ? new MediaQuery(DARK_MEDIA_QUERY, false) : null;
-
-	const stored = useLocalStorage<UseDarkMode>(storageKey, 'auto');
-
-	const isDark = $derived(
-		stored.value === 'auto' ? (prefersDark?.current ?? false) : stored.value === 'dark'
-	);
-
-	$effect(() => {
-		if (!isBrowser) return;
-		const el = document.querySelector(selector);
-		if (!el) return;
-
-		if (attribute === 'class') {
-			el.classList.toggle('dark', isDark);
-		} else {
-			el.setAttribute(attribute, isDark ? 'dark' : 'light');
-		}
+	const mode = useColorMode({
+		...rest,
+		attribute,
+		// A non-class attribute receives the whole mode as its value, so light
+		// has to spell out `light` there — the default empty `valueLight` would
+		// write `data-theme=""` instead.
+		modes:
+			attribute === 'class'
+				? { dark: valueDark, light: valueLight }
+				: { dark: 'dark', light: 'light' },
+		...(onChanged ? { onChanged: wrapDarkChanged(onChanged) } : {})
 	});
+
+	const isDark = $derived(mode.value === 'dark');
 
 	return {
 		get value() {
 			return isDark;
 		},
 		toggle() {
-			stored.value = isDark ? 'light' : 'dark';
+			mode.value = isDark ? 'light' : 'dark';
 		},
-		setMode(mode: UseDarkMode) {
-			stored.value = mode;
+		setMode(next: UseDarkMode) {
+			mode.value = next;
 		}
+	};
+}
+
+/** Adapt a dark-mode-aware `onChanged` to the color-mode signature. */
+function wrapDarkChanged(
+	onChanged: NonNullable<UseDarkOptions['onChanged']>
+): NonNullable<UseColorModeOptions['onChanged']> {
+	return (mode, defaultHandler) => {
+		onChanged(mode === 'dark', defaultHandler, mode);
 	};
 }

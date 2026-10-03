@@ -110,6 +110,24 @@ describe('onKeyStroke', () => {
 			}
 		});
 
+		it('runs a truthy-returning handler exactly once per key', async () => {
+			// The handler-only overload carries no filter. If the handler were
+			// used as the filter too, a truthy return would let it run a second
+			// time. A `vi.fn()` returning `undefined` cannot catch that, which is
+			// why this counts a handler that returns `true`.
+			const handler = vi.fn(() => true);
+			const { dispose } = await mountListener(() => {
+				onKeyStroke(handler);
+			});
+			try {
+				press('a');
+				press('Enter');
+				expect(handler).toHaveBeenCalledTimes(2);
+			} finally {
+				await dispose();
+			}
+		});
+
 		it('treats an explicit true filter as every key', async () => {
 			const handler = vi.fn();
 			const filter: KeyFilter = true;

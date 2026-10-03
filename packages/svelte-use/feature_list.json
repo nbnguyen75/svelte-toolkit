@@ -702,7 +702,7 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Extended clipboard/files plus theming/style/script injection. Depends on feat-002 useDark for useColorMode.",
-			"evidence": "",
+			"evidence": "Batch A: 3/10 functions (useColorMode, useCssSupports, useCssVar); feature stays todo for the remaining 7. 39 new Batch A tests across 6 files, plus one adjacent onKeyStroke handler-only regression test; full suite 740/740 across 80 files. check 0/0, format clean, lint 0/0, prepack + publint All good!, init.ps1 path-leak scan clean. useDark refactored onto useColorMode, its 9 existing tests unchanged. useCssVar.observe deferred to feat-017 useMutationObserver; useColorMode emitAuto dropped (deprecated upstream, store covers it). READMEs per util, all 12 new symbols verified through dist/index.js, no assertions / DOM instanceof / module-scope mutable state.",
 			"functions": [
 				{
 					"name": "useBase64",
@@ -719,20 +719,20 @@
 				{
 					"name": "useColorMode",
 					"source": "vueuse/core/useColorMode",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useColorMode/",
 					"tier": "T1"
 				},
 				{
 					"name": "useCssSupports",
 					"source": "vueuse/core/useCssSupports",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useCssSupports/"
 				},
 				{
 					"name": "useCssVar",
 					"source": "vueuse/core/useCssVar",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useCssVar/"
 				},
 				{

@@ -3,13 +3,13 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **36 util modules shipped**:
+- Pure library package (no SvelteKit shell). **39 util modules shipped**:
   - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
     `useBreakpoints`, `usePreferredLanguages`,
     `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
     `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`,
     `onKeyStroke`, `onStartTyping`, `useKeyModifier`, `useMagicKeys`,
-    `useTextareaAutosize`
+    `useTextareaAutosize`, `useColorMode`, `useCssSupports`, `useCssVar`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -17,10 +17,10 @@
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
   - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
     internal helpers, **not** utils.
-- Suite: **700 tests / 74 files**. `dist` builds, `publint` clean.
+- Suite: **740 tests / 80 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   131 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 14 features done, 11 todo; 46 functions done, 85 todo.
+  `package:` markers. 14 features done, 11 todo; 49 functions done, 82 todo.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -29,12 +29,12 @@
 
 ## Immediate Next Task
 
-- `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). Roadmap order
-  is by tier, not by feature id. Tier 1 left:
-  - `feat-022` "Clipboard extras, files, theming" — 10 functions, the **last T1
-    feature**: `useColorMode` (T1), `useBase64`, `useClipboardItems`,
-    `useCssSupports`, `useCssVar`, `useFileDialog`, `useImage`, `useObjectUrl`,
-    `useScriptTag`, `useStyleTag`. Do **not** invent extra members for it:
+- `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). `feat-022`
+  Batch A is **done** (`useColorMode`, `useCssSupports`, `useCssVar`; 3/10).
+  Roadmap order is by tier, not by feature id. Tier 1 left:
+  - `feat-022` "Clipboard extras, files, theming" — 7 functions remaining:
+    `useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`,
+    `useObjectUrl`, `useScriptTag`, `useStyleTag`. Do **not** invent extra members for it:
     `useTextareaAutosize` is listed in feat-022 for provenance and already
     shipped with feat-021, and `useHead` / `useFuse` are **not in the list at
     all** (`<svelte:head>` and a `fuse.js` peer dep respectively — both already
@@ -347,13 +347,13 @@ fail to clear the bar alone, cut them rather than padding.
 ## Next Session
 
 - **Last Updated**: 2026-10-03
-- **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done.
-  Next by tier is `feat-022` "Clipboard extras, files, theming" (T1, 10
-  functions, the last T1 feature), then `feat-017` (observers - worth early
-  because it unblocks 11 functions once you count its own 7 plus
-  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019).
-  `feat-015` is tier `niche` and deliberately last.
-- **Recommended Next Step**: run `.\init.ps1` from `packages/svelte-use/`, then
-  take `feat-017` (observers) — it is the highest-leverage feature left, and
-  `useTextareaAutosize` already carries a `ponytail:` marker pointing at
-  `useResizeObserver` for consolidation.
+- **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done, and
+  `feat-022` Batch A is done (`useColorMode`, `useCssSupports`, `useCssVar`).
+  Next by tier is the remaining `feat-022` work (7 functions), then `feat-017`
+  (observers - worth early because it unblocks 11 functions once you count its
+  own 7 plus `useInfiniteScroll` and `useMouseInElement` deferred out of
+  feat-019). `feat-015` is tier `niche` and deliberately last.
+- **Recommended Next Step**: adjudicate/implement the remaining `feat-022`
+  functions (`useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`,
+  `useObjectUrl`, `useScriptTag`, `useStyleTag`); `useCssVar.observe` still
+  waits for `feat-017`'s `useMutationObserver`. `.\init.ps1` is currently green.

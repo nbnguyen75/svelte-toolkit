@@ -23,6 +23,11 @@ dark.setMode('auto');
 
 `UseDarkMode` is `'light' | 'dark' | 'auto'`.
 
+Every [`useColorMode`](../useColorMode/README.md) option is accepted except
+`modes` and `onChanged`, which have `valueDark` / `valueLight` equivalents:
+`initialValue`, `storage`, `storageRef`, `storageKey`, `disableTransition`,
+`selector`.
+
 ## Returns
 
 | Field     | Type                          | Reactive | Description                                                     |
@@ -70,10 +75,17 @@ server HTML does not hard-code a theme class to avoid hydration mismatch.
 
 ## Parity notes
 
-- Simplified versus VueUse: no custom-mode dictionary (see `useColorMode`,
-  feat-022, for multi-theme support), and no `onChanged` hook. Storage
-  defaults to `svelte-use-color-scheme` rather than VueUse's
-  `vueuse-color-scheme`.
+- **Built on [`useColorMode`](../useColorMode/README.md)** as a thin boolean
+  view, so the mode class diffing, persistence and OS query live in one place
+  and the two utils cannot drift into disagreeing. VueUse's `useDark` is a
+  wrapper around its `useColorMode` in exactly the same way.
+- `valueDark` / `valueLight` are this package's spelling of the custom-mode
+  dictionary, and `onChanged` here reports `isDark` rather than a mode name.
+- For a non-class `attribute`, light mode is written as the literal `light`
+  even though `valueLight` defaults to `''` — the whole value is written, so an
+  empty string would set `data-theme=""`.
+- Storage defaults to `svelte-use-color-scheme` rather than VueUse's
+  `vueuse-color-scheme`, matching this package's `useColorMode`.
 - VueUse returns a writable `Ref<boolean>` whose setter maps a value to the
   matching mode. This port exposes a read-only `value` plus explicit
   `toggle`/`setMode`, so a write can never silently resolve to `auto`.
