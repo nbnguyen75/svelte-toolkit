@@ -31,18 +31,18 @@
 ## Immediate Next Task
 
 - `feat-016`, `feat-019`, and `feat-021` are **done** (2026-10-03). `feat-022`
-  Batches A **and** B are **done** (`useColorMode`, `useCssSupports`, `useCssVar`,
-  `useObjectUrl`, `useScriptTag`, `useStyleTag`; 6/10).
+  Batches A, B **and** C are **done** (`useColorMode`, `useCssSupports`, `useCssVar`,
+  `useObjectUrl`, `useScriptTag`, `useStyleTag`, `useBase64`; 7/10).
   Roadmap order is by tier, not by feature id. Tier 1 left:
-  - `feat-022` "Clipboard extras, files, theming" — 4 functions remaining:
-    `useBase64`, `useClipboardItems`, `useFileDialog`, `useImage`. Do **not** invent extra members for it:
+  - `feat-022` "Clipboard extras, files, theming" — 3 functions remaining:
+    `useClipboardItems`, `useFileDialog`, `useImage`. Do **not** invent extra members for it:
     `useTextareaAutosize` is listed in feat-022 for provenance and already
     shipped with feat-021, and `useHead` / `useFuse` are **not in the list at
     all** (`<svelte:head>` and a `fuse.js` peer dep respectively — both already
     recipes in `docs/recipes.md`).
     `useImage` is the **recipe candidate**: `<img onload onerror>` states it
-    directly, so it belongs in `docs/recipes.md`, not a module. `useBase64` and
-    `useFileDialog` clear the library bar; `useClipboardItems` is not a direct
+    directly, so it belongs in `docs/recipes.md`, not a module. `useFileDialog`
+    clears the library bar; `useClipboardItems` is not a direct
     swap for `useClipboard`'s `copy`/`paste` and needs its own read.
   - `feat-017` elements — `useElementVisibility` (T1) + `useElementBounding`,
     `useFocus`, `useFocusWithin`, `useMutationObserver` (T2).
@@ -392,15 +392,15 @@ compare resolved`src`instead (which also matches a relative`src`).
 
 - **Last Updated**: 2026-10-03
 - **Current Objective**: `feat-016`, `feat-019`, and `feat-021` are all done, and
-  `feat-022` Batches A and B are done (`useColorMode`, `useCssSupports`,
-  `useCssVar`, `useObjectUrl`, `useScriptTag`, `useStyleTag`; 6/10).
-  Next by tier is the last `feat-022` work (4 functions), then `feat-017`
+  `feat-022` Batches A, B and C are done (`useColorMode`, `useCssSupports`,
+  `useCssVar`, `useObjectUrl`, `useScriptTag`, `useStyleTag`, `useBase64`; 7/10).
+  Next by tier is the last `feat-022` work (3 functions), then `feat-017`
   (observers - worth early because it unblocks 11 functions once you count its
   own 7 plus `useInfiniteScroll` and `useMouseInElement` deferred out of
   feat-019). `feat-015` is tier `niche` and deliberately last.
-- **Recommended Next Step**: finish `feat-022` with `useBase64`,
-  `useClipboardItems`, `useFileDialog`, and `useImage` (the last as a
-  `docs/recipes.md` row, not a module); `useCssVar.observe` still waits for
+- **Recommended Next Step**: finish `feat-022` with `useClipboardItems` and
+  `useFileDialog`, plus `useImage` as a `docs/recipes.md` row rather than a
+  module; `useCssVar.observe` still waits for
   `feat-017`'s `useMutationObserver`. One cheap thing left to pick up, because
   it is independent of feat-022:
   1.  `src/lib/state/useStepper/index.svelte.ts:8` and

@@ -1,6 +1,7 @@
 // * Browser
 export * from './browser/onKeyStroke/index.ts';
 export * from './browser/onStartTyping/index.ts';
+export * from './browser/useBase64/index.ts';
 export * from './browser/useBreakpoints/index.ts';
 export * from './browser/useClipboard/index.ts';
 export * from './browser/useColorMode/index.ts';

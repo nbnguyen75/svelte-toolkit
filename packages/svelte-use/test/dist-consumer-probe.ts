@@ -1,11 +1,14 @@
 import {
+	useBase64,
 	useCloned,
 	useDark,
 	useObjectUrl,
 	useScriptTag,
 	useStyleTag,
 	useToggle,
+	type Base64Target,
 	type ClonedSnapshot,
+	type UseBase64Return,
 	type UseClonedReturn,
 	type UseScriptTagReturn,
 	type UseStyleTagReturn
@@ -27,4 +30,10 @@ const url: string | undefined = useObjectUrl(new Blob(['a'])).value;
 const dark: boolean = useDark().value;
 const toggled: boolean = useToggle().value;
 
-console.log(n, modified, css, tag, pending, url, dark, toggled);
+const source: Base64Target = { test: 5 };
+const encoded: UseBase64Return = useBase64(() => source, { dataUrl: false });
+const payload: string = encoded.base64;
+const inFlight: Promise<string> | undefined = encoded.promise;
+const rerun: Promise<string> = encoded.execute();
+
+console.log(n, modified, css, tag, pending, url, dark, toggled, payload, inFlight, rerun);
