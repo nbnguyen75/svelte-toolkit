@@ -414,19 +414,20 @@ compare resolved`src`instead (which also matches a relative`src`).
 
 ## Next Session
 
-- **Last Updated**: 2026-10-03
-- **Current Objective**: `feat-016`, `feat-019`, `feat-021`, and `feat-022` are all
-  done — **no T1 work remains**. Next by tier is `feat-017` (observers - worth
-  early because it unblocks 11 functions once you count its own 7 plus
-  `useInfiniteScroll` and `useMouseInElement` deferred out of feat-019).
-  `feat-015` is tier `niche` and deliberately last.
-- **Recommended Next Step**: `feat-017`, starting with `useElementVisibility`
-  (the only remaining T1) and the observer work it depends on;
-  `useCssVar.observe` has been waiting on `feat-017`'s `useMutationObserver`
-  since Batch A. One cheap thing left to pick up, because it is independent of
-  both:
-  1.  `src/lib/state/useStepper/index.svelte.ts:8` and
-      `useOffsetPagination/index.svelte.ts:43-44`, which emit
-      `state_referenced_locally` warnings during `vitest` (they do not fail
-      `svelte-check`, which stays 0/0).
-      `.\init.ps1` is currently green.
+- **Last Updated**: 2026-10-04
+- **Current Objective**: `feat-020` Batch A is **done** - `onClickOutside` and
+  `onLongPress` shipped, and with them **every T1 function in the list**.
+  Counts: 25 features (16 done / 9 todo), 131 functions (63 done / 66 todo).
+  Full suite 1012/1012 across 109 files; `.\init.ps1` all green.
+- **Recommended Next Step**: `feat-020`'s T2 remainder, largest first:
+  1.  `useDraggable` - zero-dep port of VueUse's element/handle dragging, and
+      it unblocks `useDropZone`'s dragging half.
+  2.  `usePointer` - pressure / tilt / pointer type; `test/fixtures/pointer.ts`
+      already exists from Batch A and will be reused.
+  3.  `useSwipe`, then `useDropZone`. Then `feat-019`'s two holdouts
+      (`useInfiniteScroll`, `useMouseInElement`), which feat-017 unblocked.
+  One cheap thing left to pick up, independent of all of the above:
+  - `src/lib/state/useStepper/index.svelte.ts:8` and
+    `useOffsetPagination/index.svelte.ts:43-44`, which emit
+    `state_referenced_locally` warnings during `vitest` (they do not fail
+    `svelte-check`, which stays 0/0).

@@ -587,7 +587,7 @@
 				{
 					"name": "onClickOutside",
 					"source": "vueuse/core/onClickOutside",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/onClickOutside/",
 					"tier": "T1"
 				},
@@ -600,7 +600,7 @@
 				{
 					"name": "onLongPress",
 					"source": "vueuse/core/onLongPress",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/onLongPress/",
 					"tier": "T1"
 				},
@@ -654,7 +654,8 @@
 			"id": "feat-020",
 			"name": "Gestures & drag",
 			"status": "todo",
-			"tier": "T2"
+			"tier": "T2",
+			"evidence": "Batch A done: onClickOutside + onLongPress (the feature's last two T1 functions). 52 new tests across 4 files (21 + 3 jsdom, 25 + 3 node SSR probes). Two upstream defects fixed with red tests first: (1) onClickOutside cancel() was overwritten by the pointerdown preceding the click it was meant to swallow - now a separate swallowNext flag, so it is usable from a pointerdown handler; (2) onLongPress onMouseUp stayed silent when a press was abandoned for drifting past the threshold, because the cancel path erased the start position - onMove now cancels only the timer, so a drag still reports isLongPress: false. Also fixed: modifiers.once no longer uses a native once listener, which VueUse's does, so an abandoned first press no longer leaves the element deaf forever. onClickOutside returns a fixed { stop, cancel }; controls / trigger / detectIframe and the iOS < 13.4 listener rewrite are deliberately not ported (README documents why). READMEs per util, exported from src/lib/index.ts, SSR probes under node, no DOM instanceof / module-scope mutable state. Remaining: useDraggable, useDropZone, usePointer, useSwipe (T2), onElementRemoval, useElementByPoint, usePointerLock, usePointerSwipe."
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],

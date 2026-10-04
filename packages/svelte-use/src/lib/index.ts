@@ -1,5 +1,7 @@
 // * Browser
+export * from './browser/onClickOutside/index.ts';
 export * from './browser/onKeyStroke/index.ts';
+export * from './browser/onLongPress/index.ts';
 export * from './browser/onStartTyping/index.ts';
 export * from './browser/useBase64/index.ts';
 export * from './browser/useBreakpoints/index.ts';
