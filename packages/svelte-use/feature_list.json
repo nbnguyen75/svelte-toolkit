@@ -702,19 +702,13 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Extended clipboard/files plus theming/style/script injection. Depends on feat-002 useDark for useColorMode.",
-			"evidence": "Batch A: 3/10 functions (useColorMode, useCssSupports, useCssVar). Batch B: 6/10 (useObjectUrl, useScriptTag, useStyleTag). useBase64: 7/10; feature stays todo for the remaining 3 (useClipboardItems, useFileDialog, useImage). 39 new Batch A tests across 6 files, plus one adjacent onKeyStroke handler-only regression test; 49 new Batch B tests across 6 files; 26 new useBase64 tests across 2 files; full suite 815/815 across 88 files. check 0/0, format clean, lint 0/0, prepack + publint All good!, init.ps1 path-leak scan clean. useDark refactored onto useColorMode, its 9 existing tests unchanged. useCssVar.observe deferred to feat-017 useMutationObserver; useColorMode emitAuto dropped (deprecated upstream, store covers it). Batch B: useObjectUrl creates/revokes per effect run so a swap revokes the URL it replaced; useScriptTag adopts an existing tag instead of duplicating and drops VueUse's CSS.escape selector (escapes identifiers, not quoted attribute values, so the match silently missed) and its 'noModule' in el duck-type (not implemented in jsdom); useStyleTag reads its isLoaded guards untracked (an effect reading and writing the same state throws effect_update_depth_exceeded) and checks tagName === 'STYLE' instead of 'sheet' in el. Module-scope WeakMap refcounting in useScriptTag/useStyleTag dropped as forbidden mutable state; documented in each README. useBase64: VueUse's eight overloads collapsed into one signature since the return type is identical; type/quality apply to canvas+image, serializer to objects, and are forwarded with no local defaults so the browser picks. Duck-typed inputs instead of instanceof (Blob/canvas/image are realm-bound); Map/Set keyed off get/set and add/has because entries/values are on Array.prototype too, so upstream's test would pass either way. A latest-run token discards stale async results; the automatic run swallows rejection while a manual execute() still hands callers the rejecting promise. ArrayBuffer chunked at 32 KiB - upstream spreads one argument per byte and throws RangeError past ~64k. Image path fixed: upstream cloneNode(false) copies no attributes, so its clone has no src and encodes a blank canvas; here a fresh element gets crossOrigin before src and the caller's element is never touched. video/audio inputs omitted (useObjectUrl work). READMEs per util, all symbols verified through dist/index.js, no assertions / DOM instanceof / module-scope mutable state.",
+			"evidence": "DONE - 8 functions shipped (useColorMode, useCssSupports, useCssVar, useObjectUrl, useScriptTag, useStyleTag, useBase64, useFileDialog). Batch A: 3. Batch B: useObjectUrl, useScriptTag, useStyleTag. Batch C: useBase64. Batch D: useFileDialog, plus useClipboard.copy widened to string | ClipboardItems. 2 hooks removed from this list as recipes per the file note (only shipped functions are tracked here): useClipboardItems and useImage, both with rows in docs/recipes.md. 39 new Batch A tests across 6 files, plus one adjacent onKeyStroke handler-only regression test; 49 new Batch B tests across 6 files; 26 new Batch C tests across 2 files; Batch D 20 new useFileDialog tests in 2 files plus 2 on useClipboard. check 0/0, format clean, lint 0/0, prepack + publint All good!, init.ps1 incl. consumer probe, rune scan, path-leak scan. useDark refactored onto useColorMode, its 9 existing tests unchanged. useCssVar.observe deferred to feat-017 useMutationObserver; useColorMode emitAuto dropped (deprecated upstream, store covers it). Batch B: useObjectUrl creates/revokes per effect run so a swap revokes the URL it replaced; useScriptTag adopts an existing tag instead of duplicating and drops VueUse's CSS.escape selector (escapes identifiers, not quoted attribute values, so the match silently missed) and its 'noModule' in el duck-type (not implemented in jsdom); useStyleTag reads its isLoaded guards untracked (an effect reading and writing the same state throws effect_update_depth_exceeded) and checks tagName === 'STYLE' instead of 'sheet' in el. Module-scope WeakMap refcounting in useScriptTag/useStyleTag dropped as forbidden mutable state; documented in each README. Batch C: VueUse's eight useBase64 overloads collapsed into one signature since the return type is identical; type/quality forwarded with no local defaults so the browser picks; duck-typed inputs instead of instanceof (realm-bound); Map/Set keyed off get/set and add/has because entries/values are on Array.prototype too, so upstream's array test shape would pass either way; latest-run token discards stale async results and the automatic run swallows its rejection while a manual execute() still rejects; ArrayBuffer chunked at 32 KiB since upstream spreads one argument per byte and throws RangeError past ~64k; image path fixed because upstream cloneNode(false) copies no attributes, leaving the clone src-less and encoding a blank canvas; video/audio inputs omitted (useObjectUrl work). Batch D: useClipboardItems not ported as a module - the write side is useClipboard.copy, and its read side is strictly worse than a native onpaste handler, since VueUse listens on copy/cut and calls navigator.clipboard.read(), prompting for clipboard-read permission on every copy; useImage not ported because it returns a useAsyncState bag this package does not ship and its thirteen options are plain <img> attributes. useFileDialog: listeners are installed once and removed in the effect teardown (a detached input still dispatches, so el.remove() alone left handlers writing to unmounted state); applyTo() takes the element as an argument because reading the reactive input inside the creating effect made it depend on the state it set; VueUse re-assigns onchange from a computed on every read; initialFiles dropped (needs DataTransfer, unimplemented in jsdom, so the branch could not be tested); VueUse's EventHookOn subscriptions became onChange/onCancel callbacks because the input is not in the caller's markup. READMEs per util, symbols verified through dist/index.js, no assertions / DOM instanceof / module-scope mutable state.",
 			"functions": [
 				{
 					"name": "useBase64",
 					"source": "vueuse/core/useBase64",
 					"status": "done",
 					"target": "src/lib/browser/useBase64/"
-				},
-				{
-					"name": "useClipboardItems",
-					"source": "vueuse/core/useClipboardItems",
-					"status": "todo",
-					"target": "src/lib/browser/useClipboardItems/"
 				},
 				{
 					"name": "useColorMode",
@@ -738,14 +732,8 @@
 				{
 					"name": "useFileDialog",
 					"source": "vueuse/core/useFileDialog",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useFileDialog/"
-				},
-				{
-					"name": "useImage",
-					"source": "vueuse/core/useImage",
-					"status": "todo",
-					"target": "src/lib/browser/useImage/"
 				},
 				{
 					"name": "useObjectUrl",
@@ -768,7 +756,7 @@
 			],
 			"id": "feat-022",
 			"name": "Clipboard extras, files, theming",
-			"status": "todo",
+			"status": "done",
 			"tier": "T1"
 		},
 		{

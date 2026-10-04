@@ -87,6 +87,9 @@ Two kinds of entry live here:
 | `useMounted`                                                                                                    | [an `$effect` body _is_ mount](#svelte-already-has-it)                                 |
 | `useTransition`                                                                                                 | [`Tween` / `Spring` / `tweened`](#svelte-already-has-it)                               |
 | `useAnimate`                                                                                                    | [`svelte/animate`, WAAPI, or a transition](#svelte-already-has-it)                     |
+| `useImage`                                                                                                      | [`<img onload onerror>` — feat-022](#svelte-already-has-it)                            |
+| **Deferred to a shipped util**                                                                                  |                                                                                        |
+| `useClipboardItems` (write side)                                                                                | [`useClipboard.copy` (shipped)](#svelte-already-has-it)                                |
 | **Deferred to a library**                                                                                       |                                                                                        |
 | `useDateFormat` `useTimeAgo` `useTimeAgoIntl` `useTemporalNow`                                                  | [`date-fns` / `Intl` / Temporal](#dates-deferred-to-date-fns)                          |
 | `useVirtualList`                                                                                                | [`@tanstack/svelte-virtual`](#virtual-lists-deferred-to-tanstack)                      |
@@ -366,7 +369,61 @@ $effect(() => {
 	const animation = node.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
 	return () => animation.cancel();
 });
+
+// useImage — the element IS the state machine; you need the loaded flag only.
+let loaded = $state(false);
+let failed = $state(false);
 ```
+
+```svelte
+<img
+	{src}
+	alt=""
+	class:loaded
+	onload={() => ((loaded = true), (failed = false))}
+	onerror={() => ((failed = true), (loaded = false))}
+/>
+{#if failed}<span>Could not load image</span>{/if}
+```
+
+`useImage` returns an async-state bag (`isLoading`, `error`, `execute`,
+`delay`) built on a `useAsyncState` this package does not ship, and thirteen
+`srcset`/`sizes`/`decoding`/`fetchPriority`/… options that are plain attributes
+in the markup above — where the browser applies `srcset` and lazy `loading`
+without a util being involved at all. The one thing worth reaching for is a
+blob URL from a picked file, which is `useObjectUrl` (shipped).
+
+```ts
+// useClipboardItems, write side — useClipboard.copy takes ClipboardItems.
+import { useClipboard } from '@wynn-dev/svelte-use';
+
+const { copy, copied } = useClipboard();
+await copy([new ClipboardItem({ 'image/png': pngBlob })]);
+```
+
+The _read_ side is deliberately not a util, and this is the reason the whole
+hook is not ported. VueUse's `useClipboardItems` keeps `content` fresh by
+listening on `copy` and `cut` and calling `navigator.clipboard.read()` — which
+asks for clipboard-read permission **every time the user copies anything**. The
+native path hands you the same data with no permission prompt at all, because
+the event that carries it is the paste:
+
+```svelte
+<div
+	role="presentation"
+	tabindex="0"
+	onpaste={async (event) => {
+		const image = [...event.clipboardData.items]
+			.find((item) => item.type.startsWith('image/'))
+			?.getAsFile();
+		if (image) pasted = image;
+	}}
+></div>
+```
+
+`navigator.clipboard.read()` stays available for the rare case of reading
+without a paste — a "paste from clipboard" button — where the permission prompt
+is expected rather than surprising.
 
 `online` and `devicePixelRatio` come from `svelte/reactivity/window`, which
 ships SSR-safe `undefined` fallbacks and cleans up on destroy. The full

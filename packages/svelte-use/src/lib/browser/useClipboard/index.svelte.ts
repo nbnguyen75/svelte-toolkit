@@ -9,13 +9,21 @@ export interface UseClipboardOptions {
 
 /** Reactive clipboard state returned by {@link useClipboard}. */
 export interface UseClipboardReturn {
-	/** Copy `value`; safe no-op when unsupported. Rejects if the write is denied. */
-	copy: (value: string) => Promise<void>;
+	/**
+	 * Copy `value`; safe no-op when unsupported. Rejects if the write is denied.
+	 *
+	 * A string is written as plain text. {@link ClipboardItems} (images, custom
+	 * MIME types) is written verbatim via `navigator.clipboard.write`.
+	 */
+	copy: (value: string | ClipboardItems) => Promise<void>;
 	/** Whether the async Clipboard API is available in this environment. Always `false` during SSR. */
 	readonly isSupported: boolean;
 	/** `true` while inside the post-copy window. Getter-backed (destructure-safe). */
 	readonly copied: boolean;
-	/** Last successfully copied text. Getter-backed (destructure-safe). */
+	/**
+	 * Last successfully copied text. Getter-backed (destructure-safe). A rich
+	 * `ClipboardItems` copy does not touch it - there is no text to report.
+	 */
 	readonly text: string;
 }
 
@@ -33,6 +41,12 @@ export interface UseClipboardReturn {
  * const clipboard = useClipboard();
  * await clipboard.copy('copy me');
  * clipboard.copied; // true for 1500ms
+ * ```
+ * @example
+ * ```ts
+ * // Rich content: copy the image the user is looking at.
+ * const { copy } = useClipboard();
+ * await copy([new ClipboardItem({ 'image/png': blob })]);
  * ```
  */
 export function useClipboard(opts?: UseClipboardOptions): UseClipboardReturn {
@@ -53,11 +67,18 @@ export function useClipboard(opts?: UseClipboardOptions): UseClipboardReturn {
 
 	const isSupported = typeof navigator !== 'undefined' && !!navigator.clipboard;
 
-	async function copy(value: string) {
+	async function copy(value: string | ClipboardItems) {
 		if (!isSupported) return;
-		await navigator.clipboard.writeText(value);
-		if (!alive) return;
-		text = value;
+		if (typeof value === 'string') {
+			await navigator.clipboard.writeText(value);
+			if (!alive) return;
+			text = value;
+		} else {
+			// Rich content: the browser takes the items verbatim, and there is no
+			// text form of them to record.
+			await navigator.clipboard.write(value);
+			if (!alive) return;
+		}
 		copied = true;
 
 		if (timer) clearTimeout(timer);

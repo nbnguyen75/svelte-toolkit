@@ -10,6 +10,7 @@ export * from './browser/useCssVar/index.ts';
 export * from './browser/useDark/index.ts';
 export * from './browser/useElementHover/index.ts';
 export * from './browser/useEventListener/index.ts';
+export * from './browser/useFileDialog/index.ts';
 export * from './browser/useKeyModifier/index.ts';
 export * from './browser/useMagicKeys/index.ts';
 export * from './browser/useMouse/index.ts';

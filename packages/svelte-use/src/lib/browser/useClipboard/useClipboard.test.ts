@@ -15,6 +15,20 @@ function mockClipboard() {
 	return writeText;
 }
 
+/**
+ * Adds a rich-content `write` alongside `writeText`. `ClipboardItem` does not
+ * exist in jsdom, but `ClipboardItems` is only a type, so a stand-in array is
+ * exactly what the implementation passes through.
+ */
+function mockRichClipboard() {
+	const write = vi.fn(async (_items: ClipboardItems) => {});
+	Object.defineProperty(window.navigator, 'clipboard', {
+		configurable: true,
+		value: { writeText: vi.fn(async () => {}), write }
+	});
+	return write;
+}
+
 const mountClipboard = (opts?: UseClipboardOptions) => mountUtil(() => useClipboard(opts));
 
 describe('useClipboard', () => {
@@ -86,6 +100,40 @@ describe('useClipboard', () => {
 			await expect(api.copy('nope')).rejects.toThrow('denied');
 			expect(api.copied).toBe(false);
 			expect(api.text).toBe('');
+		} finally {
+			await dispose();
+		}
+	});
+
+	it('copies rich items through write and flashes the same flag', async () => {
+		vi.useFakeTimers();
+		const write = mockRichClipboard();
+		const { api, dispose } = await mountClipboard({ copiedDuring: 1000 });
+		try {
+			const items = [{ types: ['image/png'] }] as unknown as ClipboardItems;
+			await api.copy(items);
+
+			expect(write).toHaveBeenCalledWith(items);
+			expect(api.copied).toBe(true);
+			vi.advanceTimersByTime(1000);
+			expect(api.copied).toBe(false);
+			// Rich content has no text form, so `text` must keep its last value
+			// rather than reporting something the clipboard does not hold.
+			expect(api.text).toBe('');
+		} finally {
+			vi.useRealTimers();
+			await dispose();
+		}
+	});
+
+	it('leaves text alone when a rich copy follows a text copy', async () => {
+		mockRichClipboard();
+		const { api, dispose } = await mountClipboard();
+		try {
+			await api.copy('hello');
+			await api.copy([{ types: ['text/plain'] }] as unknown as ClipboardItems);
+
+			expect(api.text).toBe('hello');
 		} finally {
 			await dispose();
 		}

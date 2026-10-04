@@ -20,12 +20,12 @@ await copy('hello');
 
 ## Returns
 
-| Field         | Type                               | Reactive | Description                                                |
-| ------------- | ---------------------------------- | -------- | ---------------------------------------------------------- |
-| `copied`      | `boolean`                          | getter   | `true` while inside the post-copy window.                  |
-| `text`        | `string`                           | getter   | Last successfully copied text.                             |
-| `isSupported` | `boolean`                          | const    | Async Clipboard API available (always `false` during SSR). |
-| `copy`        | `(value: string) => Promise<void>` | method   | Copy `value`; safe no-op when unsupported.                 |
+| Field         | Type                                                 | Reactive | Description                                                |
+| ------------- | ---------------------------------------------------- | -------- | ---------------------------------------------------------- |
+| `copied`      | `boolean`                                            | getter   | `true` while inside the post-copy window.                  |
+| `text`        | `string`                                             | getter   | Last successfully copied text.                             |
+| `isSupported` | `boolean`                                            | const    | Async Clipboard API available (always `false` during SSR). |
+| `copy`        | `(value: string \| ClipboardItems) => Promise<void>` | method   | Copy text or rich items; safe no-op when unsupported.      |
 
 ## Examples
 
@@ -42,6 +42,20 @@ await copy('hello');
 	{clipboard.copied ? 'Copied!' : 'Copy'}
 </button>
 ```
+
+### Rich content (images, custom MIME types)
+
+`copy` accepts `ClipboardItems` as well as a string, so a "copy image" button
+needs no second util:
+
+```ts
+const { copy, copied } = useClipboard();
+
+await copy([new ClipboardItem({ 'image/png': pngBlob })]);
+```
+
+A rich copy still flashes `copied` for the same window, and leaves `text` alone
+— there is no text form of the content to report.
 
 ### SSR behavior
 
@@ -63,8 +77,14 @@ anything, so copy buttons render safely during SSR.
 ## Parity notes
 
 - Simplified versus VueUse: modern async Clipboard API only — no legacy
-  `execCommand` fallback, no `read()`/cut support, no configurable legacy
-  copy shim, and no `copyPending` flag. See `useClipboardItems` (feat-023)
-  for multi-item support.
+  `execCommand` fallback, no cut support, no configurable legacy copy shim, and
+  no `copyPending` flag.
+- VueUse ships a separate `useClipboardItems` for rich content. That module is
+  not ported; `copy` here takes `string | ClipboardItems` instead, so the write
+  path is covered without duplicating `copied`, `copiedDuring` and
+  `isSupported`. The _read_ side is a recipe, not a util: a native `onpaste`
+  handler receives `event.clipboardData` with no clipboard-read permission,
+  where VueUse's `useClipboardItems` listens on `copy`/`cut` and calls
+  `navigator.clipboard.read()`, prompting for permission on every copy.
 - VueUse swallows a denied write; this port lets the rejection reach the
   caller, since `copy` already returns a `Promise<void>`.
