@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createBox } from '../../../../test/fixtures/box.svelte.ts';
 import { mountInitialized } from '../../../../test/fixtures/mount.ts';
 import { MockResizeObserver } from '../../../../test/fixtures/observers.ts';
+import { stubRect } from '../../../../test/fixtures/rect.ts';
 import { useElementBounding } from './index.ts';
 
 const noop = () => {};
@@ -20,21 +21,6 @@ function box(): HTMLDivElement {
 	document.body.append(el);
 	created.push(el);
 	return el;
-}
-
-/** jsdom has no layout, so the rect has to be supplied. Returns the spy. */
-function stubRect(el: HTMLElement, rect: Partial<DOMRect>): ReturnType<typeof vi.spyOn> {
-	return vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
-		height: 0,
-		bottom: 0,
-		left: 0,
-		right: 0,
-		top: 0,
-		width: 0,
-		x: 0,
-		y: 0,
-		...rect
-	} as DOMRect);
 }
 
 afterEach(() => {

@@ -415,19 +415,21 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-020` Batch A is **done** - `onClickOutside` and
-  `onLongPress` shipped, and with them **every T1 function in the list**.
-  Counts: 25 features (16 done / 9 todo), 131 functions (63 done / 66 todo).
-  Full suite 1012/1012 across 109 files; `.\init.ps1` all green.
-- **Recommended Next Step**: `feat-020`'s T2 remainder, largest first:
-  1.  `useDraggable` - zero-dep port of VueUse's element/handle dragging, and
-      it unblocks `useDropZone`'s dragging half.
-  2.  `usePointer` - pressure / tilt / pointer type; `test/fixtures/pointer.ts`
-      already exists from Batch A and will be reused.
-  3.  `useSwipe`, then `useDropZone`. Then `feat-019`'s two holdouts
-      (`useInfiniteScroll`, `useMouseInElement`), which feat-017 unblocked.
-  One cheap thing left to pick up, independent of all of the above:
+- **Current Objective**: `feat-020` Batch B is **done** - `useDraggable`
+  shipped, joining Batch A's `onClickOutside` and `onLongPress`. Every T1
+  function in the list is done. Counts: 25 features (16 done / 9 todo),
+  132 functions (64 done / 65 todo).
+- **Recommended Next Step**: `feat-020`'s remaining T2s, in this order:
+  1.  `usePointer` - pressure / tilt / pointer type. `test/fixtures/pointer.ts`
+      already exists from Batch A, and so does `test/fixtures/rect.ts` from
+      Batch B.
+  2.  `useSwipe`, then `useDropZone` - `useDraggable` has now unblocked
+      `useDropZone`'s dragging half.
+  3.  Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`),
+      which feat-017 unblocked.
+      Two cheap things independent of all of the above:
   - `src/lib/state/useStepper/index.svelte.ts:8` and
     `useOffsetPagination/index.svelte.ts:43-44`, which emit
     `state_referenced_locally` warnings during `vitest` (they do not fail
-    `svelte-check`, which stays 0/0).
+    `svelte-check`, which stays 0/0). Do not add more: Batch B learned that
+    passing a `$derived` where a value is wanted produces exactly these.

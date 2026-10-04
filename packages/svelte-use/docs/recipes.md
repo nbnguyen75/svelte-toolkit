@@ -501,10 +501,11 @@ Two questions decide this, and they lead to different answers.
 
 **Is `@neodrag/svelte` enough?** If you want free-form dragging of an element
 or a handle, yes — it is ~2KB, SSR-friendly, and a single `use:draggable`
-action. This package also plans **`useDraggable`** (feat-020), a
+action. This package also ships **`useDraggable`** (feat-020), a
 dependency-free port of VueUse's element/handle dragging, for the cases where
 you would otherwise hand-roll `pointerdown` → `pointermove` → `pointerup` with
-a transform.
+a transform. Its `autoScroll` option is not ported; the README shows the
+`onMove` equivalent.
 
 **Do you need a full DnD engine?** Windowing, multi-container support,
 sensors, and keyboard accessibility are not problems worth solving here:

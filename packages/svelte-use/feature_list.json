@@ -607,7 +607,7 @@
 				{
 					"name": "useDraggable",
 					"source": "vueuse/core/useDraggable",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useDraggable/",
 					"tier": "T2"
 				},
@@ -655,7 +655,7 @@
 			"name": "Gestures & drag",
 			"status": "todo",
 			"tier": "T2",
-			"evidence": "Batch A done: onClickOutside + onLongPress (the feature's last two T1 functions). 52 new tests across 4 files (21 + 3 jsdom, 25 + 3 node SSR probes). Two upstream defects fixed with red tests first: (1) onClickOutside cancel() was overwritten by the pointerdown preceding the click it was meant to swallow - now a separate swallowNext flag, so it is usable from a pointerdown handler; (2) onLongPress onMouseUp stayed silent when a press was abandoned for drifting past the threshold, because the cancel path erased the start position - onMove now cancels only the timer, so a drag still reports isLongPress: false. Also fixed: modifiers.once no longer uses a native once listener, which VueUse's does, so an abandoned first press no longer leaves the element deaf forever. onClickOutside returns a fixed { stop, cancel }; controls / trigger / detectIframe and the iOS < 13.4 listener rewrite are deliberately not ported (README documents why). READMEs per util, exported from src/lib/index.ts, SSR probes under node, no DOM instanceof / module-scope mutable state. Remaining: useDraggable, useDropZone, usePointer, useSwipe (T2), onElementRemoval, useElementByPoint, usePointerLock, usePointerSwipe."
+			"evidence": "Batch A: onClickOutside + onLongPress (the feature's last two T1 functions). 52 tests across 4 files. Three upstream defects fixed, each with a red test first: (1) onClickOutside cancel() was erased by the pointerdown preceding the click it was meant to swallow - now a separate swallowNext flag, so it is usable from a pointerdown handler; (2) onLongPress onMouseUp stayed silent when a press was abandoned for drifting past the threshold, because the cancel path erased the start position - onMove now cancels only the timer, so a drag still reports isLongPress: false; (3) modifiers.once no longer uses a native once listener, so an abandoned first press no longer leaves the element deaf forever. onClickOutside returns a fixed { stop, cancel }; controls / trigger / detectIframe and the iOS < 13.4 listener rewrite are deliberately not ported (README documents why). Batch B: useDraggable. 35 jsdom tests + 3 SSR probes. Two design notes: autoScroll is not ported (a 60fps interval, a four-knob option object, and a per-frame position correction - a feature bundled into a drag util rather than part of dragging; the README gives the onMove equivalent), and draggingElement falls back to window when nullish rather than binding nothing, because a nullish element in Svelte usually means a target that has not resolved yet. One hand-rolled bind instead of useEventListener, because passive is fixed at bind time and preventDefault must keep working when switched on. No casts and no DOM instanceof: Element/EventTarget do not carry the pointer event map, so the handlers take Event and narrow with a 'pointerId' in event predicate, the same trick useMouse uses. test/fixtures/rect.ts added (stubRect + stubScroll), replacing the copy useElementBounding kept locally. Suite 1050/1050 across 111 files; init.ps1 all green."
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],
