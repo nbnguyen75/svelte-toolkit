@@ -2,8 +2,9 @@ import type { MaybeGetter } from '../../shared/getter.ts';
 
 import { untrack } from 'svelte';
 
+import { useMutationObserver } from '../../elements/useMutationObserver/index.ts';
 import { resolveGetter } from '../../shared/getter.ts';
-import { isBrowser, noop } from '../../shared/is.ts';
+import { isBrowser } from '../../shared/is.ts';
 import { useDebounceFn } from '../../utilities/useDebounceFn/index.ts';
 import { useThrottleFn } from '../../utilities/useThrottleFn/index.ts';
 import { useEventListener } from '../useEventListener/index.svelte.ts';
@@ -275,22 +276,24 @@ export function useScroll(
 		}
 	});
 
-	$effect(() => {
-		if (!observeMutation) return noop;
-		const target = resolveGetter(element);
-		// A window or document is not a valid mutation target, and watching the
-		// whole viewport subtree buys nothing.
-		if (!isBrowser || !target || isWindowLike(target) || isDocumentLike(target)) return noop;
-		// ponytail: inline observer rather than pulling in feat-017's
-		// useMutationObserver; swap it in when that util lands.
-		const observer = new MutationObserver(() => {
-			untrack(() => measure());
-		});
-		observer.observe(target, { attributes: true, childList: true, subtree: true });
-		return () => {
-			observer.disconnect();
-		};
-	});
+	useMutationObserver(
+		() => {
+			const target = resolveGetter(element);
+			// A window or document is not a valid mutation target, and watching the
+			// whole viewport subtree buys nothing.
+			if (
+				!observeMutation ||
+				!isBrowser ||
+				!target ||
+				isWindowLike(target) ||
+				isDocumentLike(target)
+			)
+				return null;
+			return target;
+		},
+		() => untrack(() => measure()),
+		{ attributes: true, childList: true, subtree: true }
+	);
 
 	$effect(() => {
 		return () => {

@@ -79,6 +79,18 @@ export function hasOwn<T extends object, K extends keyof T>(object: T, key: K): 
 	return Object.hasOwn(object, key);
 }
 
+/**
+ * True when an event target is a DOM node.
+ *
+ * Focus events report `relatedTarget` as `EventTarget | null`, but the value is
+ * always a `Node`, a `Window`, or `null`, and the DOM types do not narrow it for
+ * us. Probed structurally rather than with `instanceof`, which misses nodes from
+ * another realm (an iframe) and cannot narrow.
+ */
+export function isNode(value: EventTarget | null | undefined): value is Node {
+	return !!value && 'nodeType' in value;
+}
+
 /** Does nothing. Useful as a default callback. */
 export function noop(): void {
 	/* intentionally empty */

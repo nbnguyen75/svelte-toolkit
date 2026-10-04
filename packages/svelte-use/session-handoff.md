@@ -3,7 +3,7 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **42 util modules shipped**:
+- Pure library package (no SvelteKit shell). **46 util modules shipped**:
   - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
     `useBreakpoints`, `usePreferredLanguages`,
     `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
@@ -16,12 +16,17 @@
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
   - `utilities/`: `useDebounceFn`, `useThrottleFn`, `useTimeoutFn`,
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
-  - `shared/`: `is.ts` (14 guard/predicate exports), `getter.ts`, `units.ts` —
-    internal helpers, **not** utils.
-- Suite: **789 tests / 86 files**. `dist` builds, `publint` clean.
+  - `elements/`: `useMutationObserver`, `useResizeObserver`,
+    `useIntersectionObserver`, `useElementVisibility`, `useElementBounding`,
+    `useFocus`, `useFocusWithin`
+    (new category, feat-017 - **done**, Batches A-D)
+  - `shared/`: `is.ts` (15 guard/predicate exports), `getter.ts`, `units.ts`,
+    `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
+    `resolveElements`) — internal helpers, **not** utils.
+- Suite: **960 tests / 105 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
-  131 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 14 features done, 11 todo; 52 functions done, 79 todo.
+  129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
+  `package:` markers. 16 features done, 9 todo; 61 functions done, 68 todo.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -38,11 +43,35 @@
   marked with a status — the file's `note` tracks only what ships, so both are
   `docs/recipes.md` rows now.
   Roadmap order is by tier, not by feature id. Tier 1 left:
-  - **None.** `feat-017` elements is next (`useElementVisibility` T1 +
-    `useElementBounding`, `useFocus`, `useFocusWithin`, `useMutationObserver` T2),
-    and it unblocks 11 functions including the two deferred out of feat-019.
-    `useElementHover` is listed in feat-017 for provenance only — it already
-    shipped; do not re-port it.
+- **`feat-017` elements is done** — Batches A-D shipped
+  `useMutationObserver`, `useResizeObserver`, `useIntersectionObserver`,
+  `useElementVisibility`, `useElementBounding`, `useFocus` and `useFocusWithin`
+  (2026-10-04) plus the shared `shared/element.ts` resolver every element util in
+  this feature reuses. Tier 1 left:
+- **`feat-020`'s `onClickOutside` / `onLongPress` are the only T1 functions left.**
+  Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`),
+  which the shipped observers unblocked.
+  - **Decided, do not re-litigate:** the three observers are _not_ unified behind
+    a shared helper (their return shapes genuinely differ), there is no
+    `usePausable` (`useIntersectionObserver` inlines `pause`/`resume`/`isActive`),
+    and `useElementVisibility` has no `controls` flag — it always returns
+    `stop`. Three VueUse behaviours are deliberately _not_ reproduced, all
+    documented in the READMEs: `once` stopping on the second report instead of
+    the first, the bare-ref default return, and `useFocusWithin` re-checking
+    `:focus-within` on `focusout` (which is stale by construction — it is
+    dispatched before focus moves, so the flag sticks on; this implementation
+    uses `contains(relatedTarget)`). Do not "restore" any of them without a
+    reason.
+  - **Focus utils type their target as `MaybeGetter<MaybeHTMLElement>`**, not
+    `MaybeElement`, so `useEventListener`'s `HTMLElementEventMap` overload returns
+    a typed `FocusEvent` instead of `Event` + a cast. `shared/is.ts` `isNode()`
+    narrows `relatedTarget` the same way. Src keeps **zero** `as` casts.
+  - `useFocus.focused` is readable _and_ assignable. Assign through the returned
+    object — destructuring copies the getter's value and leaves no setter. Same
+    limit VueUse's `WritableComputedRef` has.
+  - `useElementHover` is listed in feat-017 for provenance only — it already
+    shipped; do not re-port it. Its inline `MutationObserver` watches `document`,
+    not an element, and stays that way on purpose (see its `ponytail:` comment).
 - `feat-019` shipped 5 of its 7 functions. `useInfiniteScroll` and
   `useMouseInElement` stay `todo` and land with **feat-017**, which owns the
   observers they wrap (`useIntersectionObserver`, `useResizeObserver`,

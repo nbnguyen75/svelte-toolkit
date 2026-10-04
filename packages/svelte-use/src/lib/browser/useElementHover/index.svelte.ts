@@ -96,8 +96,9 @@ export function useElementHover(
 		if (!triggerOnRemoval || !isBrowser) return noop;
 		const target = resolveGetter(element);
 		if (!target) return noop;
-		// ponytail: inline observer rather than pulling in feat-017's
-		// useMutationObserver / onElementRemoval; swap it in when those land.
+		// ponytail: observes `document`, not an element, so feat-017's
+		// useMutationObserver (which takes elements) does not fit - widening its
+		// target to Node for this one callsite would cost more than it saves.
 		const observer = new MutationObserver((records) => {
 			const removed = records.flatMap((record) => [...record.removedNodes]);
 			// A removal is either the element itself or an ancestor that took it

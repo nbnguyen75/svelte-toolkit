@@ -40,6 +40,15 @@ export * from './state/usePrevious/index.ts';
 export * from './state/useStepper/index.ts';
 export * from './state/useStorage/index.ts';
 export * from './state/useToggle/index.ts';
+// * Elements
+export * from './elements/useElementBounding/index.ts';
+export * from './elements/useElementVisibility/index.ts';
+export * from './elements/useFocus/index.ts';
+export * from './elements/useFocusWithin/index.ts';
+export * from './elements/useIntersectionObserver/index.ts';
+export * from './elements/useMutationObserver/index.ts';
+export * from './elements/useResizeObserver/index.ts';
+
 // * Utilities
 export * from './utilities/useCountdown/index.ts';
 export * from './utilities/useDebounceFn/index.ts';

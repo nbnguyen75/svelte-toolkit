@@ -110,14 +110,18 @@ export class MockIntersectionObserver {
 			MockIntersectionObserver as unknown as typeof IntersectionObserver;
 	}
 
-	static triggerIntersecting(target: Element, isIntersecting: boolean) {
+	static trigger(target: Element, entries: Partial<IntersectionObserverEntry>[]) {
 		for (const instance of MockIntersectionObserver.instances) {
 			if (instance.observed.includes(target)) {
 				instance.handler(
-					[{ isIntersecting, target, time: Date.now() }],
+					entries.map((entry) => ({ ...entry, target })),
 					instance as unknown as IntersectionObserver
 				);
 			}
 		}
+	}
+
+	static triggerIntersecting(target: Element, isIntersecting: boolean) {
+		MockIntersectionObserver.trigger(target, [{ isIntersecting, target, time: Date.now() }]);
 	}
 }

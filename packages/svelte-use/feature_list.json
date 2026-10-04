@@ -437,56 +437,57 @@
 				{
 					"name": "useElementBounding",
 					"source": "vueuse/core/useElementBounding",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useElementBounding/",
 					"tier": "T2"
 				},
 				{
 					"name": "useElementVisibility",
 					"source": "vueuse/core/useElementVisibility",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useElementVisibility/",
 					"tier": "T1"
 				},
 				{
 					"name": "useFocus",
 					"source": "vueuse/core/useFocus",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useFocus/",
 					"tier": "T2"
 				},
 				{
 					"name": "useFocusWithin",
 					"source": "vueuse/core/useFocusWithin",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useFocusWithin/",
 					"tier": "T2"
 				},
 				{
 					"name": "useIntersectionObserver",
 					"source": "vueuse/core/useIntersectionObserver",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useIntersectionObserver/",
 					"tier": "T1"
 				},
 				{
 					"name": "useMutationObserver",
 					"source": "vueuse/core/useMutationObserver",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useMutationObserver/",
 					"tier": "T1"
 				},
 				{
 					"name": "useResizeObserver",
 					"source": "vueuse/core/useResizeObserver",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/elements/useResizeObserver/",
 					"tier": "T1"
 				}
 			],
 			"id": "feat-017",
 			"name": "Elements: size, visibility, focus",
-			"status": "todo",
+			"status": "done",
+			"evidence": "All seven shipped. Batch A: useMutationObserver. Batch B: useResizeObserver + useIntersectionObserver. Batch C: useElementVisibility, built on the shipped useIntersectionObserver. Batch D (2026-10-04): useElementBounding + useFocus + useFocusWithin, which complete the feature and the elements/ category. The four observers stay the native thing with nothing wrapped: options alias the platform init type (MutationObserverInit / ResizeObserverOptions / IntersectionObserverInit), callbacks are the platform's verbatim, and one $effect creates the observer per run and disconnects on replacement or unmount. Deliberate non-abstraction: the three observers share ~20 lines of effect scaffolding but unifying them would force one lowest-common-denominator return shape (pause/resume for intersection, takeRecords for mutation, neither for resize), so each stays self-contained. isSupported is a plain boolean - no useSupported (feat-025, niche) exists. useIntersectionObserver inlines pause/resume/isActive as $state rather than adding a usePausable primitive that is not on the roadmap, and its resume() is a no-op after stop(), which VueUse's unconditional isActive = true would get wrong. Two VueUse behaviours deliberately not reproduced, both documented in the READMEs: useElementVisibility's `once` option registers a watchOnce inside the observer callback, so it stops after the SECOND report rather than the first its docstring promises (untested upstream) - this implementation compares against the previous value and stops on the first change, which also means the unconditional report the platform makes on observe() does not consume it; and useElementVisibility returns a bare ShallowRef by default plus a controller under a `controls` flag - here `stop` is always returned, so there are two shapes to collapse into one. Option properties accept `| undefined` because the package compiles with exactOptionalPropertyTypes, so a Svelte `let rootMargin = $state<string>()` forwards straight through. No deprecated local observer types, no instanceof Element filter (that would reject Text nodes and depends on a global constructor check). Consolidated the inline observers whose ponytail markers asked for it: useScroll observe.mutation and useTextareaAutosize width-change; both call sites' existing tests already spy MutationObserver.prototype / MockResizeObserver, so the swaps are proven by them passing unchanged. useElementHover's inline observer watches document, not an element, and stays inline by design. jsdom ships MutationObserver so Batch A drives the real thing; jsdom has no ResizeObserver/IntersectionObserver so Batches B and C use the existing test/fixtures/observers.ts mocks, which gained a multi-entry `trigger` so the latest-entry-wins rule is testable. Batch D: useElementBounding composes useResizeObserver + useMutationObserver rather than re-implementing either, and additionally watches window scroll in the CAPTURE phase plus window resize, because a scroll can move the box without resizing it (a sticky ancestor, a transformed subtree) and neither observer fires for that; updateTiming 'next-frame' defers a burst of reports into one read. Two VueUse options dropped as no-ops: `immediate`, which VueUse accepts and never reads. useFocus returns one getter/setter pair instead of VueUse's WritableComputedRef plus focus()/blur() methods - the two methods are the two assignments, and a bare `ShallowRef` is the wrong shape for Svelte. useFocusWithin uses relatedTarget containment instead of VueUse's `:focus-within` re-check, which is stale by construction: focusout is dispatched BEFORE focus moves, so the pseudo-class still describes the old focus and the flag sticks on; its `focused` is read-only because imperative focus belongs to useFocus. Both focus utils type the target as MaybeGetter<MaybeHTMLElement> (new shared alias) rather than MaybeElement, because focus()/blur() and the FocusEvent event map only exist on HTMLElement - that is what lets useEventListener's HTMLElementEventMap overload hand back a typed FocusEvent instead of a cast. shared/is.ts gained isNode() for that reason too: relatedTarget is typed EventTarget | null but is always a Node, a Window, or null, and `'nodeType' in value` narrows without instanceof (which misses iframe nodes) and without a cast. The useFocus initialValue effect calls el.focus() directly instead of through the accessor, since going through the setter would make the effect read the $state it writes and loop. useElementBounding's public update() is a no-op under SSR - caught by its own SSR probe, which is the only reason that probe exists. Tests: 13+4, 15+3, 18+4, 16+3, 12+4, 14+3, 9+2. Gates: check 0/0, format clean, lint 0 errors 0 warnings, test 960/960 across 105 files, prepack publint clean, consumer probe, rune scan and path-leak scan clean.",
 			"tier": "T2"
 		},
 		{

@@ -1,7 +1,7 @@
 import type { MaybeGetter } from '../../shared/getter.ts';
 
+import { useResizeObserver } from '../../elements/useResizeObserver/index.ts';
 import { resolveGetter } from '../../shared/getter.ts';
-import { noop } from '../../shared/is.ts';
 
 /** Which CSS property the computed height is written to. */
 export type TextareaAutosizeStyleProp = 'height' | 'minHeight';
@@ -99,25 +99,17 @@ export function useTextareaAutosize(
 		if (scrollHeight > 0) options.onResize?.();
 	});
 
-	$effect(() => {
-		const textarea = resolveGetter(options.element ?? null);
-		if (!textarea || typeof ResizeObserver === 'undefined') return noop;
-
-		// Only a width change needs a re-measure: the height we set is what the
-		// observer is reporting in the first place, so reacting to it would loop.
-		// ponytail: inline observer rather than feat-017's useResizeObserver; swap
-		// it in when that lands.
-		const observer = new ResizeObserver((entries) => {
+	// Only a width change needs a re-measure: the height we set is what the
+	// observer is reporting in the first place, so reacting to it would loop.
+	useResizeObserver(
+		() => resolveGetter(options.element ?? null),
+		(entries) => {
 			const width = entries[0]?.contentRect.width ?? 0;
 			if (width === lastWidth) return;
 			lastWidth = width;
 			triggerResize();
-		});
-		observer.observe(textarea);
-		return () => {
-			observer.disconnect();
-		};
-	});
+		}
+	);
 
 	return {
 		triggerResize,
