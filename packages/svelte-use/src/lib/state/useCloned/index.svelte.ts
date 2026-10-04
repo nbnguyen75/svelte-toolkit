@@ -5,12 +5,16 @@ import { untrack } from 'svelte';
 import { resolveGetter } from '../../shared/getter.ts';
 
 /**
- * Plain projection of `T`: what `$state.snapshot` hands back after unwrapping
- * reactive proxies. For plain data this resolves to `T` itself, which is why
- * {@link useCloned} exposes it instead of asserting a snapshot back to `T`.
+ * Plain projection of `T`: what the clone hands back, after `$state.snapshot`
+ * unwraps any reactive proxy. Kept as its own name because it appears in
+ * {@link UseClonedOptions} and {@link UseClonedReturn}, and because it documents
+ * intent at the call site.
+ *
+ * Plain `T`, deliberately: Svelte's own snapshot type is not importable, and
+ * every spelling that pulls it into this position breaks the published build.
+ * See the note on `defaultClone` below.
  */
-// export type ClonedSnapshot<T> = ReturnType<typeof defaultClone<T>>; => TS7056
-export type ClonedSnapshot<T> = ReturnType<typeof $state.snapshot<T>>;
+export type ClonedSnapshot<T> = T;
 
 /** Options for {@link useCloned}. */
 export interface UseClonedOptions<T> {
@@ -41,8 +45,8 @@ export interface UseClonedReturn<T> {
  * modified.
  *
  * The source must be structured-cloneable: the default clone runs
- * `structuredClone` over `$state.snapshot(source)` (the snapshot is required
- * because `structuredClone` cannot read a reactive proxy).
+ * `structuredClone` over `$state.snapshot(source)`, and the snapshot is required
+ * because `structuredClone` cannot read a reactive proxy.
  *
  * @param source Reactive source: a value or a getter over reactive state.
  * @param options `clone` implementation and `manual` sync mode.
@@ -118,8 +122,32 @@ export function useCloned<T>(
 	};
 }
 
-
-/** `structuredClone` cannot read a reactive proxy, so unwrap first. */
-function defaultClone<T>(source: T): ClonedSnapshot<T> {
-	return structuredClone($state.snapshot(source));
+/**
+ * `structuredClone` cannot read a reactive proxy, so unwrap with
+ * `$state.snapshot` first.
+ *
+ * `$state.snapshot` returns Svelte's own snapshot type, which is declared in
+ * `svelte/types/compiler/interfaces` and so cannot be imported from `svelte`.
+ * That leaves the cast below as the only way to express "Svelte's snapshot of
+ * structured-cloneable data is that data". It is sound for this util's
+ * documented input, and `structuredClone<T>(value: T): T` is identity-typed, so
+ * the runtime result really is `T`.
+ *
+ * The alternatives all shipped broken, and none of them were caught by
+ * `svelte-check` or `publint`, both of which report success:
+ *
+ * - letting this function infer its return, or writing
+ *   `ClonedSnapshot<T> = ReturnType<typeof defaultClone<T>>`, makes TS serialize
+ *   Svelte's recursive conditional and fail with **TS7056**, which silently
+ *   suppresses the `.d.ts` for this whole module.
+ * - `ClonedSnapshot<T> = ReturnType<typeof $state.snapshot<T>>` serializes fine
+ *   but ships a rune in the public types, and a consumer has no `$state` in
+ *   scope, so every import failed with TS2304.
+ *
+ * Keeping the snapshot *out* of the type surface is also not an option: dropping
+ * it and cloning the proxy directly throws `DataCloneError`.
+ */
+function defaultClone<T>(source: T): T {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Svelte's snapshot type is unnameable and unserializable; see above. Sound for structured-cloneable input.
+	return structuredClone($state.snapshot(source)) as T;
 }

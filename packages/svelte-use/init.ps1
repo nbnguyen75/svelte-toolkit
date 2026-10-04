@@ -39,6 +39,34 @@ Invoke-Gate "Running linter (oxlint & eslint)" @("run", "lint")
 Invoke-Gate "Running unit tests (vitest)" @("run", "test")
 Invoke-Gate "Testing library packaging (prepack)" @("run", "prepack")
 
+# publint and svelte-check both pass on declarations a consumer cannot compile:
+# publint never resolves types, and svelte-check reads the source, not the
+# emitted .d.ts. Two failures reached a release that way - `useCloned` shipped a
+# `.d.ts` naming `$state` (TS2304 for every consumer) and, in an earlier
+# revision, silently emitted no `.d.ts` at all (TS7056). Gate the artifact.
+Invoke-Gate "Typechecking a consumer against dist" @(
+    "x", "tsc",
+    "--noEmit", "--ignoreConfig", "--strict", "--skipLibCheck", "false",
+    "--moduleResolution", "bundler", "--module", "esnext",
+    "--target", "es2022", "--lib", "es2022,dom",
+    "test/dist-consumer-probe.ts"
+)
+
+Write-Host ">> Scanning emitted declarations for rune identifiers..." -ForegroundColor Yellow
+# Runes are in scope only inside a .svelte.ts processed by svelte2tsx. Reaching
+# a published .d.ts means a consumer gets TS2304. Doc comments are stripped
+# first so prose mentioning `$state.snapshot` does not trip the gate.
+$runePattern = '\$(?:state|derived|effect|props|bindable|inspect)\b'
+$declarationLeaks = Get-ChildItem -Recurse -Path dist -Filter *.d.ts | ForEach-Object {
+    $stripped = [regex]::Replace((Get-Content $_.FullName -Raw), '/\*[\s\S]*?\*/|//[^\n]*', '')
+    if ($stripped -match $runePattern) { "$($_.FullName): $($Matches[0])" }
+}
+if ($declarationLeaks) {
+    $declarationLeaks | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    throw "Declaration gate failed: rune identifier(s) in published .d.ts"
+}
+Write-Host "   no rune leaks found" -ForegroundColor DarkGray
+
 Write-Host ">> Scanning for machine-specific absolute paths..." -ForegroundColor Yellow
 $leaks = & git grep -nP $pathLeakPattern -- $pathLeakGlobs 2>&1
 if ($LASTEXITCODE -eq 0 -and $leaks) {

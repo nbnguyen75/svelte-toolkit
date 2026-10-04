@@ -37,9 +37,8 @@ The source must be **structured-cloneable**. The default clone runs
 `structuredClone` over `$state.snapshot(source)`: the snapshot is required
 because `structuredClone` cannot read a reactive proxy.
 
-`value` is typed as `ClonedSnapshot<T>` — the plain projection of `T`. For plain
-data that resolves to `T` itself, so `form.value.name` types exactly as you
-expect.
+`value` is typed as `ClonedSnapshot<T>`, which is exactly `T` — so
+`form.value.name` types exactly as you expect.
 
 Source changes re-sync automatically unless `manual: true`.
 

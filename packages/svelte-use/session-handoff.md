@@ -341,14 +341,26 @@ fail to clear the bar alone, cut them rather than padding.
   `querySelector(\`script[src="${CSS.escape(url)}"]\`)`does not match a real URL,
 so its dedupe silently degrades to always-injecting. Filter the elements and
 compare resolved`src`instead (which also matches a relative`src`).
-- **`svelte-package` can silently skip a module's `index.svelte.d.ts`** and
-  `publint` still reports "All good!" — it does not resolve re-export targets.
-  Known case: `dist/state/useCloned/index.d.ts` re-exports `./index.svelte.ts`
-  but no declaration is emitted for it, so `useCloned` ships with `any` types.
-  Reproduces on a clean build. Unfixed — see `progress.md` 2026-10-03 Batch B.
-- **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists) and
-  **`--allowArbitraryExtensions`** for `.svelte.ts` → `.svelte.d.ts` resolution,
-  which is what the `dist` probes need.
+- **Neither `svelte-check` nor `publint` can see a broken published type
+  surface.** `publint` reports "All good!" on declarations a consumer cannot
+  compile, and `svelte-check` reads source, not the emitted `.d.ts`. Two distinct
+  `useCloned` failures shipped that way, so `init.ps1` / `init.sh` now
+  (a) typecheck `test/dist-consumer-probe.ts` against `dist` and (b) scan every
+  emitted `dist/**/*.d.ts` for rune identifiers after stripping comments. Keep
+  the probe's imports honest — a wrong property name there is a false failure.
+- **Svelte's snapshot type is unnameable and unserializable.** `$state.snapshot`
+  returns `Snapshot<T>`, declared in `svelte/types/compiler/interfaces`, so
+  neither `Snapshot` nor `snapshot` can be imported from `svelte` (verified on
+  `svelte@5.57.1`). Consequences: letting a helper infer it triggers **TS7056**,
+  which _silently suppresses that module's `.d.ts`_ while both tools report
+  success; and writing `ReturnType<typeof $state.snapshot<T>>` in an exported
+  type ships a rune, giving consumers **TS2304**. Keep the snapshot type out of
+  exported positions — `ClonedSnapshot<T> = T` with one documented cast at the
+  `structuredClone` call site. The snapshot step itself is **not** optional:
+  `structuredClone` on a `$state` proxy throws `DataCloneError`.
+- **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists).
+  Never point a declaration-emitting `tsc` run at the repo — it writes `.d.ts`
+  next to sources and fixtures; use `--noEmit` or an external temp dir.
 
 ## How to Resume
 
@@ -389,11 +401,10 @@ compare resolved`src`instead (which also matches a relative`src`).
 - **Recommended Next Step**: finish `feat-022` with `useBase64`,
   `useClipboardItems`, `useFileDialog`, and `useImage` (the last as a
   `docs/recipes.md` row, not a module); `useCssVar.observe` still waits for
-  `feat-017`'s `useMutationObserver`. Two things to pick up first because they are
-  independent of feat-022 and both are cheap:
-  1. the `useCloned` `dist` declaration bug above (a published-build defect), and
-  2. `src/lib/state/useStepper/index.svelte.ts:8` and
-     `useOffsetPagination/index.svelte.ts:43-44`, which emit
-     `state_referenced_locally` warnings during `vitest` (they do not fail
-     `svelte-check`, which stays 0/0).
-     `.\init.ps1` is currently green.
+  `feat-017`'s `useMutationObserver`. One cheap thing left to pick up, because
+  it is independent of feat-022:
+  1.  `src/lib/state/useStepper/index.svelte.ts:8` and
+      `useOffsetPagination/index.svelte.ts:43-44`, which emit
+      `state_referenced_locally` warnings during `vitest` (they do not fail
+      `svelte-check`, which stays 0/0).
+      `.\init.ps1` is currently green.
