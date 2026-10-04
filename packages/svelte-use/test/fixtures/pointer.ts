@@ -1,11 +1,12 @@
 /**
- * Pointer event factory for jsdom.
+ * Pointer, touch, and drag event factories for jsdom.
  *
  * jsdom implements `MouseEvent` but not `PointerEvent`, and the gesture utils
  * read pointer-only fields (`x`/`y`, `pointerId`, `pointerType`, `pressure`).
  * Building them on `MouseEvent` keeps the real propagation path - capture,
  * bubbling, `composedPath()` - so tests exercise the same listener wiring a
- * browser would.
+ * browser would. `DragEvent` and `DataTransfer` are missing from jsdom outright,
+ * so those get the same treatment plus a structural `dataTransfer`.
  */
 export interface PointerInit {
 	/** Client/viewport x, also mirrored to `x`. */
@@ -100,4 +101,46 @@ export function touchEvent(
 		configurable: true
 	});
 	return event;
+}
+
+/** A dropped file. Name plus MIME type is all a drop zone inspects. */
+export function dropFile(name: string, type = 'text/plain'): File {
+	return new File(['dropped'], name, { type });
+}
+
+export interface DragInit {
+	/** Dropped files. `items` is derived from them, one item per file. */
+	files?: File[];
+	/**
+	 * Item MIME types, when they should not follow the files. Safari exposes
+	 * `items` but not `files` mid-drag, and that is the case this exists for.
+	 */
+	types?: readonly string[];
+	/** Omit `dataTransfer` entirely, as a drag of in-page data may. */
+	withoutDataTransfer?: boolean;
+}
+
+/**
+ * A `DragEvent` carrying `dataTransfer`.
+ *
+ * jsdom implements `File` but neither `DragEvent` nor `DataTransfer`, so this is a
+ * `MouseEvent` with a `dataTransfer` bolted on - the same shape as
+ * {@link pointerEvent}, for the same reason. Dispatch it rather than returning
+ * it for inspection: `dropEffect` is only meaningful as a write, and
+ * `defaultPrevented` only after the handlers have run.
+ */
+export function dragEvent(type: string, init: DragInit = {}): DragEvent {
+	const event = new MouseEvent(type, { bubbles: true, cancelable: true });
+	if (!init.withoutDataTransfer) {
+		const types = init.types ?? (init.files ?? []).map((file) => file.type);
+		Object.defineProperty(event, 'dataTransfer', {
+			value: {
+				dropEffect: 'none',
+				files: init.files ?? [],
+				items: types.map((type) => ({ kind: 'file', type }))
+			},
+			configurable: true
+		});
+	}
+	return event as DragEvent;
 }

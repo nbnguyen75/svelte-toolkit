@@ -124,6 +124,15 @@ export function isTouchEvent(event: Event): event is TouchEvent {
 	return 'touches' in event;
 }
 
+/**
+ * True for a `DragEvent`, by the same reasoning as {@link isMouseEvent}.
+ *
+ * `dataTransfer` is the marker: no other event interface in the DOM carries one.
+ */
+export function isDragEvent(event: Event): event is DragEvent {
+	return 'dataTransfer' in event;
+}
+
 /** Does nothing. Useful as a default callback. */
 export function noop(): void {
 	/* intentionally empty */

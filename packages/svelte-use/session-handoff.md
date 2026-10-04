@@ -3,14 +3,16 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **46 util modules shipped**:
-  - `browser/`: `useEventListener`, `useDark`, `useClipboard`, `useSmoothScroll`,
-    `useBreakpoints`, `usePreferredLanguages`,
-    `usePreferredReducedTransparency`, `useTextDirection`, `useScroll`,
-    `useMouse`, `useMousePressed`, `useScrollLock`, `useElementHover`,
-    `onKeyStroke`, `onStartTyping`, `useKeyModifier`, `useMagicKeys`,
-    `useTextareaAutosize`, `useColorMode`, `useCssSupports`, `useCssVar`,
-    `useObjectUrl`, `useScriptTag`, `useStyleTag`
+- Pure library package (no SvelteKit shell). **57 util modules shipped**:
+  - `browser/` (32): `onClickOutside`, `onKeyStroke`, `onLongPress`,
+    `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
+    `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
+    `useDropZone`, `useElementHover`, `useEventListener`, `useFileDialog`,
+    `useKeyModifier`, `useMagicKeys`, `useMouse`, `useMousePressed`,
+    `useObjectUrl`, `usePointer`, `usePreferredLanguages`,
+    `usePreferredReducedTransparency`, `useScriptTag`, `useScroll`,
+    `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
+    `useTextareaAutosize`, `useTextDirection`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -20,13 +22,15 @@
     `useIntersectionObserver`, `useElementVisibility`, `useElementBounding`,
     `useFocus`, `useFocusWithin`
     (new category, feat-017 - **done**, Batches A-D)
-  - `shared/`: `is.ts` (15 guard/predicate exports), `getter.ts`, `units.ts`,
+  - `shared/`: `is.ts` (19 guard/predicate exports), `getter.ts`, `units.ts`,
     `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
     `resolveElements`) — internal helpers, **not** utils.
-- Suite: **1124 tests / 115 files**. `dist` builds, `publint` clean.
+- Suite: **1156 tests / 117 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 16 features done, 9 todo; 66 functions done, 63 todo.
+  `package:` markers. 16 features done, 9 todo; 67 functions done, 62 todo. The `features` array
+  is physically ordered by tier (T1, then T2, then niche, then extra), historical
+  order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -42,15 +46,27 @@
   `useClipboardItems` and `useImage` were **deleted from `feature_list.json`**, not
   marked with a status — the file's `note` tracks only what ships, so both are
   `docs/recipes.md` rows now.
-  Roadmap order is by tier, not by feature id. Tier 1 left:
+  Roadmap order is by tier, not by feature id, and the array is now stored in
+  that order so the remaining work reads top-down.
+- **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
+  28 functions left across 9 features, in this order:
+  `feat-018` (`useFullscreen`, `usePageLeave`, `useWindowFocus`), `feat-019`
+  (`useInfiniteScroll`, `useMouseInElement`), `feat-020` (`onElementRemoval`,
+  `useElementByPoint`, `usePointerLock`, `usePointerSwipe`), `feat-023` (8
+  network ones), `feat-024` (`useGeolocation`, `useIdle`, `usePermission`),
+  `feat-026` (`useWakeLock`), `feat-027` (`useClamp`, `usePrecision`,
+  `useToNumber`), `feat-032` (`useId`, `useControllableState`), `feat-011`
+  (`useNow`, `useTimestamp`). Then niche (34).
+- **Correction to the last session's claim that "one T2 remains in `feat-020`":**
+  it counted only the entries carrying an explicit `tier`. `feat-020` has four
+  more, all untiered so they inherit the feature's T2 - `onElementRemoval`,
+  `useElementByPoint`, `usePointerLock`, `usePointerSwipe`. Count the effective
+  tier (`fn.tier ?? feature.tier`), not the explicit field.
 - **`feat-017` elements is done** — Batches A-D shipped
   `useMutationObserver`, `useResizeObserver`, `useIntersectionObserver`,
   `useElementVisibility`, `useElementBounding`, `useFocus` and `useFocusWithin`
   (2026-10-04) plus the shared `shared/element.ts` resolver every element util in
-  this feature reuses. Tier 1 left:
-- **`feat-020`'s `onClickOutside` / `onLongPress` are the only T1 functions left.**
-  Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`),
-  which the shipped observers unblocked.
+  this feature reuses.
   - **Decided, do not re-litigate:** the three observers are _not_ unified behind
     a shared helper (their return shapes genuinely differ), there is no
     `usePausable` (`useIntersectionObserver` inlines `pause`/`resume`/`isActive`),
@@ -73,12 +89,13 @@
     shipped; do not re-port it. Its inline `MutationObserver` watches `document`,
     not an element, and stays that way on purpose (see its `ponytail:` comment).
 - `feat-019` shipped 5 of its 7 functions. `useInfiniteScroll` and
-  `useMouseInElement` stay `todo` and land with **feat-017**, which owns the
-  observers they wrap (`useIntersectionObserver`, `useResizeObserver`,
-  `useMutationObserver`). The reason and the Svelte-native recipe are in
-  `docs/recipes.md` § "Scroll & pointer" — do not port them on an inline
-  observer, and do not add `getBoundingClientRect()` per `pointermove` to
-  `useMouseInElement`.
+  `useMouseInElement` stay `todo`. They were parked behind **feat-017`, which
+owns the observers they wrap (`useIntersectionObserver`, `useResizeObserver`,
+`useMutationObserver`) - feat-017 is now **done**, so nothing blocks them any
+more and they are next in tier order after feat-018. The reason and the
+Svelte-native recipe are in
+`docs/recipes.md`§ "Scroll & pointer" — do not port them on an inline
+observer, and do not add`getBoundingClientRect()`per`pointermove`to`useMouseInElement`.
 - `feat-015` (async + history) is tier **`niche`** — deliberately last, not
   next. `feat-012` is `useTimeAgo` only, tier T2.
 - `useNow` / `useTimestamp` are `todo` again (tier T2, on `feat-011`) after
@@ -235,8 +252,11 @@ fail to clear the bar alone, cut them rather than padding.
 
 ## Harness Notes (learned this session — do not rediscover)
 
-- **`perfectionist/sort-interfaces` orders `trigger` before `value`**, and
-  `perfectionist/sort-object-types` orders `set` before `get`. Run `lint:fix`
+- **`perfectionist/sort-interfaces` sorts by LINE LENGTH, descending** - not
+  alphabetically. `checkValidity` (56 chars) sorts before `dataTypes` (35), which
+  is why `useDropZone`'s options read callbacks-first and `multiple` last.
+  Hand-sorting is a waste: `bunx eslint <path> --fix` places them correctly, and
+  `perfectionist/sort-object-types` does the same for object types. Run `lint:fix`
   before `format:fix`; the autofix reorders code and leaves formatting to `oxfmt`.
 - **PowerShell `ConvertTo-Json` / `Set-Content` corrupts `feature_list.json`**
   (mangles indentation and backslash escapes). Rewrite it with a `node -e` script
@@ -342,6 +362,12 @@ fail to clear the bar alone, cut them rather than padding.
   whitespace (and switches tabs to spaces). Splice by line number / targeted edit,
   then check `git diff --stat` before moving on. This supersedes the
   `ConvertTo-Json` warning above for this file.
+- **To reorder the `features` array, splice the text and never the JSON.** Parse
+  it to _decide_ the new order, then move whole block strings and re-`JSON.parse`
+  to prove it still parses; tabs and LF endings are easy to lose. Prove it was
+  order-only with a differential script comparing the sorted
+  `id:functionCount:status` projection against `git show HEAD:...`. A 25-entry
+  reorder is a 320-line diff by nature - that is expected, not a mistake.
 - **jsdom has no `ResizeObserver` and no `KeyboardEvent` constructor in the
   `node` environment.** Use `MockResizeObserver.install()` from
   `test/fixtures/observers.ts`, and stub `scrollHeight` with
@@ -415,16 +441,16 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-020` Batch D is **done** - `useSwipe` shipped,
-  joining `onClickOutside` / `onLongPress`, `useDraggable`, and `usePointer`.
-  Every T1 function in the list is done. Counts: 25 features (16 done / 9 todo),
-  129 functions (66 done / 63 todo).
-- **Recommended Next Step**: one T2 remains in `feat-020`:
-  - `useDropZone` - drag-and-drop file and element targets. `useDraggable` and
-    `usePointer` have already unblocked its dragging half.
-    Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`).
-    Four conventions the last four batches settled, worth reusing rather than
-    re-deriving:
+- **Current Objective**: `feat-020` Batch E is **done** - `useDropZone` shipped,
+  joining `onClickOutside` / `onLongPress`, `useDraggable`, `usePointer`, and
+  `useSwipe`. Every T1 function in the list is done. Counts: 25 features
+  (16 done / 9 todo), 129 functions (67 done / 62 todo). The `features` array is
+  now stored in tier order.
+- **Recommended Next Step**: `feat-018`, the first feature in the T2 block
+  (`useFullscreen`, `usePageLeave`, `useWindowFocus`), then `feat-019`
+  (`useInfiniteScroll`, `useMouseInElement`), then `feat-020`'s remaining four.
+  Five conventions the last five batches settled, worth reusing rather than
+  re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`) and
     `Position` live in `shared/`; `bindListener` lives in
     `useEventListener/bind.ts`. Use them; do not add a private copy.

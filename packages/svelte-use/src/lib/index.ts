@@ -11,6 +11,7 @@ export * from './browser/useCssSupports/index.ts';
 export * from './browser/useCssVar/index.ts';
 export * from './browser/useDark/index.ts';
 export * from './browser/useDraggable/index.ts';
+export * from './browser/useDropZone/index.ts';
 export * from './browser/useElementHover/index.ts';
 export * from './browser/useEventListener/index.ts';
 export * from './browser/useFileDialog/index.ts';
