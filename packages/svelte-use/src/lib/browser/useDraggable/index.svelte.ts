@@ -1,14 +1,14 @@
 import type { MaybeElement } from '../../shared/element.ts';
 import type { MaybeGetter } from '../../shared/getter.ts';
+import type { Position } from '../../shared/types.ts';
 
 import { resolveGetter } from '../../shared/getter.ts';
 import { isPointerEvent, isBrowser, noop } from '../../shared/is.ts';
+import { bindListener } from '../useEventListener/bind.ts';
 
-/** A point in pixels. */
-export interface Position {
-	x: number;
-	y: number;
-}
+// Re-exported so `Position` stays public through this module's surface, where it
+// has always been visible, now that the declaration itself lives in `shared/`.
+export type { Position };
 
 /** Pointer kinds a drag can be limited to. */
 export type DragPointerType = 'mouse' | 'pen' | 'touch';
@@ -129,22 +129,6 @@ function clampContainerScroll(container: Element): void {
 		container.scrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
 	if (container.scrollTop > container.scrollHeight - container.clientHeight)
 		container.scrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-}
-
-/**
- * Attach and detach by hand rather than through `useEventListener`, for one
- * reason: `passive` is fixed when a listener is bound, so it has to be read
- * inside the effect that owns the binding or `preventDefault` would stop working
- * the moment it was switched on.
- */
-function bind(
-	target: EventTarget,
-	type: string,
-	handler: (event: Event) => void,
-	options: AddEventListenerOptions
-): () => void {
-	target.addEventListener(type, handler, options);
-	return () => target.removeEventListener(type, handler, options);
 }
 
 /**
@@ -302,10 +286,10 @@ export function useDraggable(
 			passive: !resolveGetter(preventDefault)
 		};
 		const detachers = [
-			bind(pressTarget, 'pointerdown', start, listenerOptions),
-			bind(moveTarget, 'pointermove', move, listenerOptions),
-			bind(moveTarget, 'pointerup', end, listenerOptions),
-			bind(moveTarget, 'pointercancel', end, listenerOptions)
+			bindListener(pressTarget, 'pointerdown', start, listenerOptions),
+			bindListener(moveTarget, 'pointermove', move, listenerOptions),
+			bindListener(moveTarget, 'pointerup', end, listenerOptions),
+			bindListener(moveTarget, 'pointercancel', end, listenerOptions)
 		];
 		return () => {
 			for (const detach of detachers) detach();

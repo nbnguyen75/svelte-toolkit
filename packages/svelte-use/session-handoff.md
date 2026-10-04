@@ -23,10 +23,10 @@
   - `shared/`: `is.ts` (15 guard/predicate exports), `getter.ts`, `units.ts`,
     `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
     `resolveElements`) — internal helpers, **not** utils.
-- Suite: **960 tests / 105 files**. `dist` builds, `publint` clean.
+- Suite: **1124 tests / 115 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 16 features done, 9 todo; 61 functions done, 68 todo.
+  `package:` markers. 16 features done, 9 todo; 66 functions done, 63 todo.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
 - `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
@@ -415,29 +415,28 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-020` Batch C is **done** - `usePointer` shipped,
-  joining Batch A's `onClickOutside` / `onLongPress` and Batch B's
-  `useDraggable`. Every T1 function in the list is done. Counts: 25 features
-  (16 done / 9 todo), 132 functions (65 done / 64 todo).
-- **Recommended Next Step**: `feat-020`'s remaining T2s, in this order:
-  1.  `useSwipe` - left/right/up/down with thresholds. VueUse's is a wrapper
-      over `usePointer`-shaped state, so Batch C is the warm-up.
-  2.  `useDropZone` - the last T2, and `useDraggable` plus `usePointer` have
-      already unblocked its dragging half.
-  3.  Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`),
-      which feat-017 unblocked.
-      Three conventions the last three batches settled, worth reusing rather than
-      re-deriving:
-  - `isPointerEvent` now lives in `shared/is.ts` - use it, do not re-add a
-    local copy.
-  - A `$derived` passed where a _value_ is wanted produces
-    `state_referenced_locally` warnings and silently freezes the value
-    (`useDraggable`'s `passive`). Bind listeners by hand when an option has to
-    be read at bind time.
+- **Current Objective**: `feat-020` Batch D is **done** - `useSwipe` shipped,
+  joining `onClickOutside` / `onLongPress`, `useDraggable`, and `usePointer`.
+  Every T1 function in the list is done. Counts: 25 features (16 done / 9 todo),
+  129 functions (66 done / 63 todo).
+- **Recommended Next Step**: one T2 remains in `feat-020`:
+  - `useDropZone` - drag-and-drop file and element targets. `useDraggable` and
+    `usePointer` have already unblocked its dragging half.
+    Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`).
+    Four conventions the last four batches settled, worth reusing rather than
+    re-deriving:
+  - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`) and
+    `Position` live in `shared/`; `bindListener` lives in
+    `useEventListener/bind.ts`. Use them; do not add a private copy.
+  - **An option must not get a `$derived` of its own** if it is a getter. A
+    derived with no reactive dependency caches its first value forever and
+    silently stops updating - `useSwipe`'s `threshold` was exactly this. Read the
+    option inside a derived that depends on real state.
+  - A `$derived` or `$state` passed where a _value_ is wanted warns
+    (`state_referenced_locally`) and freezes it. Bind by hand when an option must
+    be read at bind time, like `passive` in `useDraggable` and `useSwipe`.
   - `createBox` from `test/fixtures/box.svelte.ts` is how a rune-free
-    `.test.ts` drives a reactive source. A plain `let` will not re-run an
-    effect.
-    One cheap thing left to pick up, independent of all of the above:
+    `.test.ts` drives a reactive source. A plain `let` will not re-run anything.
   - `src/lib/state/useStepper/index.svelte.ts:8` and
     `useOffsetPagination/index.svelte.ts:43-44`, which emit
     `state_referenced_locally` warnings during `vitest` (they do not fail

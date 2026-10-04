@@ -3,7 +3,7 @@ import type { MaybeGetter } from '../../shared/getter.ts';
 import { untrack } from 'svelte';
 
 import { resolveGetter } from '../../shared/getter.ts';
-import { isBrowser, isIOS } from '../../shared/is.ts';
+import { isTouchEvent, isBrowser, isIOS } from '../../shared/is.ts';
 
 /** Element, window, or document whose scrolling is locked. */
 export type UseScrollLockTarget = HTMLElement | SVGElement | Window | Document | null | undefined;
@@ -20,11 +20,6 @@ export interface UseScrollLockReturn {
 /** `Document` guard. `HTMLElement` has a `nodeType` too, so the value is the test. */
 function isDocumentNode(target: object): target is Document {
 	return 'nodeType' in target && target.nodeType === 9;
-}
-
-/** `TouchEvent` guard, so a `touchmove` can be read without an assertion. */
-function isTouchEvent(event: Event): event is TouchEvent {
-	return 'touches' in event;
 }
 
 /**

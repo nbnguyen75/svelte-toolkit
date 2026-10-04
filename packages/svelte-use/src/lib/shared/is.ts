@@ -107,6 +107,23 @@ export function isPointerEvent(event: Event): event is PointerEvent {
 	return 'pointerId' in event;
 }
 
+/**
+ * True for a `MouseEvent`.
+ *
+ * Same reasoning as {@link isPointerEvent}: a listener helper typed against a
+ * bare `EventTarget` hands back a plain `Event`, but the DOM guarantees the
+ * concrete type for a given name. Probed structurally — `instanceof` misses
+ * events from another realm (an iframe) and cannot narrow.
+ */
+export function isMouseEvent(event: Event): event is MouseEvent {
+	return 'clientX' in event;
+}
+
+/** True for a `TouchEvent`, by the same reasoning as {@link isMouseEvent}. */
+export function isTouchEvent(event: Event): event is TouchEvent {
+	return 'touches' in event;
+}
+
 /** Does nothing. Useful as a default callback. */
 export function noop(): void {
 	/* intentionally empty */

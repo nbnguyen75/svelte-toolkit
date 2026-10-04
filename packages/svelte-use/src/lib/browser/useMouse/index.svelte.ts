@@ -1,7 +1,7 @@
 import type { MaybeGetter } from '../../shared/getter.ts';
 
 import { resolveGetter } from '../../shared/getter.ts';
-import { isBrowser } from '../../shared/is.ts';
+import { isMouseEvent, isTouchEvent, isBrowser } from '../../shared/is.ts';
 import { useEventListener } from '../useEventListener/index.svelte.ts';
 
 /** Coordinate space the reported position is expressed in. */
@@ -90,21 +90,10 @@ const EXTRACTORS: Record<UseMouseCoordType, UseMouseEventExtractor> = {
 
 /**
  * `useEventListener`'s generic overload hands back a plain `Event`, but the DOM
- * guarantees the concrete type for a given event name: `mousemove` is always a
- * `MouseEvent`, `touchstart` always a `TouchEvent`.
- *
- * Recovering that needs either an assertion or a predicate, and both are suspect
- * on their own: `in` narrowing adds the key to the type without its numeric
- * fields, and `instanceof` is banned for being cross-realm unsafe. A predicate
- * keeps the narrowing honest at the one place the event name guarantees it.
+ * guarantees the concrete type for a given event name. `isMouseEvent` and
+ * `isTouchEvent` live in `shared/is.ts`, where the reasoning behind the
+ * predicate lives with them.
  */
-function isMouseEvent(event: Event): event is MouseEvent {
-	return 'clientX' in event;
-}
-
-function isTouchEvent(event: Event): event is TouchEvent {
-	return 'touches' in event;
-}
 
 /**
  * Reactive pointer position, following the mouse or the first touch. Must be

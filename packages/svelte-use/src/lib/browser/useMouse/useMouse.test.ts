@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mountUtil } from '../../../../test/fixtures/mount.ts';
+import { touchEvent } from '../../../../test/fixtures/pointer.ts';
 import type { UseMouseOptions } from './index.ts';
 import { useMouse } from './index.ts';
 
@@ -31,29 +32,6 @@ function mouse(type: string, coords: Partial<Record<Coordinate, number>> = {}): 
 		if (value === undefined) continue;
 		Object.defineProperty(event, key, { value });
 	}
-	return event;
-}
-
-/** jsdom ships `TouchEvent` but no `Touch` constructor, so a touch is a coordinate bag. */
-function touch(
-	type: string,
-	coords: { clientX: number; clientY: number; pageX?: number; pageY?: number }
-): TouchEvent {
-	const event = new TouchEvent(type, { bubbles: true });
-	Object.defineProperty(event, 'touches', {
-		value: [
-			{
-				identifier: 0,
-				target: document.body,
-				clientX: coords.clientX,
-				clientY: coords.clientY,
-				pageX: coords.pageX ?? coords.clientX,
-				pageY: coords.pageY ?? coords.clientY,
-				screenX: coords.clientX,
-				screenY: coords.clientY
-			}
-		]
-	});
 	return event;
 }
 
@@ -136,7 +114,7 @@ describe('useMouse', () => {
 		it('ignores a touch for movement, which has no touch equivalent', async () => {
 			const { api, dispose } = await mountMouse({ type: 'movement' });
 			try {
-				window.dispatchEvent(touch('touchstart', { clientX: 50, clientY: 60 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 50, clientY: 60 }]));
 				expect(api.x).toBe(0);
 				expect(api.sourceType).toBeNull();
 			} finally {
@@ -186,7 +164,7 @@ describe('useMouse', () => {
 				expect(api.sourceType).toBe('mouse');
 
 				window.dispatchEvent(
-					touch('touchmove', { clientX: 30, clientY: 40, pageX: 300, pageY: 400 })
+					touchEvent('touchmove', [{ clientX: 30, clientY: 40, pageX: 300, pageY: 400 }])
 				);
 				expect(api.sourceType).toBe('touch');
 				expect(api.x).toBe(300);
@@ -225,7 +203,7 @@ describe('useMouse', () => {
 		it('skips touch listeners when touch is false', async () => {
 			const { api, dispose } = await mountMouse({ touch: false });
 			try {
-				window.dispatchEvent(touch('touchstart', { clientX: 90, clientY: 90 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 90, clientY: 90 }]));
 				expect(api.sourceType).toBeNull();
 			} finally {
 				await dispose();
@@ -235,7 +213,7 @@ describe('useMouse', () => {
 		it('keeps the position on touchend by default', async () => {
 			const { api, dispose } = await mountMouse();
 			try {
-				window.dispatchEvent(touch('touchstart', { clientX: 12, clientY: 34 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 12, clientY: 34 }]));
 				window.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
 				expect(api.x).toBe(12);
 			} finally {
@@ -246,7 +224,7 @@ describe('useMouse', () => {
 		it('resets on touchend only when asked', async () => {
 			const { api, dispose } = await mountMouse({ resetOnTouchEnds: true });
 			try {
-				window.dispatchEvent(touch('touchstart', { clientX: 12, clientY: 34 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 12, clientY: 34 }]));
 				window.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
 				expect(api.x).toBe(0);
 				expect(api.y).toBe(0);
@@ -262,7 +240,7 @@ describe('useMouse', () => {
 			});
 			try {
 				expect(api.x).toBe(5);
-				window.dispatchEvent(touch('touchstart', { clientX: 12, clientY: 34 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 12, clientY: 34 }]));
 				window.dispatchEvent(new TouchEvent('touchend', { bubbles: true }));
 				expect(api.x).toBe(5);
 				expect(api.y).toBe(6);
@@ -372,7 +350,7 @@ describe('useMouse', () => {
 		it('does not credit a touch to the mouse scroll baseline', async () => {
 			const { api, dispose } = await mountMouse();
 			try {
-				window.dispatchEvent(touch('touchstart', { clientX: 10, clientY: 20 }));
+				window.dispatchEvent(touchEvent('touchstart', [{ clientX: 10, clientY: 20 }]));
 				stubScroll(0, 100);
 				window.dispatchEvent(new Event('scroll'));
 

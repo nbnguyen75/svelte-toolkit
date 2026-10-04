@@ -3,25 +3,7 @@ import type { MaybeGetter } from '../../shared/getter.ts';
 import { resolveGetter } from '../../shared/getter.ts';
 import { isBrowser } from '../../shared/is.ts';
 
-const noop = () => {};
-
-/**
- * Attach `handler` to `el` and return the matching detach function. Returns a
- * no-op when there is nothing to attach, so the `$effect` cleanup below is
- * always callable (an `undefined` return trips `consistent-return`).
- */
-function bindListener(
-	el: EventTarget | null | undefined,
-	event: string,
-	handler: (e: Event) => void,
-	options: boolean | AddEventListenerOptions | undefined
-): () => void {
-	if (!el) return noop;
-	el.addEventListener(event, handler, options);
-	return () => {
-		el.removeEventListener(event, handler, options);
-	};
-}
+import { bindListener } from './bind.ts';
 
 /**
  * Listen for a `Window` event. No-op during SSR or when the target is nullish.

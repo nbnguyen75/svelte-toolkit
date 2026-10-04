@@ -27,6 +27,7 @@ export * from './browser/useScroll/index.ts';
 export * from './browser/useScrollLock/index.ts';
 export * from './browser/useSmoothScroll/index.ts';
 export * from './browser/useStyleTag/index.ts';
+export * from './browser/useSwipe/index.ts';
 export * from './browser/useTextDirection/index.ts';
 export * from './browser/useTextareaAutosize/index.ts';
 // * Shared

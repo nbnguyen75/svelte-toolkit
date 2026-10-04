@@ -65,3 +65,39 @@ export function pointerEvent(type: string, init: PointerInit = {}): PointerEvent
 	});
 	return event as PointerEvent;
 }
+
+/** A point in client/page/screen space, which is all `useSwipe` reads. */
+export interface TouchCoords {
+	clientX: number;
+	clientY: number;
+	pageX?: number;
+	pageY?: number;
+}
+
+/**
+ * A `TouchEvent` carrying `touches`.
+ *
+ * jsdom ships the `TouchEvent` constructor but no `Touch` one, so a touch is a
+ * coordinate bag. Pass an empty array for "no finger down" — `touchcancel` and
+ * the empty-`touches` cases both need it.
+ */
+export function touchEvent(
+	type: string,
+	touches: TouchCoords[] = [{ clientX: 0, clientY: 0 }]
+): TouchEvent {
+	const event = new TouchEvent(type, { bubbles: true, cancelable: true });
+	Object.defineProperty(event, 'touches', {
+		value: touches.map((coords) => ({
+			identifier: 0,
+			target: document.body,
+			clientX: coords.clientX,
+			clientY: coords.clientY,
+			pageX: coords.pageX ?? coords.clientX,
+			pageY: coords.pageY ?? coords.clientY,
+			screenX: coords.clientX,
+			screenY: coords.clientY
+		})),
+		configurable: true
+	});
+	return event;
+}
