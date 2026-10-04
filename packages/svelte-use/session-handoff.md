@@ -415,19 +415,29 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-020` Batch B is **done** - `useDraggable`
-  shipped, joining Batch A's `onClickOutside` and `onLongPress`. Every T1
-  function in the list is done. Counts: 25 features (16 done / 9 todo),
-  132 functions (64 done / 65 todo).
+- **Current Objective**: `feat-020` Batch C is **done** - `usePointer` shipped,
+  joining Batch A's `onClickOutside` / `onLongPress` and Batch B's
+  `useDraggable`. Every T1 function in the list is done. Counts: 25 features
+  (16 done / 9 todo), 132 functions (65 done / 64 todo).
 - **Recommended Next Step**: `feat-020`'s remaining T2s, in this order:
-  1.  `usePointer` - pressure / tilt / pointer type. `test/fixtures/pointer.ts`
-      already exists from Batch A, and so does `test/fixtures/rect.ts` from
-      Batch B.
-  2.  `useSwipe`, then `useDropZone` - `useDraggable` has now unblocked
-      `useDropZone`'s dragging half.
+  1.  `useSwipe` - left/right/up/down with thresholds. VueUse's is a wrapper
+      over `usePointer`-shaped state, so Batch C is the warm-up.
+  2.  `useDropZone` - the last T2, and `useDraggable` plus `usePointer` have
+      already unblocked its dragging half.
   3.  Then `feat-019`'s two holdouts (`useInfiniteScroll`, `useMouseInElement`),
       which feat-017 unblocked.
-      Two cheap things independent of all of the above:
+      Three conventions the last three batches settled, worth reusing rather than
+      re-deriving:
+  - `isPointerEvent` now lives in `shared/is.ts` - use it, do not re-add a
+    local copy.
+  - A `$derived` passed where a _value_ is wanted produces
+    `state_referenced_locally` warnings and silently freezes the value
+    (`useDraggable`'s `passive`). Bind listeners by hand when an option has to
+    be read at bind time.
+  - `createBox` from `test/fixtures/box.svelte.ts` is how a rune-free
+    `.test.ts` drives a reactive source. A plain `let` will not re-run an
+    effect.
+    One cheap thing left to pick up, independent of all of the above:
   - `src/lib/state/useStepper/index.svelte.ts:8` and
     `useOffsetPagination/index.svelte.ts:43-44`, which emit
     `state_referenced_locally` warnings during `vitest` (they do not fail

@@ -15,6 +15,16 @@ export interface PointerInit {
 	pointerId?: number;
 	pointerType?: string;
 	pressure?: number;
+	/** Tilt from the X axis, in degrees. */
+	tiltX?: number;
+	/** Tilt from the Y axis, in degrees. */
+	tiltY?: number;
+	/** Contact geometry width, in CSS pixels. `1` is what a mouse reports. */
+	width?: number;
+	/** Contact geometry height, in CSS pixels. `1` is what a mouse reports. */
+	height?: number;
+	/** Barrel rotation, in degrees. */
+	twist?: number;
 	/** `0` marks a keyboard-synthesised click, as the platform reports it. */
 	detail?: number;
 	isPrimary?: boolean;
@@ -46,6 +56,11 @@ export function pointerEvent(type: string, init: PointerInit = {}): PointerEvent
 		pointerId: { value: init.pointerId ?? 1, configurable: true },
 		pointerType: { value: init.pointerType ?? 'mouse', configurable: true },
 		pressure: { value: init.pressure ?? (buttons ? 0.5 : 0), configurable: true },
+		tiltX: { value: init.tiltX ?? 0, configurable: true },
+		tiltY: { value: init.tiltY ?? 0, configurable: true },
+		width: { value: init.width ?? 1, configurable: true },
+		height: { value: init.height ?? 1, configurable: true },
+		twist: { value: init.twist ?? 0, configurable: true },
 		isPrimary: { value: init.isPrimary ?? true, configurable: true }
 	});
 	return event as PointerEvent;

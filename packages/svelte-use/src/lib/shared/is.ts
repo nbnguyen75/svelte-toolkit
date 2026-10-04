@@ -91,6 +91,22 @@ export function isNode(value: EventTarget | null | undefined): value is Node {
 	return !!value && 'nodeType' in value;
 }
 
+/**
+ * True for a `PointerEvent`.
+ *
+ * A listener helper typed against a bare `EventTarget` hands back a plain
+ * `Event`, because only `Window`, `Document` and `HTMLElement` carry an event
+ * map - `EventTarget` does not. The DOM still guarantees the concrete type for
+ * a given name (`pointermove` is always a `PointerEvent`), so the narrowing is
+ * worth keeping honest here rather than asserting it at each call site.
+ *
+ * Probed structurally: `instanceof` misses events from another realm (an
+ * iframe) and cannot narrow.
+ */
+export function isPointerEvent(event: Event): event is PointerEvent {
+	return 'pointerId' in event;
+}
+
 /** Does nothing. Useful as a default callback. */
 export function noop(): void {
 	/* intentionally empty */

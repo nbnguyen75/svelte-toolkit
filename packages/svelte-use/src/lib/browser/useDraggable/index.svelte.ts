@@ -2,7 +2,7 @@ import type { MaybeElement } from '../../shared/element.ts';
 import type { MaybeGetter } from '../../shared/getter.ts';
 
 import { resolveGetter } from '../../shared/getter.ts';
-import { isBrowser, noop } from '../../shared/is.ts';
+import { isPointerEvent, isBrowser, noop } from '../../shared/is.ts';
 
 /** A point in pixels. */
 export interface Position {
@@ -121,17 +121,6 @@ export interface UseDraggableReturn {
 	readonly x: number;
 	/** Vertical offset, in pixels. */
 	readonly y: number;
-}
-
-/**
- * `useEventListener` hands back a plain `Event`, but the DOM guarantees the
- * concrete type for a given name: `pointermove` is always a `PointerEvent`.
- * Recovering that needs an assertion or a predicate, and `instanceof` is banned
- * for being cross-realm unsafe, so the narrowing is a predicate - at the one
- * place the event name already guarantees it.
- */
-function isPointerEvent(event: Event): event is PointerEvent {
-	return 'pointerId' in event;
 }
 
 /** Keeps a container that has been scrolled past its content from staying there. */

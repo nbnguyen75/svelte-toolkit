@@ -19,6 +19,7 @@ export * from './browser/useMagicKeys/index.ts';
 export * from './browser/useMouse/index.ts';
 export * from './browser/useMousePressed/index.ts';
 export * from './browser/useObjectUrl/index.ts';
+export * from './browser/usePointer/index.ts';
 export * from './browser/usePreferredLanguages/index.ts';
 export * from './browser/usePreferredReducedTransparency/index.ts';
 export * from './browser/useScriptTag/index.ts';
