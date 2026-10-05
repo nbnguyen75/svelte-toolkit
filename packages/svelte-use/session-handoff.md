@@ -3,16 +3,16 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **57 util modules shipped**:
-  - `browser/` (32): `onClickOutside`, `onKeyStroke`, `onLongPress`,
+- Pure library package (no SvelteKit shell). **60 util modules shipped**:
+  - `browser/` (35): `onClickOutside`, `onKeyStroke`, `onLongPress`,
     `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
     `useDropZone`, `useElementHover`, `useEventListener`, `useFileDialog`,
-    `useKeyModifier`, `useMagicKeys`, `useMouse`, `useMousePressed`,
-    `useObjectUrl`, `usePointer`, `usePreferredLanguages`,
-    `usePreferredReducedTransparency`, `useScriptTag`, `useScroll`,
-    `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
-    `useTextareaAutosize`, `useTextDirection`
+    `useFullscreen`, `useKeyModifier`, `useMagicKeys`, `useMouse`,
+    `useMousePressed`, `useObjectUrl`, `usePageLeave`, `usePointer`,
+    `usePreferredLanguages`, `usePreferredReducedTransparency`, `useScriptTag`,
+    `useScroll`, `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
+    `useTextareaAutosize`, `useTextDirection`, `useWindowFocus`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -25,10 +25,10 @@
   - `shared/`: `is.ts` (19 guard/predicate exports), `getter.ts`, `units.ts`,
     `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
     `resolveElements`) — internal helpers, **not** utils.
-- Suite: **1156 tests / 117 files**. `dist` builds, `publint` clean.
+- Suite: **1199 tests / 123 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 16 features done, 9 todo; 67 functions done, 62 todo. The `features` array
+  `package:` markers. 17 features done, 8 todo; 70 functions done, 59 todo. The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
@@ -39,7 +39,9 @@
 
 ## Immediate Next Task
 
-- `feat-016`, `feat-019`, `feat-021`, and **`feat-022`** are **done** (2026-10-03).
+- `feat-016`, `feat-018`, `feat-019`, `feat-021`, and **`feat-022`** are **done**
+  (feat-018 closed 2026-10-04 with `useFullscreen`, `usePageLeave`,
+  `useWindowFocus`).
   feat-022 shipped 8 functions across four batches: `useColorMode`, `useCssSupports`,
   `useCssVar`, `useObjectUrl`, `useScriptTag`, `useStyleTag`, `useBase64`,
   `useFileDialog`, plus `useClipboard.copy` widened to `string | ClipboardItems`.
@@ -49,14 +51,17 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  28 functions left across 9 features, in this order:
-  `feat-018` (`useFullscreen`, `usePageLeave`, `useWindowFocus`), `feat-019`
-  (`useInfiniteScroll`, `useMouseInElement`), `feat-020` (`onElementRemoval`,
+  **25 functions left across 8 features**, in this order:
+  `feat-011` (`useNow`, `useTimestamp`), `feat-019` (`useInfiniteScroll`,
+  `useMouseInElement`), `feat-020` (`onElementRemoval`,
   `useElementByPoint`, `usePointerLock`, `usePointerSwipe`), `feat-023` (8
-  network ones), `feat-024` (`useGeolocation`, `useIdle`, `usePermission`),
-  `feat-026` (`useWakeLock`), `feat-027` (`useClamp`, `usePrecision`,
-  `useToNumber`), `feat-032` (`useId`, `useControllableState`), `feat-011`
-  (`useNow`, `useTimestamp`). Then niche (34).
+  network ones), `feat-027` (`useClamp`, `usePrecision`,
+  `useToNumber`), `feat-032` (`useId`, `useControllableState`), `feat-024`
+  (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
+  Then niche (34). Note `feat-011` and `feat-019` are T1-_feature_ records whose
+  open functions are individually tagged **T2** — a feature marked `done` is not
+  the same as "nothing left in it", so read the function statuses, not the
+  feature status, when picking work.
 - **Correction to the last session's claim that "one T2 remains in `feat-020`":**
   it counted only the entries carrying an explicit `tier`. `feat-020` has four
   more, all untiered so they inherit the feature's T2 - `onElementRemoval`,
@@ -88,6 +93,26 @@
   - `useElementHover` is listed in feat-017 for provenance only — it already
     shipped; do not re-port it. Its inline `MutationObserver` watches `document`,
     not an element, and stays that way on purpose (see its `ponytail:` comment).
+- **`feat-018` is done** (2026-10-04) — `useFullscreen`, `usePageLeave`,
+  `useWindowFocus`. Four decisions, all documented in the READMEs, none of them
+  to be "restored" to match upstream without a reason:
+  - **`useFullscreen` is standard-API only.** Upstream probes ~20 prefixed
+    spellings across four name tables; `lib.dom` types only the unprefixed four,
+    and every browser that shipped a prefix has shipped the standard version
+    since ~2011. Dropping them deleted ~half the implementation and its four
+    `@ts-expect-error`s. `webkitEnterFullscreen` is video-only on iPhone — the
+    README points at `<video controls>`.
+  - **`isSupported` = the two methods exist.** Upstream also requires a
+    `fullscreenEnabled`-style flag, which is a _permission_ bit, not a capability.
+  - **`isFullscreen` compares `document.fullscreenElement`** against the target.
+    Upstream reads a _resolved property name_ as the state, which was right for
+    `webkitIsFullScreen` ("is in fullscreen") and wrong for the standard
+    `fullscreenEnabled` ("is fullscreen allowed") — so on current browsers it
+    reports `true` whenever the API merely exists, and its `exit()` then refuses
+    to run.
+  - **`usePageLeave`'s `mouseenter` has its own handler.** Upstream shares one
+    `isLeft = !event.relatedTarget` handler across all three events, so
+    re-entering with a nullish `relatedTarget` sets `isLeft` back to `true`.
 - `feat-019` shipped 5 of its 7 functions. `useInfiniteScroll` and
   `useMouseInElement` stay `todo`. They were parked behind **feat-017`, which
 owns the observers they wrap (`useIntersectionObserver`, `useResizeObserver`,
@@ -441,14 +466,18 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-020` Batch E is **done** - `useDropZone` shipped,
-  joining `onClickOutside` / `onLongPress`, `useDraggable`, `usePointer`, and
-  `useSwipe`. Every T1 function in the list is done. Counts: 25 features
-  (16 done / 9 todo), 129 functions (67 done / 62 todo). The `features` array is
-  now stored in tier order.
-- **Recommended Next Step**: `feat-018`, the first feature in the T2 block
-  (`useFullscreen`, `usePageLeave`, `useWindowFocus`), then `feat-019`
-  (`useInfiniteScroll`, `useMouseInElement`), then `feat-020`'s remaining four.
+- **Current Objective**: `feat-018` is **done** — `useFullscreen`, `usePageLeave`
+  and `useWindowFocus` shipped, closing the feature. Counts: 25 features
+  (17 done / 8 todo), 129 functions (70 done / 59 todo), 60 modules,
+  1199 tests / 123 files. `feat-018` is **uncommitted**; the last commit
+  (`84526d8`) is `feat-020` Batch E.
+- **Recommended Next Step**: the four T2 functions parked behind feat-017, whose
+  blocker is now gone — `useInfiniteScroll` and `useMouseInElement` (feat-019,
+  both wrap the shipped observers, so build them on `useIntersectionObserver` /
+  `useResizeObserver` rather than an inline observer) and `useNow` /
+  `useTimestamp` (feat-011, both belong to the hand-rolled timing core described
+  above — every timer armed inside `$effect`). Then `feat-020`'s remaining four
+  (`onElementRemoval`, `useElementByPoint`, `usePointerLock`, `usePointerSwipe`).
   Five conventions the last five batches settled, worth reusing rather than
   re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`) and

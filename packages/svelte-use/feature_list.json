@@ -581,31 +581,31 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Document/page-level visibility, icon, fullscreen. (useTitle skipped: <svelte:head> covers it.) All SSR-guarded with server fallbacks.",
-			"evidence": "",
+			"evidence": "Batch A (2026-10-04): all three functions, closing the feature. useWindowFocus and usePageLeave take no options at all: upstream ConfigurableWindow is dropped, since the only window worth watching is the one the code runs in and there is nothing to configure. useFullscreen kept autoExit and dropped ConfigurableDocument. One upstream bug fixed in usePageLeave: VueUse points all three listeners at one handler doing isLeft = !event.relatedTarget, so re-entering the page fires mouseenter with a nullish relatedTarget and sets isLeft back to true - the pointer just arrived and the flag says it left (it self-corrects on the next move between elements). mouseenter gets its own handler here, pinned by a test that dispatches the null-relatedTarget case explicitly. useFullscreen uses ONLY the standard Fullscreen API: VueUse probes twenty prefixed spellings across four name tables (webkitRequestFullScreen, mozCancelFullScreen, msExitFullscreen, ...), and every browser that shipped one has shipped the unprefixed version since ~2011, while TypeScript lib.dom types only the unprefixed four - so the tables bought compatibility with browsers that cannot run a modern Svelte app, at the cost of string-indexed lookups this package forbids (no casts). The one live prefixed form, webkitEnterFullscreen, is video-only on iPhone and belongs to native <video controls>. That deleted roughly half the upstream implementation and with it four @ts-expect-error suppressions. Two more upstream readings changed, both in the README: isSupported asks only whether requestFullscreen and exitFullscreen exist, because the fullscreenEnabled flag upstream also requires is a PERMISSION bit (an iframe without allowfullscreen reports false while both methods are present), and isFullscreen compares document.fullscreenElement against the target. Upstream resolves a fullscreenEnabled-style property NAME and reads that as the state, which was right for webkitIsFullScreen (\"is in fullscreen\") but not for the standard fullscreenEnabled (\"is fullscreen allowed\") - so on any current browser VueUse reports isFullscreen true whenever the API is merely available, and exit() then refuses to run because it is gated on that flag. Kept faithful: a fullscreenchange naming a different element is ignored (another component fullscreen is not this flag business); the initial sync runs in its own $effect, because folding it into the autoExit effect would run the teardown on every target change and exit fullscreen when a bind:this target rebinds; and enter() sets the flag optimistically once the request resolves, leaving fullscreenchange to keep it honest. jsdom implements none of the Fullscreen API, so the tests stub requestFullscreen/exitFullscreen/fullscreenElement with Object.defineProperty and delete them in afterEach. 36 jsdom tests + 7 SSR probes across the three (useFullscreen 20+3, usePageLeave 9+2, useWindowFocus 7+2), closing feat-018. Suite 1199/1199 across 123 files; init.ps1 all green.",
 			"functions": [
 				{
 					"name": "useFullscreen",
 					"source": "vueuse/core/useFullscreen",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useFullscreen/",
 					"tier": "T2"
 				},
 				{
 					"name": "usePageLeave",
 					"source": "vueuse/core/usePageLeave",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/usePageLeave/"
 				},
 				{
 					"name": "useWindowFocus",
 					"source": "vueuse/core/useWindowFocus",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useWindowFocus/"
 				}
 			],
 			"id": "feat-018",
 			"name": "Document & page UI",
-			"status": "todo",
+			"status": "done",
 			"tier": "T2"
 		},
 		{
