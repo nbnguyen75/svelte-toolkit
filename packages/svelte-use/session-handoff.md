@@ -36,8 +36,12 @@
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
-  function directly; otherwise the feature's `tier` applies.
-- `docs/recipes.md` holds **all 95** deliberately-not-ported hooks with a
+  function directly; otherwise the feature's `tier` applies. **The function's own
+  `tier` wins over its feature's**, and four sit inside niche features while
+  counting as T2 (`useGeolocation`, `useIdle`, `usePermission` in feat-024,
+  `useWakeLock` in feat-026). Group by feature tier instead and you get
+  "T2 17 / niche 38" and both halves are wrong. Read the effective tier.
+- `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
 
@@ -542,7 +546,7 @@ compare resolved`src`instead (which also matches a relative`src`).
 
 - `packages/svelte-use/AGENTS.md` — canonical harness.
 - `packages/svelte-use/feature_list.json` — implement-only roadmap, this package only.
-- `packages/svelte-use/docs/recipes.md` — all 95 not-ported hooks + replacements.
+- `packages/svelte-use/docs/recipes.md` — all 97 not-ported hooks + replacements.
 - `packages/svelte-use/progress.md` — session log.
 
 ## Next Session
