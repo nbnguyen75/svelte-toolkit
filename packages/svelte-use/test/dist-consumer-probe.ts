@@ -3,6 +3,7 @@ import {
 	useCloned,
 	useDark,
 	useObjectUrl,
+	usePrecision,
 	useScriptTag,
 	useStyleTag,
 	useToggle,
@@ -10,6 +11,7 @@ import {
 	type ClonedSnapshot,
 	type UseBase64Return,
 	type UseClonedReturn,
+	type UsePrecisionReturn,
 	type UseScriptTagReturn,
 	type UseStyleTagReturn
 } from '../dist/index.js';
@@ -36,4 +38,7 @@ const payload: string = encoded.base64;
 const inFlight: Promise<string> | undefined = encoded.promise;
 const rerun: Promise<string> = encoded.execute();
 
-console.log(n, modified, css, tag, pending, url, dark, toggled, payload, inFlight, rerun);
+const precise: UsePrecisionReturn = usePrecision(45.125, 2, { math: 'round' });
+const rounded: number = precise.value;
+
+console.log(n, modified, css, tag, pending, url, dark, toggled, payload, inFlight, rerun, rounded);

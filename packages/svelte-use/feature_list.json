@@ -751,33 +751,19 @@
 		{
 			"dependencies": [],
 			"description": "Three small VueUse math/coercion helpers that were left stranded in a \"recipe-only\" bucket which was never part of the tier scheme. useClamp is the common one and sliderMath.clamp moves out to svelte-base, so core needs its own. All three are one-expression wrappers; if any prove too thin to clear the bar on its own, cut them rather than padding.",
-			"evidence": "",
+			"evidence": "Batch A: usePrecision shipped; useClamp and useToNumber cut to docs/recipes.md (deleted from this list, not marked — the file tracks only what ships).",
 			"functions": [
-				{
-					"name": "useClamp",
-					"source": "vueuse/math/useClamp",
-					"status": "todo",
-					"target": "src/lib/shared/useClamp/",
-					"tier": "T2"
-				},
 				{
 					"name": "usePrecision",
 					"source": "vueuse/math/usePrecision",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/shared/usePrecision/",
-					"tier": "T2"
-				},
-				{
-					"name": "useToNumber",
-					"source": "vueuse/shared/useToNumber",
-					"status": "todo",
-					"target": "src/lib/shared/useToNumber/",
 					"tier": "T2"
 				}
 			],
 			"id": "feat-027",
 			"name": "Reactive math & value coercion",
-			"status": "todo",
+			"status": "done",
 			"tier": "T2"
 		},
 		{

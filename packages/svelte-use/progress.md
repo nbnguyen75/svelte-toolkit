@@ -650,3 +650,15 @@ calls were put to the maintainer rather than decided in the code.
 - [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1325/1325 across 138 files**, `publint` All good, `init.ps1` exit 0.
 - [ ] **Next:** feat-027 (3 T2) and feat-032 (2 T2) are the smallest remaining T2 features; feat-023 (8) is the largest. Then the 34 niche functions.
 - [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?
+
+### feat-027: usePrecision shipped, useClamp + useToNumber cut (feat-027 DONE)
+
+- [x] **feat-027 has zero `todo` entries - the feature is closed with one ship and two cuts.** `usePrecision` done; `useClamp` and `useToNumber` deleted from `feature_list.json` (the file tracks only what ships, per the `useClipboardItems` precedent) and recorded as recipes. Counts: **127 functions (79 done / 48 todo)**; T2 down to **14 across 4 features** (feat-023 8, feat-024 3, feat-026 1, feat-032 2); niche still 34.
+- [x] **The yardstick decided before any implementation was written.** `useClamp` is a one-expression wrapper over `clamp`, which this package already exports from `shared/is.ts` - the wrapper would only re-read it, so it is a recipe (read-only `$derived` plus a `$state` + setter form for the writable case). `useToNumber` is branch logic over `Number.parseFloat` / `parseInt`, which the platform already owns - no lifecycle, no env branching, no building-block use, so it is a recipe showing the default + NaN shape. `usePrecision` owns `accurateMultiply`, a real float-correction algorithm (`45.125 * 100` is `4512.4999...`, so the naive formula answers `45.12`), plus a `math` method option - that clears scope.md criterion 4.
+- [x] **`options` takes no `= undefined` default.** `no-useless-default-assignment` rejects it; the parameter is optional (`?`) and the derived guards it explicitly.
+- [x] **`noUncheckedIndexedAccess` applies to `split('.')[1]`.** Narrowed with `?.length ?? 0`, guarded by the `includes('.')` above it.
+- [x] **No `isReadonly` / writable split.** Upstream returns a writable ref only when handed one; Svelte has no refs, so this always returns a read-only getter. The README says so and points at the `useClamp` recipe for the writable shape.
+- [x] 13 tests (9 jsdom via `mountInitialized` + `createBox`, 4 node SSR probes - pure math, so the server answer is the browser answer).
+- [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1338/1338 across 140 files**, `publint` All good, `init.ps1` exit 0. `usePrecision` added to `test/dist-consumer-probe.ts`, so the barrel + dist types stay honest.
+- [ ] **Next:** feat-032 (2: `useId`, `useControllableState`) is the smallest T2 left; feat-023 (8 network ones) is the largest.
+- [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?

@@ -26,74 +26,74 @@ Two kinds of entry live here:
 
 ## Master index
 
-| VueUse hook                                                                                                     | Use instead                                                                            |
-| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Timing**                                                                                                      |                                                                                        |
-| `useTimeout`                                                                                                    | [`useTimeoutFn`](#timing)                                                              |
-| `useInterval`                                                                                                   | [`useIntervalFn`](#timing)                                                             |
-| `useDebouncedCallback`                                                                                          | [`useDebounceFn`](#timing)                                                             |
-| `useCached`                                                                                                     | [`$effect` + comparator](#timing)                                                      |
-| **Watchers**                                                                                                    |                                                                                        |
-| `watchOnce`                                                                                                     | [`$effect`](#watchers)                                                                 |
-| `watchImmediate`                                                                                                | [`$effect`](#watchers)                                                                 |
-| `watchDeep`                                                                                                     | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
-| `watchDebounced`                                                                                                | [`useDebounceFn` + `$effect`](#watchers)                                               |
-| `watchThrottled`                                                                                                | [`useThrottleFn` + `$effect`](#watchers)                                               |
-| `watchPausable`                                                                                                 | [`$state` flag read in `$effect`](#watchers)                                           |
-| `watchWithFilter`                                                                                               | [`useDebounceFn` / `useThrottleFn`](#watchers)                                         |
-| `watchIgnorable`                                                                                                | [`$effect` teardown / `untrack`](#watchers)                                            |
-| `watchTriggerable`                                                                                              | [`$state` token read in `$effect`](#watchers)                                          |
-| `watchAtMost`                                                                                                   | [`$effect` + last-seen local](#watchers)                                               |
-| `watchArray`                                                                                                    | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
-| `whenever`                                                                                                      | [`$effect` with a `when` guard](#watchers)                                             |
-| **Refs & computed**                                                                                             |                                                                                        |
-| `refDefault`                                                                                                    | [`$derived(x ?? fallback)`](#refs--computed)                                           |
-| `refDebounced`                                                                                                  | [`useDebounceFn` + `$state`](#refs--computed)                                          |
-| `refThrottled`                                                                                                  | [`useThrottleFn` + `$state`](#refs--computed)                                          |
-| `refManualReset`                                                                                                | [`$state` cell + setter](#refs--computed)                                              |
-| `refWithControl`                                                                                                | [`$state` cell + setter](#refs--computed)                                              |
-| `computedEager`                                                                                                 | [`$derived` is already eager on read](#refs--computed)                                 |
-| `computedWithControl`                                                                                           | [`$state` revision + `$derived`](#refs--computed)                                      |
-| `syncRef` / `syncRefs`                                                                                          | [`$effect` + microtask guard](#refs--computed)                                         |
-| `useSSRWidth`                                                                                                   | [a constant](#refs--computed)                                                          |
-| `useProjection`                                                                                                 | [`$derived`](#refs--computed)                                                          |
-| **Arrays**                                                                                                      |                                                                                        |
-| `useArrayMap` … `useArrayJoin` (12 hooks)                                                                       | [template expressions + `$derived`](#arrays)                                           |
-| `useSorted`                                                                                                     | [`$derived` + `.sort()`](#arrays)                                                      |
-| **Math**                                                                                                        |                                                                                        |
-| `useMin` `useMax` `useAverage` `useSum` `useRound` `useCeil` `useFloor` `useTrunc` `useAbs` `useMath`           | [one-line `$derived`](#math)                                                           |
-| `logicAnd` `logicOr` `logicNot`                                                                                 | [`&&` `\|\|` `!`](#math)                                                               |
-| **Shared & state plumbing**                                                                                     |                                                                                        |
-| `isDefined`                                                                                                     | [`!== undefined` / optional chaining](#shared--state-plumbing)                         |
-| `get` / `set`                                                                                                   | [direct property access](#shared--state-plumbing)                                      |
-| `useToString`                                                                                                   | [`String(x)`](#shared--state-plumbing)                                                 |
-| `reactify` / `reactifyObject`                                                                                   | [`$state`](#shared--state-plumbing)                                                    |
-| `reactiveComputed`                                                                                              | [`$derived`](#shared--state-plumbing)                                                  |
-| `reactiveOmit` / `reactivePick`                                                                                 | [rest spread / destructuring](#shared--state-plumbing)                                 |
-| `toReactive`                                                                                                    | [`$state`](#shared--state-plumbing)                                                    |
-| `makeDestructurable`                                                                                            | [a plain object with getters — what our utils already return](#shared--state-plumbing) |
-| `createProjection` / `createGenericProjection`                                                                  | [`$derived` over a reactive object](#shared--state-plumbing)                           |
-| `createEventHook`                                                                                               | [a callback prop + `$state`](#shared--state-plumbing)                                  |
-| `useEventBus`                                                                                                   | [a `$state` map + `$effect`](#shared--state-plumbing)                                  |
-| `createGlobalState` / `createSharedComposable`                                                                  | [context (`setContext` / `getContext`)](#shared--state-plumbing)                       |
-| `composeHandlers` / `mergeProps`                                                                                | [`mergeProps` from `svelte/mergeprops`](#shared--state-plumbing)                       |
-| `useBoolean`                                                                                                    | [`useToggle` (shipped)](#shared--state-plumbing)                                       |
-| **Svelte already has it**                                                                                       |                                                                                        |
-| `useWindowSize` `useWindowScroll` `useOnline` `useDevicePixelRatio`                                             | [`svelte/reactivity/window`](#svelte-already-has-it)                                   |
-| `useMediaQuery` `usePreferredDark` `usePreferredContrast` `usePreferredReducedMotion` `usePreferredColorScheme` | [`MediaQuery` / `prefersReducedMotion`](#svelte-already-has-it)                        |
-| `useElementSize`                                                                                                | [`bind:clientHeight` / `ResizeObserver`](#svelte-already-has-it)                       |
-| `useActiveElement` `useDocumentVisibility`                                                                      | [binding on `<svelte:document>` / `<svelte:window>`](#svelte-already-has-it)           |
-| `useTitle` `useFavicon`                                                                                         | [`<svelte:head>`](#svelte-already-has-it)                                              |
-| `useMounted`                                                                                                    | [an `$effect` body _is_ mount](#svelte-already-has-it)                                 |
-| `useTransition`                                                                                                 | [`Tween` / `Spring` / `tweened`](#svelte-already-has-it)                               |
-| `useAnimate`                                                                                                    | [`svelte/animate`, WAAPI, or a transition](#svelte-already-has-it)                     |
-| `useImage`                                                                                                      | [`<img onload onerror>` — feat-022](#svelte-already-has-it)                            |
-| **Deferred to a shipped util**                                                                                  |                                                                                        |
-| `useClipboardItems` (write side)                                                                                | [`useClipboard.copy` (shipped)](#svelte-already-has-it)                                |
-| **Deferred to a library**                                                                                       |                                                                                        |
-| `useDateFormat` `useTimeAgo` `useTimeAgoIntl` `useTemporalNow`                                                  | [`date-fns` / `Intl` / Temporal](#dates-deferred-to-date-fns)                          |
-| `useVirtualList`                                                                                                | [`@tanstack/svelte-virtual`](#virtual-lists-deferred-to-tanstack)                      |
-| **Deferred to a sibling feature**                                                                               |                                                                                        |
+| VueUse hook                                                                                                                    | Use instead                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| **Timing**                                                                                                                     |                                                                                        |
+| `useTimeout`                                                                                                                   | [`useTimeoutFn`](#timing)                                                              |
+| `useInterval`                                                                                                                  | [`useIntervalFn`](#timing)                                                             |
+| `useDebouncedCallback`                                                                                                         | [`useDebounceFn`](#timing)                                                             |
+| `useCached`                                                                                                                    | [`$effect` + comparator](#timing)                                                      |
+| **Watchers**                                                                                                                   |                                                                                        |
+| `watchOnce`                                                                                                                    | [`$effect`](#watchers)                                                                 |
+| `watchImmediate`                                                                                                               | [`$effect`](#watchers)                                                                 |
+| `watchDeep`                                                                                                                    | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
+| `watchDebounced`                                                                                                               | [`useDebounceFn` + `$effect`](#watchers)                                               |
+| `watchThrottled`                                                                                                               | [`useThrottleFn` + `$effect`](#watchers)                                               |
+| `watchPausable`                                                                                                                | [`$state` flag read in `$effect`](#watchers)                                           |
+| `watchWithFilter`                                                                                                              | [`useDebounceFn` / `useThrottleFn`](#watchers)                                         |
+| `watchIgnorable`                                                                                                               | [`$effect` teardown / `untrack`](#watchers)                                            |
+| `watchTriggerable`                                                                                                             | [`$state` token read in `$effect`](#watchers)                                          |
+| `watchAtMost`                                                                                                                  | [`$effect` + last-seen local](#watchers)                                               |
+| `watchArray`                                                                                                                   | _nothing_ — [`$state` proxies track nested reads](#watchers)                           |
+| `whenever`                                                                                                                     | [`$effect` with a `when` guard](#watchers)                                             |
+| **Refs & computed**                                                                                                            |                                                                                        |
+| `refDefault`                                                                                                                   | [`$derived(x ?? fallback)`](#refs--computed)                                           |
+| `refDebounced`                                                                                                                 | [`useDebounceFn` + `$state`](#refs--computed)                                          |
+| `refThrottled`                                                                                                                 | [`useThrottleFn` + `$state`](#refs--computed)                                          |
+| `refManualReset`                                                                                                               | [`$state` cell + setter](#refs--computed)                                              |
+| `refWithControl`                                                                                                               | [`$state` cell + setter](#refs--computed)                                              |
+| `computedEager`                                                                                                                | [`$derived` is already eager on read](#refs--computed)                                 |
+| `computedWithControl`                                                                                                          | [`$state` revision + `$derived`](#refs--computed)                                      |
+| `syncRef` / `syncRefs`                                                                                                         | [`$effect` + microtask guard](#refs--computed)                                         |
+| `useSSRWidth`                                                                                                                  | [a constant](#refs--computed)                                                          |
+| `useProjection`                                                                                                                | [`$derived`](#refs--computed)                                                          |
+| **Arrays**                                                                                                                     |                                                                                        |
+| `useArrayMap` … `useArrayJoin` (12 hooks)                                                                                      | [template expressions + `$derived`](#arrays)                                           |
+| `useSorted`                                                                                                                    | [`$derived` + `.sort()`](#arrays)                                                      |
+| **Math**                                                                                                                       |                                                                                        |
+| `useMin` `useMax` `useAverage` `useSum` `useRound` `useCeil` `useFloor` `useTrunc` `useAbs` `useMath` `useClamp` `useToNumber` | [one-line `$derived`](#math)                                                           |
+| `logicAnd` `logicOr` `logicNot`                                                                                                | [`&&` `\|\|` `!`](#math)                                                               |
+| **Shared & state plumbing**                                                                                                    |                                                                                        |
+| `isDefined`                                                                                                                    | [`!== undefined` / optional chaining](#shared--state-plumbing)                         |
+| `get` / `set`                                                                                                                  | [direct property access](#shared--state-plumbing)                                      |
+| `useToString`                                                                                                                  | [`String(x)`](#shared--state-plumbing)                                                 |
+| `reactify` / `reactifyObject`                                                                                                  | [`$state`](#shared--state-plumbing)                                                    |
+| `reactiveComputed`                                                                                                             | [`$derived`](#shared--state-plumbing)                                                  |
+| `reactiveOmit` / `reactivePick`                                                                                                | [rest spread / destructuring](#shared--state-plumbing)                                 |
+| `toReactive`                                                                                                                   | [`$state`](#shared--state-plumbing)                                                    |
+| `makeDestructurable`                                                                                                           | [a plain object with getters — what our utils already return](#shared--state-plumbing) |
+| `createProjection` / `createGenericProjection`                                                                                 | [`$derived` over a reactive object](#shared--state-plumbing)                           |
+| `createEventHook`                                                                                                              | [a callback prop + `$state`](#shared--state-plumbing)                                  |
+| `useEventBus`                                                                                                                  | [a `$state` map + `$effect`](#shared--state-plumbing)                                  |
+| `createGlobalState` / `createSharedComposable`                                                                                 | [context (`setContext` / `getContext`)](#shared--state-plumbing)                       |
+| `composeHandlers` / `mergeProps`                                                                                               | [`mergeProps` from `svelte/mergeprops`](#shared--state-plumbing)                       |
+| `useBoolean`                                                                                                                   | [`useToggle` (shipped)](#shared--state-plumbing)                                       |
+| **Svelte already has it**                                                                                                      |                                                                                        |
+| `useWindowSize` `useWindowScroll` `useOnline` `useDevicePixelRatio`                                                            | [`svelte/reactivity/window`](#svelte-already-has-it)                                   |
+| `useMediaQuery` `usePreferredDark` `usePreferredContrast` `usePreferredReducedMotion` `usePreferredColorScheme`                | [`MediaQuery` / `prefersReducedMotion`](#svelte-already-has-it)                        |
+| `useElementSize`                                                                                                               | [`bind:clientHeight` / `ResizeObserver`](#svelte-already-has-it)                       |
+| `useActiveElement` `useDocumentVisibility`                                                                                     | [binding on `<svelte:document>` / `<svelte:window>`](#svelte-already-has-it)           |
+| `useTitle` `useFavicon`                                                                                                        | [`<svelte:head>`](#svelte-already-has-it)                                              |
+| `useMounted`                                                                                                                   | [an `$effect` body _is_ mount](#svelte-already-has-it)                                 |
+| `useTransition`                                                                                                                | [`Tween` / `Spring` / `tweened`](#svelte-already-has-it)                               |
+| `useAnimate`                                                                                                                   | [`svelte/animate`, WAAPI, or a transition](#svelte-already-has-it)                     |
+| `useImage`                                                                                                                     | [`<img onload onerror>` — feat-022](#svelte-already-has-it)                            |
+| **Deferred to a shipped util**                                                                                                 |                                                                                        |
+| `useClipboardItems` (write side)                                                                                               | [`useClipboard.copy` (shipped)](#svelte-already-has-it)                                |
+| **Deferred to a library**                                                                                                      |                                                                                        |
+| `useDateFormat` `useTimeAgo` `useTimeAgoIntl` `useTemporalNow`                                                                 | [`date-fns` / `Intl` / Temporal](#dates-deferred-to-date-fns)                          |
+| `useVirtualList`                                                                                                               | [`@tanstack/svelte-virtual`](#virtual-lists-deferred-to-tanstack)                      |
+| **Deferred to a sibling feature**                                                                                              |                                                                                        |
 
 ---
 
@@ -266,7 +266,8 @@ Spread into a copy before sorting: `.sort()` mutates in place, and mutating a
 
 ## Math
 
-Nine one-line `$derived`s and three operators:
+Nine one-line `$derived`s, three operators, and two small wrappers whose whole
+body is one expression:
 
 ```ts
 const min = $derived(Math.min(...values()));
@@ -275,6 +276,26 @@ const rounded = $derived(Math.round(raw() * 100) / 100);
 
 // logicAnd / logicOr / logicNot — the language has these.
 const ready = $derived(isLoaded() && !isError());
+
+// useClamp — `clamp` is already exported by this package, so the wrapper
+// would only re-read it. Read-only:
+import { clamp } from '@wynn-dev/svelte-use';
+const v = $derived(clamp(raw(), min(), max()));
+// Writable — clamp on the way in, through your own `$state`:
+let raw = $state(10);
+const clamped = $derived(clamp(raw, min(), max()));
+function setClamped(next: number) {
+	raw = clamp(next, min(), max());
+}
+
+// useToNumber — the platform owns the parsing, so there is nothing to wrap
+// beyond the shape. Default plus NaN handling:
+const n = $derived.by(() => {
+	const v = value();
+	const parsed = typeof v === 'string' ? Number.parseFloat(v) : v;
+	return Number.isNaN(parsed) ? 0 : parsed;
+});
+// `parseInt` with a radix is the same shape with `Number.parseInt(v, 16)`.
 ```
 
 ## Shared & state plumbing
