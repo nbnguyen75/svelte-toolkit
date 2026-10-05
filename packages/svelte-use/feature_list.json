@@ -256,7 +256,7 @@
 				{
 					"name": "useNow",
 					"source": "vueuse/core/useNow",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useNow/",
 					"tier": "T2"
 				},
@@ -275,7 +275,7 @@
 				{
 					"name": "useTimestamp",
 					"source": "vueuse/core/useTimestamp",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/utilities/useTimestamp/",
 					"tier": "T2"
 				}
@@ -283,6 +283,7 @@
 			"id": "feat-011",
 			"name": "Timing core (timeouts, intervals, clock)",
 			"status": "done",
+			"evidence": "Batch B (2026-10-04): useNow and useTimestamp, the last two functions in the feature, so feat-011 now has no todo entries. Both are thin wrappers over the shipped useRafFn and own no timing logic - the frame loop already existed, and all these add is the state it drives. That is the whole reason they are small. Two upstream options dropped on both. ConfigurableScheduler (scheduler) let you swap useRafFn for useIntervalFn or useTimeoutFn: no shipped util in this package accepts a scheduler - useCountdown takes one as a private parameter - so a public one here would be the first. And `controls` split the return into two shapes, a bare ref by default and the ref plus Pausable on request, which is the same simplification useElementVisibility already made (stop is always returned). UseNowReturn and UseTimestampReturn therefore both extend UseRafFnReturn and isActive/pause/resume are always present, which also deletes the <Controls extends boolean> generic, the conditional return type and both overloads. useNow now takes no options at all. isActive is forwarded through a getter rather than destructured off the useRafFn result. Destructuring reads the getter once, which would freeze isActive at false and make pause() invisible to the caller - the trap this package already hit in useFocus. A test pins both halves: property access is live, a destructured copy is frozen. Two decisions worth keeping. The clock comes from the wall clock, not from the frame timestamp: a frame timestamp is \"when the frame was scheduled\", relative to the page start, and 1234 is not a date - pinned by a test that steps a frame with a deliberately absurd timestamp. And useNow replaces the Date every frame rather than skipping equal values, because the instance identity changes anyway and gating the write on a comparison would make the update cadence depend on something the caller cannot see; useTimestamp documents that its value may legitimately repeat, since a 120Hz display produces frames faster than the millisecond clock ticks. No Date is held in reactive state: it is SvelteDate, per the svelte(prefer-svelte-reactivity) rule, which extends Date so instanceof and every method hold, and which is globalThis.Date on the server. That has a test consequence recorded in session-handoff.md - SvelteDate extends whichever Date was live when svelte/reactivity was imported, so vi.setSystemTime cannot reach its constructor. useTimestamp can still fake the clock because it calls the global Date.now(). 29 tests (12 jsdom + 6 SSR for useNow, 11 jsdom for useTimestamp). Suite 1228/1228 across 126 files; init.ps1 all green.",
 			"tier": "T1"
 		},
 		{
@@ -358,7 +359,7 @@
 		{
 			"dependencies": ["feat-005", "feat-008"],
 			"description": "Scroll position/lock/infinite lists plus pointer position primitives. Passive listeners; SSR fallbacks.",
-			"evidence": "Ships 5 utils: useScroll, useMouse, useMousePressed, useScrollLock, useElementHover. 189 new tests across 10 files (33+30+25+20+20 browser, 7+16+16+13+7 SSR); suite is now 547/547 across 64 files. All five expose getter- or writable-getter-backed state, so destructuring keeps reactivity and bind: works on the two writable ones (useScroll.x/y, useScrollLock.locked). All useEventListener calls are passive; the one deliberate exception is useScrollLock's iOS touchmove guard, which must be non-passive to preventDefault and is attached per lock rather than per component. Every timer/listener/observer is released on unmount; the unmount teardowns restore scroll-lock overflow and cancel a pending hover delay from plain variables, because a $state read in a teardown sees the pre-destroy value. Parity notes recorded per util: useScroll drops VueUse's no-op RTL multiplier (Math.abs(x * -1) === Math.abs(x)) and resolves a Document target to documentElement for both read and write; useScrollLock drops VueUse's module-scope WeakMap (unsafe under SSR request sharing) and restores an author's own inline overflow instead of clearing it; useElementHover narrows the target to Element and cancels its pending delay on unmount, which VueUse leaks; useMouse/useMousePressed replace every DOM assertion with a structural predicate. useInfiniteScroll and useMouseInElement are DEFERRED to feat-017, not cut - both are thin wrappers over the IntersectionObserver / ResizeObserver+MutationObserver that feat-017 ships first, with the Svelte-native recipe and the reason recorded in docs/recipes.md (Scroll & pointer). Two inline MutationObservers are marked ponytail for consolidation into feat-017's useMutationObserver (useScroll observe.mutation, useElementHover triggerOnRemoval).",
+			"evidence": "Ships 5 utils: useScroll, useMouse, useMousePressed, useScrollLock, useElementHover. 189 new tests across 10 files (33+30+25+20+20 browser, 7+16+16+13+7 SSR); suite is now 547/547 across 64 files. All five expose getter- or writable-getter-backed state, so destructuring keeps reactivity and bind: works on the two writable ones (useScroll.x/y, useScrollLock.locked). All useEventListener calls are passive; the one deliberate exception is useScrollLock's iOS touchmove guard, which must be non-passive to preventDefault and is attached per lock rather than per component. Every timer/listener/observer is released on unmount; the unmount teardowns restore scroll-lock overflow and cancel a pending hover delay from plain variables, because a $state read in a teardown sees the pre-destroy value. Parity notes recorded per util: useScroll drops VueUse's no-op RTL multiplier (Math.abs(x * -1) === Math.abs(x)) and resolves a Document target to documentElement for both read and write; useScrollLock drops VueUse's module-scope WeakMap (unsafe under SSR request sharing) and restores an author's own inline overflow instead of clearing it; useElementHover narrows the target to Element and cancels its pending delay on unmount, which VueUse leaks; useMouse/useMousePressed replace every DOM assertion with a structural predicate. useInfiniteScroll and useMouseInElement were DEFERRED to feat-017, not cut - both are thin wrappers over the IntersectionObserver / ResizeObserver+MutationObserver that feat-017 ships first, with the Svelte-native recipe and the reason recorded in docs/recipes.md (Scroll & pointer; that section is now removed, since both have shipped). Two inline MutationObservers are marked ponytail for consolidation into feat-017's useMutationObserver (useScroll observe.mutation, useElementHover triggerOnRemoval). BATCH B (useInfiniteScroll, useMouseInElement): +33 tests across 4 files (14+13 browser, 3+3 SSR); suite is now 1261/1261 across 130 files. Both compose shipped utils and add no observer of their own - useInfiniteScroll is useScroll + useElementVisibility (useResizeObserver/useMutationObserver for useMouseInElement), which is why the two deferrals cleared once feat-017 landed. Three shared-helper/robustness fixes came out of it: useScroll's four cross-realm guards (isWindowLike/isDocumentLike/isScrollableElement/scrollElementOf) moved from private to src/lib/shared/element.ts, because a Window or Document cannot be observed at all and useInfiniteScroll needs the same resolution (shared/element.ts is not in the barrel, so they stay internal); useScroll.measure() now checks isBrowser BEFORE resolving the getter, because measure() is public API and a () => window target threw ReferenceError on the server (found by the SSR probe, fixed at the source rather than in the caller); and useInfiniteScroll does the same for its own observedElement. Three real bugs the tests caught, each fixed at the source: (1) destructuring useElementVisibility's isVisible getter snapshots it, so useInfiniteScroll keeps the object and reads .isVisible inside the effect - the effect never saw it change before that; (2) a SYNCHRONOUS throw from onLoadMore escaped before Promise.all could attach .catch, so it is now called through Promise.resolve().then() and reaches onError like any rejection; (3) canLoadMore was memoized in a $derived, which silently cached a non-reactive gate forever - upstream re-evaluates it per check and so does this. Per-util parity notes: useInfiniteScroll drops upstream's controls/scheduler options and the v-on-infinite-scroll directive build (no Svelte equivalent worth carrying), keeps interval as a floor via Promise.all (max(onLoadMore, interval), not an added delay), defaults onError to console.error to match useScroll, and GAINS reset() so a caller appending rows outside the load handler can trigger a check without faking a scroll event; the interval timer is cleared on unmount so an in-flight load is abandoned rather than resolving into a dead component. useMouseInElement binds through the internal useEventListener/bind.ts because the public useEventListener returns void and stop() needs the detachers (it stops both observers and the three listeners; useMouse keeps following the cursor, as upstream). Its update() writes one plain local per field and assigns the $state once at the end, because reading a $state back right after writing it made the tracking effect invalidate itself - one rect settled, two rects hit effect_update_depth_exceeded after 47s, which is exactly the wrapped-inline-element case that loop exists for. The upstream option comments for windowScroll/windowResize are swapped and are documented correctly here. Docs: docs/recipes.md lost its Scroll & pointer section and the two master-index rows.",
 			"functions": [
 				{
 					"name": "useElementHover",
@@ -370,7 +371,7 @@
 				{
 					"name": "useInfiniteScroll",
 					"source": "vueuse/core/useInfiniteScroll",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useInfiniteScroll/",
 					"tier": "T2"
 				},
@@ -384,7 +385,7 @@
 				{
 					"name": "useMouseInElement",
 					"source": "vueuse/core/useMouseInElement",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/browser/useMouseInElement/",
 					"tier": "T2"
 				},

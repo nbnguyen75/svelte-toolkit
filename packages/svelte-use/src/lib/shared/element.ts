@@ -48,3 +48,53 @@ export function resolveElements(target: MaybeElements): Element[] {
 	const list = Array.isArray(value) ? value : [value];
 	return [...new Set(list.filter(notNullish))];
 }
+
+/**
+ * Window detection without `instanceof`, which fails across realms (iframes, and
+ * test runners evaluating modules in separate VM contexts). A scrollable element
+ * never carries a numeric `scrollY`, and `in` narrowing is enough here because
+ * the check is on the property's type rather than on the object.
+ *
+ * @internal
+ */
+export function isWindowLike(target: object): target is Window {
+	return 'scrollY' in target && typeof target.scrollY === 'number';
+}
+
+/** Document detection by `nodeType`, for the same cross-realm reason. @internal */
+export function isDocumentLike(target: object): target is Document {
+	return 'nodeType' in target && target.nodeType === 9;
+}
+
+/**
+ * Scroll-metric-capable element. Written as a guard rather than a
+ * `'scrollTop' in target` narrowing because `in` on a bare `object` only adds
+ * the key to the type — it cannot produce `HTMLElement | SVGElement`, and the
+ * repo forbids the assertion that would.
+ *
+ * @internal
+ */
+export function isScrollableElement(target: object): target is HTMLElement | SVGElement {
+	return 'scrollTop' in target && 'scrollHeight' in target;
+}
+
+/**
+ * The element whose scroll metrics describe `target`. A window and a document
+ * both scroll as their `documentElement`; `Document` is duck-typed to
+ * `documentElement` rather than VueUse's `document.body` write target, so reads
+ * and writes agree in standards mode.
+ *
+ * `useScroll` and `useInfiniteScroll` both need this, and an `IntersectionObserver`
+ * cannot observe a `Window` or a `Document` at all — so the second caller is
+ * exactly why these four live in `shared/` instead of beside the first one.
+ *
+ * @internal
+ */
+export function scrollElementOf(
+	target: object | null | undefined
+): HTMLElement | SVGElement | null {
+	if (!target) return null;
+	if (isWindowLike(target)) return target.document.documentElement;
+	if (isDocumentLike(target)) return target.documentElement;
+	return isScrollableElement(target) ? target : null;
+}

@@ -3,6 +3,7 @@ import type { MaybeGetter } from '../../shared/getter.ts';
 import { untrack } from 'svelte';
 
 import { useMutationObserver } from '../../elements/useMutationObserver/index.ts';
+import { scrollElementOf, isDocumentLike, isWindowLike } from '../../shared/element.ts';
 import { resolveGetter } from '../../shared/getter.ts';
 import { isBrowser } from '../../shared/is.ts';
 import { useDebounceFn } from '../../utilities/useDebounceFn/index.ts';
@@ -92,44 +93,6 @@ export interface UseScrollReturn {
 	x: number;
 	/** Vertical offset. Assigning scrolls there. */
 	y: number;
-}
-
-/**
- * Window detection without `instanceof`, which fails across realms (iframes, and
- * test runners evaluating modules in separate VM contexts). A scrollable element
- * never carries a numeric `scrollY`, and `in` narrowing is enough here because
- * the check is on the property's type rather than on the object.
- */
-function isWindowLike(target: object): target is Window {
-	return 'scrollY' in target && typeof target.scrollY === 'number';
-}
-
-/** Document detection by `nodeType`, for the same cross-realm reason. */
-function isDocumentLike(target: object): target is Document {
-	return 'nodeType' in target && target.nodeType === 9;
-}
-
-/**
- * Scroll-metric-capable element. Written as a guard rather than a
- * `'scrollTop' in target` narrowing because `in` on a bare `object` only adds
- * the key to the type — it cannot produce `HTMLElement | SVGElement`, and the
- * repo forbids the assertion that would.
- */
-function isScrollableElement(target: object): target is HTMLElement | SVGElement {
-	return 'scrollTop' in target && 'scrollHeight' in target;
-}
-
-/**
- * The element whose scroll metrics describe `target`. A window and a document
- * both scroll as their `documentElement`; `Document` is duck-typed to
- * `documentElement` rather than VueUse's `document.body` write target, so reads
- * and writes agree in standards mode.
- */
-function scrollElementOf(target: object | null | undefined): HTMLElement | SVGElement | null {
-	if (!target) return null;
-	if (isWindowLike(target)) return target.document.documentElement;
-	if (isDocumentLike(target)) return target.documentElement;
-	return isScrollableElement(target) ? target : null;
 }
 
 /**
@@ -226,8 +189,11 @@ export function useScroll(
 	}
 
 	function measure(): void {
+		// Guarded before the getter runs, not after: a `() => window` target throws
+		// on a server, and `measure()` is public API a caller may invoke directly.
+		if (!isBrowser) return;
 		const el = scrollElementOf(resolveGetter(element));
-		if (isBrowser && el) setArrivedState(el);
+		if (el) setArrivedState(el);
 	}
 
 	function onScrollEnd(e: Event): void {

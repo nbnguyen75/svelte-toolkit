@@ -3,37 +3,41 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **60 util modules shipped**:
-  - `browser/` (35): `onClickOutside`, `onKeyStroke`, `onLongPress`,
+- Pure library package (no SvelteKit shell). **64 util modules shipped**:
+  - `browser/` (37): `onClickOutside`, `onKeyStroke`, `onLongPress`,
     `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
     `useDropZone`, `useElementHover`, `useEventListener`, `useFileDialog`,
-    `useFullscreen`, `useKeyModifier`, `useMagicKeys`, `useMouse`,
-    `useMousePressed`, `useObjectUrl`, `usePageLeave`, `usePointer`,
-    `usePreferredLanguages`, `usePreferredReducedTransparency`, `useScriptTag`,
-    `useScroll`, `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
+    `useFullscreen`, `useInfiniteScroll`, `useKeyModifier`, `useMagicKeys`,
+    `useMouse`, `useMouseInElement`, `useMousePressed`, `useObjectUrl`,
+    `usePageLeave`, `usePointer`, `usePreferredLanguages`,
+    `usePreferredReducedTransparency`, `useScriptTag`, `useScroll`,
+    `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
     `useTextareaAutosize`, `useTextDirection`, `useWindowFocus`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
   - `utilities/`: `useDebounceFn`, `useThrottleFn`, `useTimeoutFn`,
-    `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`
+    `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`, `useNow`,
+    `useTimestamp`
   - `elements/`: `useMutationObserver`, `useResizeObserver`,
     `useIntersectionObserver`, `useElementVisibility`, `useElementBounding`,
     `useFocus`, `useFocusWithin`
     (new category, feat-017 - **done**, Batches A-D)
   - `shared/`: `is.ts` (19 guard/predicate exports), `getter.ts`, `units.ts`,
     `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
-    `resolveElements`) — internal helpers, **not** utils.
-- Suite: **1199 tests / 123 files**. `dist` builds, `publint` clean.
+    `resolveElements`, and the internal `isWindowLike` / `isDocumentLike` /
+    `isScrollableElement` / `scrollElementOf` guards lifted out of `useScroll`)
+    — internal helpers, **not** utils.
+- Suite: **1261 tests / 130 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 17 features done, 8 todo; 70 functions done, 59 todo. The `features` array
+  `package:` markers. 17 features done, 8 todo; 74 functions done, 55 todo. The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
   function directly; otherwise the feature's `tier` applies.
-- `docs/recipes.md` holds **all 97** deliberately-not-ported hooks with a
+- `docs/recipes.md` holds **all 95** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
 
@@ -51,17 +55,15 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  **25 functions left across 8 features**, in this order:
-  `feat-011` (`useNow`, `useTimestamp`), `feat-019` (`useInfiniteScroll`,
-  `useMouseInElement`), `feat-020` (`onElementRemoval`,
-  `useElementByPoint`, `usePointerLock`, `usePointerSwipe`), `feat-023` (8
-  network ones), `feat-027` (`useClamp`, `usePrecision`,
+  **21 functions left across 6 features**, in this order:
+  `feat-020`
+  (`onElementRemoval`, `useElementByPoint`, `usePointerLock`, `usePointerSwipe`),
+  `feat-023` (8 network ones), `feat-027` (`useClamp`, `usePrecision`,
   `useToNumber`), `feat-032` (`useId`, `useControllableState`), `feat-024`
   (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
-  Then niche (34). Note `feat-011` and `feat-019` are T1-_feature_ records whose
-  open functions are individually tagged **T2** — a feature marked `done` is not
-  the same as "nothing left in it", so read the function statuses, not the
-  feature status, when picking work.
+  Then niche (34). Note a feature marked `done` is not the same as "nothing left
+  in it" — read the function statuses, not the feature status, when picking work.
+  (`feat-011` and `feat-019` were both that shape and closed 2026-10-04.)
 - **Correction to the last session's claim that "one T2 remains in `feat-020`":**
   it counted only the entries carrying an explicit `tier`. `feat-020` has four
   more, all untiered so they inherit the feature's T2 - `onElementRemoval`,
@@ -113,19 +115,52 @@
   - **`usePageLeave`'s `mouseenter` has its own handler.** Upstream shares one
     `isLeft = !event.relatedTarget` handler across all three events, so
     re-entering with a nullish `relatedTarget` sets `isLeft` back to `true`.
-- `feat-019` shipped 5 of its 7 functions. `useInfiniteScroll` and
-  `useMouseInElement` stay `todo`. They were parked behind **feat-017`, which
-owns the observers they wrap (`useIntersectionObserver`, `useResizeObserver`,
-`useMutationObserver`) - feat-017 is now **done**, so nothing blocks them any
-more and they are next in tier order after feat-018. The reason and the
-Svelte-native recipe are in
-`docs/recipes.md`§ "Scroll & pointer" — do not port them on an inline
-observer, and do not add`getBoundingClientRect()`per`pointermove`to`useMouseInElement`.
+- **`feat-019` is done** (2026-10-04) — all 7 functions, `useInfiniteScroll` and
+  `useMouseInElement` closing it. Both are compositions of already-shipped utils
+  and own no observer: `useScroll` + `useElementVisibility`, and `useMouse` +
+  `useResizeObserver` + `useMutationObserver`. That is the entire reason they were
+  parked behind feat-017, and the reason they cleared once it shipped. Five
+  decisions, all documented in the READMEs:
+  - **`useScroll`'s cross-realm guards now live in `shared/element.ts`**
+    (`isWindowLike` / `isDocumentLike` / `isScrollableElement` /
+    `scrollElementOf`). `useInfiniteScroll` needs the identical resolution
+    because a `Window` or `Document` cannot be observed at all. That file is not
+    in the barrel, so they stay internal.
+  - **`useScroll.measure()` checks `isBrowser` before resolving the getter.** It
+    is public API, and `() => window` threw `ReferenceError` on the server.
+    Found by the SSR probe; fixed at the source, not in the caller.
+  - **`useInfiniteScroll` gained `reset()`**, and clears its `interval` timer on
+    unmount so an in-flight load is abandoned rather than resolving into a dead
+    component. It drops upstream's `controls` / `scheduler` and the directive
+    build, and keeps `interval` as a **floor** (`max(onLoadMore, interval)`,
+    upstream's real `Promise.all` semantics).
+  - **`canLoadMore` is asked per check, never memoized in a `$derived`** — see
+    the harness note below. A synchronous throw from `onLoadMore` is routed
+    through `Promise.resolve().then(...)` so it reaches `onError`.
+  - **`useMouseInElement` binds through `useEventListener/bind.ts`**, because the
+    public `useEventListener` returns `void` and `stop()` needs the detachers. Its
+    `update()` writes a plain local per field and assigns the `$state` once at the
+    end — see the harness note below. Upstream's `windowScroll` / `windowResize`
+    doc comments are swapped; ours are correct.
 - `feat-015` (async + history) is tier **`niche`** — deliberately last, not
   next. `feat-012` is `useTimeAgo` only, tier T2.
-- `useNow` / `useTimestamp` are `todo` again (tier T2, on `feat-011`) after
-  being cut earlier. **`useTimeAgo` was NOT resurrected** — it stays a recipe on
-  the strength of native `Intl.RelativeTimeFormat`. Do not re-add it.
+- `useNow` / `useTimestamp` **shipped** (2026-10-04), which closes `feat-011`
+  entirely — it has no `todo` entries left. Both are thin wrappers over the
+  shipped `useRafFn`: the frame loop already existed and they only own the state
+  it drives, so neither contains timing logic.
+  - **Both drop `ConfigurableScheduler`.** No shipped util accepts a `scheduler`
+    option — `useCountdown` takes one as a _private_ parameter for testability.
+    Do not add a public one.
+  - **Both drop `controls`.** `UseNowReturn` / `UseTimestampReturn` `extend
+UseRafFnReturn`, so `isActive` / `pause` / `resume` are always returned and
+    the `<Controls extends boolean>` generic, the conditional return type and
+    both overloads are gone. Same call `useElementVisibility` made.
+  - **`isActive` must be forwarded with a getter**, never destructured off the
+    `useRafFn` result: destructuring reads the getter once and freezes it at
+    `false`. `useNow`'s test pins both halves of that.
+  - **`useNow` holds a `SvelteDate`,** not a `Date` — see the harness note below.
+  - **`useTimeAgo` was NOT resurrected** — it stays a recipe on the strength of
+    native `Intl.RelativeTimeFormat`. Do not re-add it.
 
 ## Cross-package scope: this list is svelte-use only
 
@@ -407,6 +442,29 @@ fail to clear the bar alone, cut them rather than padding.
   minutes to fail with every value empty, not a clean failure. Any imperative
   guard called from inside an `$effect` (`load()`, `start()`, `pause()`) must read
   its own flag through `untrack()`. See `useStyleTag`'s `isLoaded`.
+- **Write-then-read inside an effect is the same bug, and it hides behind stable
+  values.** `useMouseInElement.update()` assigned `elementPositionX` and then
+  computed `mouse.x - elementPositionX`, so the effect depended on state it had
+  just written. With **one** rect the second run wrote identical values and settled
+  silently; with **two** rects the intermediate write dirtied the first and it
+  looped until Svelte gave up — 47 seconds, `effect_update_depth_exceeded`, in
+  exactly the wrapped-inline-element case the `getClientRects()` loop exists for.
+  **Compute into plain locals and assign each `$state` once, at the end.** `untrack`
+  is not a fix here: the reads are real reads, and the values still move.
+- **A getter-returning util breaks if the caller destructures it.** `const {
+isVisible } = useElementVisibility(...)` reads the getter once, so a tracking
+  effect that reads the copy never sees it change — `useInfiniteScroll` silently
+  loaded **nothing**, and 12 of 14 tests failed with zero calls. Keep the object
+  and read `.isVisible` inside the effect. Same trap as `isActive` in `useFocus`
+  and `useNow`.
+- **Do not memoize a callback option in a `$derived`.** `canLoadMore` in a derived
+  caches its first answer forever when the closure reads no reactive state, so
+  `() => page < last` silently never updates. Ask a function option per check, the
+  way upstream does.
+- **A synchronous `throw` from a user callback skips a later `.catch`.**
+  `Promise.all([onLoadMore(state), sleep(interval)])` throws before `Promise.all`
+  is even entered if `onLoadMore` throws while building the array — upstream has
+  this hole. Wrap it: `Promise.resolve().then(() => onLoadMore(state))`.
 - **Duck-typing a DOM element with `in` is not a structural check.**
   `'noModule' in el` is false for jsdom's `HTMLScriptElement`, and `'sheet' in el`
   depends on the stylesheet having been parsed — both fail silently as "not found".
@@ -433,6 +491,30 @@ compare resolved`src`instead (which also matches a relative`src`).
   exported positions — `ClonedSnapshot<T> = T` with one documented cast at the
   `structuredClone` call site. The snapshot step itself is **not** optional:
   `structuredClone` on a `$state` proxy throws `DataCloneError`.
+- **`SvelteDate` is the only `Date` allowed in reactive state, and it cannot be
+  faked.** `svelte(prefer-svelte-reactivity)` rejects `new Date()` in a `$state`
+  slot (error, not warning). `SvelteDate extends Date`, so `instanceof` and every
+  method hold and the public type can stay `Date`; `index-server.js` exports it
+  as `globalThis.Date`, so no `isBrowser` guard is needed. But `extends` binds
+  the base class **at module-evaluation time**, so a `globalThis.Date` installed
+  later by `vi.useFakeTimers()` / `vi.setSystemTime()` never reaches its
+  constructor — `new SvelteDate()` returns the _real_ clock. Assert on real epoch
+  values, or track a `Date.now()` number (which fakes fine) and build the `Date`
+  in a getter.
+- **`vi.useFakeTimers()` also fakes `requestAnimationFrame`,** silently
+  replacing `mockRaf()`'s manual mock. `raf.step()` then drives nothing and the
+  test fails on a stale value instead of on a missing frame, which reads like a
+  bug in the util. Use `vi.useFakeTimers({ toFake: ['Date'] })` whenever a manual
+  rAF is installed.
+- **`feature_list.json` has no consistent key order per feature, and some
+  features have no `evidence` key at all** (feat-017 puts it before `tier`,
+  feat-006 before `functions`, feat-011 had none). A forward `indexOf('"evidence":
+')` from a feature's `id` will therefore land in a _different_ feature and
+  corrupt the file. **Always assert an anchor matches exactly once and
+  `JSON.parse` after every step** — a silent 0-match replace is the same failure.
+- **The working copy of `feature_list.json` is CRLF after `git checkout`**
+  (autocrlf), so a `\n`-joined multi-line anchor matches zero times. Detect the
+  newline first, or use a whitespace-tolerant regex.
 - **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists).
   Never point a declaration-emitting `tsc` run at the repo — it writes `.d.ts`
   next to sources and fixtures; use `--noEmit` or an external temp dir.
@@ -460,38 +542,45 @@ compare resolved`src`instead (which also matches a relative`src`).
 
 - `packages/svelte-use/AGENTS.md` — canonical harness.
 - `packages/svelte-use/feature_list.json` — implement-only roadmap, this package only.
-- `packages/svelte-use/docs/recipes.md` — all 97 not-ported hooks + replacements.
+- `packages/svelte-use/docs/recipes.md` — all 95 not-ported hooks + replacements.
 - `packages/svelte-use/progress.md` — session log.
 
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-018` is **done** — `useFullscreen`, `usePageLeave`
-  and `useWindowFocus` shipped, closing the feature. Counts: 25 features
-  (17 done / 8 todo), 129 functions (70 done / 59 todo), 60 modules,
-  1199 tests / 123 files. `feat-018` is **uncommitted**; the last commit
-  (`84526d8`) is `feat-020` Batch E.
-- **Recommended Next Step**: the four T2 functions parked behind feat-017, whose
-  blocker is now gone — `useInfiniteScroll` and `useMouseInElement` (feat-019,
-  both wrap the shipped observers, so build them on `useIntersectionObserver` /
-  `useResizeObserver` rather than an inline observer) and `useNow` /
-  `useTimestamp` (feat-011, both belong to the hand-rolled timing core described
-  above — every timer armed inside `$effect`). Then `feat-020`'s remaining four
-  (`onElementRemoval`, `useElementByPoint`, `usePointerLock`, `usePointerSwipe`).
-  Five conventions the last five batches settled, worth reusing rather than
+- **Current Objective**: `feat-019` is **done** — `useInfiniteScroll` and
+  `useMouseInElement` shipped, closing the feature's last two entries and its
+  `docs/recipes.md` deferrals. Counts: 25 features (17 done / 8 todo),
+  129 functions (74 done / 55 todo), 64 modules, 1261 tests / 130 files.
+  The `feat-011` batch (`useNow`, `useTimestamp`) is still **uncommitted**; both
+  batches belong in this commit or in two.
+- **Recommended Next Step**: `feat-020`'s remaining four — `onElementRemoval`,
+  `useElementByPoint`, `usePointerLock`, `usePointerSwipe` (`useDraggable` and
+  `useDropZone` already shipped) — then `feat-027` (3) and `feat-032` (2).
+  Six conventions the last six batches settled, worth reusing rather than
   re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`) and
     `Position` live in `shared/`; `bindListener` lives in
     `useEventListener/bind.ts`. Use them; do not add a private copy.
-  - **An option must not get a `$derived` of its own** if it is a getter. A
-    derived with no reactive dependency caches its first value forever and
-    silently stops updating - `useSwipe`'s `threshold` was exactly this. Read the
-    option inside a derived that depends on real state.
+  - **An option must not get a `$derived` of its own** if it is a getter **or a
+    function**. A derived with no reactive dependency caches its first value
+    forever and silently stops updating — `useSwipe`'s `threshold` and
+    `useInfiniteScroll`'s `canLoadMore` were both exactly this. Read the option
+    inside a derived that depends on real state, or just ask it per check.
+  - **Never destructure a getter off another util's return.** Read the property
+    where it is consumed; see the harness notes for the two utils that got this
+    wrong.
+  - **Compute into plain locals and assign `$state` once per field** inside a
+    function that an `$effect` calls. Write-then-read is a self-invalidation.
   - A `$derived` or `$state` passed where a _value_ is wanted warns
     (`state_referenced_locally`) and freezes it. Bind by hand when an option must
     be read at bind time, like `passive` in `useDraggable` and `useSwipe`.
   - `createBox` from `test/fixtures/box.svelte.ts` is how a rune-free
     `.test.ts` drives a reactive source. A plain `let` will not re-run anything.
+  - **jsdom metrics never move on their own.** Anything that re-checks after an
+    async step (infinite scroll re-checks after every load) loops forever in tests
+    unless each spy either mutates the stubbed `scrollHeight` / `getClientRects`
+    or closes its own gate. Stub with `Object.defineProperty`, and expect the loop.
   - `src/lib/state/useStepper/index.svelte.ts:8` and
     `useOffsetPagination/index.svelte.ts:43-44`, which emit
     `state_referenced_locally` warnings during `vitest` (they do not fail
