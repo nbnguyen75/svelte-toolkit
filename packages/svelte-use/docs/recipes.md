@@ -84,6 +84,7 @@ Two kinds of entry live here:
 | `useElementSize`                                                                                                               | [`bind:clientHeight` / `ResizeObserver`](#svelte-already-has-it)                       |
 | `useActiveElement` `useDocumentVisibility`                                                                                     | [binding on `<svelte:document>` / `<svelte:window>`](#svelte-already-has-it)           |
 | `useTitle` `useFavicon`                                                                                                        | [`<svelte:head>`](#svelte-already-has-it)                                              |
+| `useId`                                                                                                                        | [`$props.id()` — feat-032](#svelte-already-has-it)                                     |
 | `useMounted`                                                                                                                   | [an `$effect` body _is_ mount](#svelte-already-has-it)                                 |
 | `useTransition`                                                                                                                | [`Tween` / `Spring` / `tweened`](#svelte-already-has-it)                               |
 | `useAnimate`                                                                                                                   | [`svelte/animate`, WAAPI, or a transition](#svelte-already-has-it)                     |
@@ -342,6 +343,15 @@ save two lines, and it _loses_ composability, because a caller cannot spread a
 util's return into their own `$derived`.
 
 ```svelte
+<!-- or a ResizeObserver for the content box -->
+
+<!-- useId — the rune, called at the top of the component. It cannot be a util:
+     the compiler only allows `$props.id()` as a variable declaration
+     initializer at component top level, so a wrapper cannot call it. -->
+<script lang="ts">
+	const id = $props.id();
+</script>
+
 <!-- useTitle / useFavicon -->
 <svelte:head>
 	<title>{title()}</title>
@@ -354,7 +364,9 @@ util's return into their own `$derived`.
 
 <!-- useElementSize -->
 <div bind:clientHeight={height}></div>
-<!-- or a ResizeObserver for the content box -->
+
+<label for={id}>Name</label>
+<input {id} />
 ```
 
 ```ts

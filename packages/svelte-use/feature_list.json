@@ -773,23 +773,20 @@
 			"tier": "T2",
 			"dependencies": [],
 			"description": "The only two items promoted out of the svelte-base sweep, both qualifying under scope.md Â§3. useId: ids must match between the server render and hydration, which is a genuine env-branching problem (3.2), and every util that needs an id depends on it (3.4). Implement on top of $props.id() where a component is available; the module counter + Math.random() form in svbase is NOT portable as written (module-scope mutable state, scope.md Â§2, plus non-stable across server/client). README documents $props.id() as the first choice for component-level ids. useControllableState: non-trivial reactive state (internal value overridden by an external prop, with a setter) that core lacks and that useToggle/useCounter/useStorage each re-invent; Svelte has no controlled/uncontrolled primitive. Kept as a building block (3.4).",
-			"evidence": "",
+			"evidence": "useControllableState shipped; useId cut to docs/recipes.md (deleted from this list, not marked — the file tracks only what ships).",
 			"functions": [
-				{
-					"name": "useId",
-					"source": "svbase/utils/id.ts (generateId/createId)",
-					"status": "todo",
-					"target": "src/lib/state/useId/",
-					"tier": "T2"
-				},
 				{
 					"name": "useControllableState",
 					"source": "base-ui:useControlled",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/state/useControllableState/",
 					"tier": "T2"
 				}
-			]
+			],
+			"id": "feat-032",
+			"name": "Ids & controllable state",
+			"status": "done",
+			"tier": "T2"
 		},
 		{
 			"dependencies": ["feat-005", "feat-008"],

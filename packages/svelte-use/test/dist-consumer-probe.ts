@@ -1,6 +1,7 @@
 import {
 	useBase64,
 	useCloned,
+	useControllableState,
 	useDark,
 	useObjectUrl,
 	usePrecision,
@@ -11,6 +12,7 @@ import {
 	type ClonedSnapshot,
 	type UseBase64Return,
 	type UseClonedReturn,
+	type UseControllableStateReturn,
 	type UsePrecisionReturn,
 	type UseScriptTagReturn,
 	type UseStyleTagReturn
@@ -41,4 +43,22 @@ const rerun: Promise<string> = encoded.execute();
 const precise: UsePrecisionReturn = usePrecision(45.125, 2, { math: 'round' });
 const rounded: number = precise.value;
 
-console.log(n, modified, css, tag, pending, url, dark, toggled, payload, inFlight, rerun, rounded);
+const open: UseControllableStateReturn<boolean> = useControllableState({ defaultValue: false });
+open.value = true;
+const isOpen: boolean | undefined = open.value;
+
+console.log(
+	n,
+	modified,
+	css,
+	tag,
+	pending,
+	url,
+	dark,
+	toggled,
+	payload,
+	inFlight,
+	rerun,
+	rounded,
+	isOpen
+);

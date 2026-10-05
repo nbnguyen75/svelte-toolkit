@@ -3,7 +3,7 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **69 util modules shipped**:
+- Pure library package (no SvelteKit shell). **70 util modules shipped**:
   - `browser/` (41): `onClickOutside`, `onElementRemoval`, `onKeyStroke`,
     `onLongPress`, `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
@@ -17,7 +17,8 @@
     `useWindowFocus`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
-    `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
+    `useStepper`, `useOffsetPagination`, `useControllableState`, `refAutoReset`,
+    `until`
   - `utilities/`: `useDebounceFn`, `useThrottleFn`, `useTimeoutFn`,
     `useIntervalFn`, `useCountdown`, `useRafFn`, `useFps`, `useNow`,
     `useTimestamp`
@@ -32,11 +33,11 @@
     `isWindowLike` / `isDocumentLike` / `isScrollableElement` /
     `scrollElementOf` guards lifted out of `useScroll`)
     — internal helpers, **not** utils.
-- Suite: **1338 tests / 140 files**. `dist` builds, `publint` clean.
+- Suite: **1348 tests / 142 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 19 features done, 6 todo; 79 functions done, 48 todo (of
-  127 — `useClamp` and `useToNumber` were cut to recipes, not shipped). The `features` array
+  `package:` markers. 20 features done, 5 todo; 80 functions done, 46 todo (of
+  126 — `useClamp`, `useToNumber` and `useId` were cut to recipes, not shipped). The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
@@ -45,7 +46,7 @@
   counting as T2 (`useGeolocation`, `useIdle`, `usePermission` in feat-024,
   `useWakeLock` in feat-026). Group by feature tier instead and you get
   "T2 17 / niche 38" and both halves are wrong. Read the effective tier.
-- `docs/recipes.md` holds **all 99** deliberately-not-ported hooks with a
+- `docs/recipes.md` holds **all 100** deliberately-not-ported hooks with a
   "Use instead" column, and is the source the Astro migration docs render from.
   There is **no** `feature_list.recipe.json` — do not create one.
 
@@ -63,14 +64,14 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  **14 functions left across 4 features**, in this order:
+  **12 functions left across 3 features**, in this order:
   `feat-023` (8 network ones), `feat-024`
-  (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`),
-  `feat-032` (`useId`, `useControllableState`).
+  (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
   Then niche (34). Note a feature marked `done` is not the same as "nothing left
-  in it" — read the function statuses, not the feature status, when picking work.
+  in it" - read the function statuses, not the feature status, when picking work.
   (`feat-011`, `feat-019` and `feat-020` were all that shape and closed
-  2026-10-04; `feat-027` closed 2026-10-05 with one ship and two cuts.)
+  2026-10-04; `feat-027` closed 2026-10-05 with one ship and two cuts, and
+  `feat-032` with one ship and one cut.)
 - **Count the effective tier (`fn.tier ?? feature.tier`), not the explicit
   field.** `feat-020` carried four untiered entries that inherited its T2, which
   is how "one T2 remains" was the wrong answer twice. Four functions still sit
@@ -577,17 +578,16 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-05
-- **Current Objective**: `feat-027` "Reactive math & value coercion" is
-  **done** — `usePrecision` shipped; `useClamp` and `useToNumber` were cut to
-  `docs/recipes.md` (deleted from `feature_list.json`, which tracks only what
-  ships). Counts: 25 features (19 done / 6 todo), 127 functions
-  (79 done / 48 todo), 69 modules, 1338 tests / 140 files, T2 down to 14
-  across 4 features.
-- **Recommended Next Step**: `feat-032` (`useId`, `useControllableState`) — 2
-  functions, the smallest T2 feature left. `useId` must document `$props.id()`
-  as the first choice and must not use module-scope mutable state; then
-  `feat-023` (8 network ones, the largest).
-  Eight conventions the last eight batches settled, worth reusing rather than
+- **Current Objective**: `feat-032` "Ids & controllable state" is **done** —
+  `useControllableState` shipped; `useId` was cut to `docs/recipes.md`
+  (`$props.id()` cannot be called from a util — the compiler only allows it at
+  component top level). Counts: 25 features (20 done / 5 todo), 126 functions
+  (80 done / 46 todo), 70 modules, 1348 tests / 142 files, T2 down to 12
+  across 3 features.
+- **Recommended Next Step**: `feat-023` (8 network ones, the largest T2 left),
+  then `feat-024` (3) and `feat-026` (`useWakeLock`). Non-trivial batch with
+  SSR-unsafe APIs — get an `improve` plan first per batch-workflow §1.
+  Eight conventions the last nine batches settled, worth reusing rather than
   re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`,
     `isElement`) and `Position` live in `shared/`; `bindListener` lives in

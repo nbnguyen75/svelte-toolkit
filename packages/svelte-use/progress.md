@@ -662,3 +662,15 @@ calls were put to the maintainer rather than decided in the code.
 - [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1338/1338 across 140 files**, `publint` All good, `init.ps1` exit 0. `usePrecision` added to `test/dist-consumer-probe.ts`, so the barrel + dist types stay honest.
 - [ ] **Next:** feat-032 (2: `useId`, `useControllableState`) is the smallest T2 left; feat-023 (8 network ones) is the largest.
 - [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?
+
+### feat-032: useControllableState shipped, useId cut (feat-032 DONE)
+
+- [x] **feat-032 has zero `todo` entries - the feature is closed with one ship and one cut.** `useControllableState` done; `useId` deleted from `feature_list.json` (the file tracks only what ships) and recorded as a recipe. Counts: **126 functions (80 done / 46 todo)**; T2 down to **12 across 3 features** (feat-023 8, feat-024 3, feat-026 1); niche still 34.
+- [x] **`useId` cannot exist as a util - the compiler forbids it.** `$props.id()` is only allowed as a variable declaration initializer at component top level, so a wrapper function cannot call it (CompileError, caught before any test ran). The recipe _is_ the rune: `const id = $props.id()`, with a note saying why it is not wrapped. This is the best possible outcome of the feature description''s demand to document `$props.id()` as the first choice.
+- [x] **`useControllableState` locks the mode on reads, not just writes.** The first draft locked only the setter, so a `value` arriving after an uncontrolled start took over on read and dropped internal state silently - the lock test caught it. The getter now returns `internal` unconditionally while uncontrolled, mirroring Base UI''s `useRef` lock.
+- [x] **No `onChange`, no mode-flip warning.** Base UI''s setter is a silent no-op while controlled and carries no callback; the owner already observes its own prop. The lock is documented and pinned by a test instead of logged.
+- [x] **`defaultValue`, not `default`.** Base UI''s option is `default`; this follows the package''s `initialValue` convention in spirit while naming what it is. Parity note in the README.
+- [x] 10 tests (7 jsdom via `mountInitialized` + `createBox`, 3 node SSR probes - pure state, so the server holds what the browser holds).
+- [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1348/1348 across 142 files**, `publint` All good, `init.ps1` exit 0. Added to `test/dist-consumer-probe.ts`.
+- [ ] **Next:** feat-023 (8 network ones) is the largest T2 left; feat-024 (3) and feat-026 (1) are small. Then the 34 niche functions.
+- [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?

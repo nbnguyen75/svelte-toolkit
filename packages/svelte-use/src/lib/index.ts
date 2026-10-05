@@ -48,6 +48,7 @@ export * from './shared/usePrecision/index.ts';
 export * from './state/refAutoReset/index.ts';
 export * from './state/until/index.ts';
 export * from './state/useCloned/index.ts';
+export * from './state/useControllableState/index.ts';
 export * from './state/useCounter/index.ts';
 export * from './state/useCycleList/index.ts';
 export * from './state/useLastChanged/index.ts';
