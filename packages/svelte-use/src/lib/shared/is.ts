@@ -92,6 +92,18 @@ export function isNode(value: EventTarget | null | undefined): value is Node {
 }
 
 /**
+ * True for a DOM `Element`.
+ *
+ * `currentTarget` on an `Event` is `EventTarget | null`, but a pointer lock can
+ * only be taken on an element, so `currentTarget` is one or `null`. Probed
+ * structurally for the same reason as {@link isNode}: `instanceof` misses a node
+ * from another realm (an iframe) and cannot narrow.
+ */
+export function isElement(value: EventTarget | null | undefined): value is Element {
+	return !!value && 'nodeType' in value && value.nodeType === 1;
+}
+
+/**
  * True for a `PointerEvent`.
  *
  * A listener helper typed against a bare `EventTarget` hands back a plain

@@ -1,5 +1,6 @@
 // * Browser
 export * from './browser/onClickOutside/index.ts';
+export * from './browser/onElementRemoval/index.ts';
 export * from './browser/onKeyStroke/index.ts';
 export * from './browser/onLongPress/index.ts';
 export * from './browser/onStartTyping/index.ts';
@@ -12,6 +13,7 @@ export * from './browser/useCssVar/index.ts';
 export * from './browser/useDark/index.ts';
 export * from './browser/useDraggable/index.ts';
 export * from './browser/useDropZone/index.ts';
+export * from './browser/useElementByPoint/index.ts';
 export * from './browser/useElementHover/index.ts';
 export * from './browser/useEventListener/index.ts';
 export * from './browser/useFileDialog/index.ts';
@@ -25,6 +27,8 @@ export * from './browser/useMousePressed/index.ts';
 export * from './browser/useObjectUrl/index.ts';
 export * from './browser/usePageLeave/index.ts';
 export * from './browser/usePointer/index.ts';
+export * from './browser/usePointerLock/index.ts';
+export * from './browser/usePointerSwipe/index.ts';
 export * from './browser/usePreferredLanguages/index.ts';
 export * from './browser/usePreferredReducedTransparency/index.ts';
 export * from './browser/useScriptTag/index.ts';

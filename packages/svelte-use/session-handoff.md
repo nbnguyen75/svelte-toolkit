@@ -3,17 +3,18 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **64 util modules shipped**:
-  - `browser/` (37): `onClickOutside`, `onKeyStroke`, `onLongPress`,
-    `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
+- Pure library package (no SvelteKit shell). **68 util modules shipped**:
+  - `browser/` (41): `onClickOutside`, `onElementRemoval`, `onKeyStroke`,
+    `onLongPress`, `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
-    `useDropZone`, `useElementHover`, `useEventListener`, `useFileDialog`,
-    `useFullscreen`, `useInfiniteScroll`, `useKeyModifier`, `useMagicKeys`,
-    `useMouse`, `useMouseInElement`, `useMousePressed`, `useObjectUrl`,
-    `usePageLeave`, `usePointer`, `usePreferredLanguages`,
-    `usePreferredReducedTransparency`, `useScriptTag`, `useScroll`,
-    `useScrollLock`, `useSmoothScroll`, `useStyleTag`, `useSwipe`,
-    `useTextareaAutosize`, `useTextDirection`, `useWindowFocus`
+    `useDropZone`, `useElementByPoint`, `useElementHover`, `useEventListener`,
+    `useFileDialog`, `useFullscreen`, `useInfiniteScroll`, `useKeyModifier`,
+    `useMagicKeys`, `useMouse`, `useMouseInElement`, `useMousePressed`,
+    `useObjectUrl`, `usePageLeave`, `usePointer`, `usePointerLock`,
+    `usePointerSwipe`, `usePreferredLanguages`, `usePreferredReducedTransparency`,
+    `useScriptTag`, `useScroll`, `useScrollLock`, `useSmoothScroll`,
+    `useStyleTag`, `useSwipe`, `useTextareaAutosize`, `useTextDirection`,
+    `useWindowFocus`
   - `state/`: `useStorage`/`useLocalStorage`/`useSessionStorage`, `useToggle`,
     `useCounter`, `usePrevious`, `useLastChanged`, `useCloned`, `useCycleList`,
     `useStepper`, `useOffsetPagination`, `refAutoReset`, `until`
@@ -24,15 +25,15 @@
     `useIntersectionObserver`, `useElementVisibility`, `useElementBounding`,
     `useFocus`, `useFocusWithin`
     (new category, feat-017 - **done**, Batches A-D)
-  - `shared/`: `is.ts` (19 guard/predicate exports), `getter.ts`, `units.ts`,
+  - `shared/`: `is.ts` (20 guard/predicate exports), `getter.ts`, `units.ts`,
     `element.ts` (`MaybeElement`, `MaybeHTMLElement`, `MaybeElements`,
     `resolveElements`, and the internal `isWindowLike` / `isDocumentLike` /
     `isScrollableElement` / `scrollElementOf` guards lifted out of `useScroll`)
     — internal helpers, **not** utils.
-- Suite: **1261 tests / 130 files**. `dist` builds, `publint` clean.
+- Suite: **1325 tests / 138 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 17 features done, 8 todo; 74 functions done, 55 todo. The `features` array
+  `package:` markers. 18 features done, 7 todo; 78 functions done, 51 todo. The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
   Per-function `tier` (`T1`/`T2`/`niche`/`extra`) where the roadmap named a
@@ -59,20 +60,20 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  **21 functions left across 6 features**, in this order:
-  `feat-020`
-  (`onElementRemoval`, `useElementByPoint`, `usePointerLock`, `usePointerSwipe`),
+  **17 functions left across 5 features**, in this order:
   `feat-023` (8 network ones), `feat-027` (`useClamp`, `usePrecision`,
   `useToNumber`), `feat-032` (`useId`, `useControllableState`), `feat-024`
   (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
   Then niche (34). Note a feature marked `done` is not the same as "nothing left
   in it" — read the function statuses, not the feature status, when picking work.
-  (`feat-011` and `feat-019` were both that shape and closed 2026-10-04.)
-- **Correction to the last session's claim that "one T2 remains in `feat-020`":**
-  it counted only the entries carrying an explicit `tier`. `feat-020` has four
-  more, all untiered so they inherit the feature's T2 - `onElementRemoval`,
-  `useElementByPoint`, `usePointerLock`, `usePointerSwipe`. Count the effective
-  tier (`fn.tier ?? feature.tier`), not the explicit field.
+  (`feat-011`, `feat-019` and `feat-020` were all that shape and closed
+  2026-10-04.)
+- **Count the effective tier (`fn.tier ?? feature.tier`), not the explicit
+  field.** `feat-020` carried four untiered entries that inherited its T2, which
+  is how "one T2 remains" was the wrong answer twice. Four functions still sit
+  inside niche features while counting as T2 (`useGeolocation`, `useIdle`,
+  `usePermission` in feat-024, `useWakeLock` in feat-026); grouping by feature
+  tier reports "T2 17 / niche 38" and both halves are wrong.
 - **`feat-017` elements is done** — Batches A-D shipped
   `useMutationObserver`, `useResizeObserver`, `useIntersectionObserver`,
   `useElementVisibility`, `useElementBounding`, `useFocus` and `useFocusWithin`
@@ -298,6 +299,8 @@ fail to clear the bar alone, cut them rather than padding.
 - **`until` is called during component init (or inside `$effect.root`);** it
   constructs a `$effect`. On the server the effect is inert, so an
   already-matching matcher resolves synchronously while a waiting one cannot.
+  **Never call it from a callback** — see the harness note below; that is what
+  made `usePointerLock` unusable.
 - **`until` is cast-free by construction:** the impl returns
   `UntilValueInstance<T> | UntilArrayInstance<T>` and `createArrayUntil` narrows
   with `Array.isArray` inside `toContains` — no `as unknown as` dispatch.
@@ -519,6 +522,25 @@ compare resolved`src`instead (which also matches a relative`src`).
 - **The working copy of `feature_list.json` is CRLF after `git checkout`**
   (autocrlf), so a `\n`-joined multi-line anchor matches zero times. Detect the
   newline first, or use a whitespace-tolerant regex.
+- **`until` cannot be called from a callback, and the symptom is not a rejected
+  promise — it is `Svelte error: effect_orphan`.** `until` builds its own
+  `$effect`, so a call from an event handler (long after component init) creates
+  an effect with no owner and Svelte throws. A util whose public method is called
+  from a handler must settle its promise from an effect created **at init**, as
+  `usePointerLock.lock` now does. Make that helper take a **type-guard
+  predicate** (`(current): current is T`) rather than a boolean test: a boolean
+  cannot narrow, so something ends up asserting the matched value.
+- **An `in` check is not a support check.** `'elementFromPoint' in document`
+  accepts a name that is present but `undefined` — supported-looking, and it
+  throws on the call, inside a rAF callback where vitest reports it as an
+  _unhandled error_ rather than a test failure. Probe `typeof x === 'function'`
+  for anything you will invoke.
+- **A test helper that is more permissive than the platform hides real bugs.**
+  `usePointerSwipe`'s pointer-event helper defaulted `buttons: 1` for _every_
+  event type, so a `pointerup` never reported the `buttons: 0` the browser
+  actually sends — and the util's up-path re-filtered on "a button is down", so a
+  mouse swipe could never end. Default test inputs to what the platform does,
+  not to what keeps the assertions short.
 - **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists).
   Never point a declaration-emitting `tsc` run at the repo — it writes `.d.ts`
   next to sources and fixtures; use `--noEmit` or an external temp dir.
@@ -552,20 +574,25 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-04
-- **Current Objective**: `feat-019` is **done** — `useInfiniteScroll` and
-  `useMouseInElement` shipped, closing the feature's last two entries and its
-  `docs/recipes.md` deferrals. Counts: 25 features (17 done / 8 todo),
-  129 functions (74 done / 55 todo), 64 modules, 1261 tests / 130 files.
-  The `feat-011` batch (`useNow`, `useTimestamp`) is still **uncommitted**; both
-  batches belong in this commit or in two.
-- **Recommended Next Step**: `feat-020`'s remaining four — `onElementRemoval`,
-  `useElementByPoint`, `usePointerLock`, `usePointerSwipe` (`useDraggable` and
-  `useDropZone` already shipped) — then `feat-027` (3) and `feat-032` (2).
-  Six conventions the last six batches settled, worth reusing rather than
+- **Current Objective**: `feat-020` "Gestures & drag" is **done** — its last four
+  functions shipped (`onElementRemoval`, `useElementByPoint`, `usePointerLock`,
+  `usePointerSwipe`), closing all 10. Counts: 25 features (18 done / 7 todo),
+  129 functions (78 done / 51 todo), 68 modules, 1325 tests / 138 files,
+  T2 down to 17 across 5 features.
+- **Recommended Next Step**: `feat-027` (`useClamp`, `usePrecision`,
+  `useToNumber`) or `feat-032` (`useId`, `useControllableState`) — 3 and 2
+  functions, the smallest T2 features left. `feat-023` is the largest (8 network
+  ones). All three of `feat-027`'s are one-expression wrappers: **if any fails to
+  clear the bar alone, cut it rather than padding.**
+  Eight conventions the last seven batches settled, worth reusing rather than
   re-deriving:
-  - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`) and
-    `Position` live in `shared/`; `bindListener` lives in
+  - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`,
+    `isElement`) and `Position` live in `shared/`; `bindListener` lives in
     `useEventListener/bind.ts`. Use them; do not add a private copy.
+  - **Probe DOM shapes with `in`, never `instanceof`**, so a node from another
+    realm still works — and keep the probe's optional properties optional so a
+    target that lacks one is a skip, not a crash. `no-unsafe-type-assertion`
+    rejects casting `EventTarget` to `Element`, so a guard is the only route.
   - **An option must not get a `$derived` of its own** if it is a getter **or a
     function**. A derived with no reactive dependency caches its first value
     forever and silently stops updating — `useSwipe`'s `threshold` and
