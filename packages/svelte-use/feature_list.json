@@ -700,7 +700,7 @@
 				{
 					"name": "useBrowserLocation",
 					"source": "vueuse/core/useBrowserLocation",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useBrowserLocation/"
 				},
 				{
@@ -719,20 +719,20 @@
 				{
 					"name": "useNetwork",
 					"source": "vueuse/core/useNetwork",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useNetwork/"
 				},
 				{
 					"name": "useShare",
 					"source": "vueuse/core/useShare",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useShare/",
 					"tier": "T2"
 				},
 				{
 					"name": "useUrlSearchParams",
 					"source": "vueuse/core/useUrlSearchParams",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useUrlSearchParams/"
 				},
 				{
@@ -746,7 +746,8 @@
 			"id": "feat-023",
 			"name": "Network & connectivity",
 			"status": "todo",
-			"tier": "T2"
+			"tier": "T2",
+			"evidence": "Batch A: useNetwork + useBrowserLocation + useShare + useUrlSearchParams (35 tests across 8 files, new network/ category). Two real bugs, each with a red test first: (1) the write-back effect in useUrlSearchParams ran before the initial-read effect, so mounting alone overwrote the query (and pushed a duplicate in push mode) - an initialized flag holds it until the URL is absorbed; (2) updateState read Object.keys(state) while writing state from inside an effect, invalidating itself forever (effect_update_depth_exceeded, 28s hang) - known keys now live in a plain set. useShare is rune-free (plain index.ts); the DOM lib already types canShare/share, so typeof probes replaced a structural guard the linter proved unnecessary. useUrlSearchParams drops upstream's T generic (casting to a generic target trips no-unsafe-type-assertion) and its watchPausable (the in-sync skip covers the echo case). Remaining: useBroadcastChannel, useEventSource, useFetch, useWebSocket - see advisor-plans/feat-023-network.md Batches B-D."
 		},
 		{
 			"dependencies": [],

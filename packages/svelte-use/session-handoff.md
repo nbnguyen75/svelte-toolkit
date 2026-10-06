@@ -3,7 +3,7 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **70 util modules shipped**:
+- Pure library package (no SvelteKit shell). **74 util modules shipped**:
   - `browser/` (41): `onClickOutside`, `onElementRemoval`, `onKeyStroke`,
     `onLongPress`, `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
@@ -33,10 +33,12 @@
     `isWindowLike` / `isDocumentLike` / `isScrollableElement` /
     `scrollElementOf` guards lifted out of `useScroll`)
     — internal helpers, **not** utils.
-- Suite: **1348 tests / 142 files**. `dist` builds, `publint` clean.
+  - `network/` (new category, feat-023 Batch A): `useNetwork`,
+    `useBrowserLocation`, `useShare`, `useUrlSearchParams`
+- Suite: **1383 tests / 150 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 20 features done, 5 todo; 80 functions done, 46 todo (of
+  `package:` markers. 20 features done, 5 todo; 84 functions done, 42 todo (of
   126 — `useClamp`, `useToNumber` and `useId` were cut to recipes, not shipped). The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
@@ -64,8 +66,10 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  **12 functions left across 3 features**, in this order:
-  `feat-023` (8 network ones), `feat-024`
+  **11 functions left across 3 features**, in this order:
+  `feat-023` (4 left: `useBroadcastChannel`, `useEventSource`, `useFetch`,
+  `useWebSocket` — Batch A shipped the other 4; plan in
+  `advisor-plans/feat-023-network.md`), `feat-024`
   (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
   Then niche (34). Note a feature marked `done` is not the same as "nothing left
   in it" - read the function statuses, not the feature status, when picking work.
@@ -545,6 +549,11 @@ compare resolved`src`instead (which also matches a relative`src`).
   actually sends — and the util's up-path re-filtered on "a button is down", so a
   mouse swipe could never end. Default test inputs to what the platform does,
   not to what keeps the assertions short.
+- **Effects run in creation order on mount — and a write effect created before
+  the read effect writes first.** `useUrlSearchParams`' write-back effect ran
+  before its initial-read effect, so mounting alone overwrote the URL with the
+  still-empty state. An `initialized` flag held it until the initial read ran.
+  Creation order is deterministic, but say it with a flag anyway.
 - **Ad-hoc `bunx tsc` needs `--ignoreConfig`** (TS5112 when a tsconfig exists).
   Never point a declaration-emitting `tsc` run at the repo — it writes `.d.ts`
   next to sources and fixtures; use `--noEmit` or an external temp dir.
@@ -577,17 +586,16 @@ compare resolved`src`instead (which also matches a relative`src`).
 
 ## Next Session
 
-- **Last Updated**: 2026-10-05
-- **Current Objective**: `feat-032` "Ids & controllable state" is **done** —
-  `useControllableState` shipped; `useId` was cut to `docs/recipes.md`
-  (`$props.id()` cannot be called from a util — the compiler only allows it at
-  component top level). Counts: 25 features (20 done / 5 todo), 126 functions
-  (80 done / 46 todo), 70 modules, 1348 tests / 142 files, T2 down to 12
-  across 3 features.
-- **Recommended Next Step**: `feat-023` (8 network ones, the largest T2 left),
-  then `feat-024` (3) and `feat-026` (`useWakeLock`). Non-trivial batch with
-  SSR-unsafe APIs — get an `improve` plan first per batch-workflow §1.
-  Eight conventions the last nine batches settled, worth reusing rather than
+- **Last Updated**: 2026-10-06
+- **Current Objective**: `feat-023` Batch A is **done** — `useNetwork`,
+  `useBrowserLocation`, `useShare`, `useUrlSearchParams` shipped (new
+  `network/` category), closing 4 of 8. Counts: 25 features (20 done / 5
+  todo), 126 functions (84 done / 42 todo), 74 modules, 1383 tests / 150
+  files, T2 down to 11 across 3 features.
+- **Recommended Next Step**: `feat-023` Batch B (`useBroadcastChannel`,
+  `useEventSource`), then C (`useFetch`), then D (`useWebSocket`) — full plan
+  in `advisor-plans/feat-023-network.md`.
+  Nine conventions the last ten batches settled, worth reusing rather than
   re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`,
     `isElement`) and `Position` live in `shared/`; `bindListener` lives in

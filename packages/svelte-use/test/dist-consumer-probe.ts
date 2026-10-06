@@ -1,21 +1,29 @@
 import {
 	useBase64,
+	useBrowserLocation,
 	useCloned,
 	useControllableState,
 	useDark,
+	useNetwork,
 	useObjectUrl,
 	usePrecision,
 	useScriptTag,
+	useShare,
 	useStyleTag,
 	useToggle,
+	useUrlSearchParams,
 	type Base64Target,
 	type ClonedSnapshot,
 	type UseBase64Return,
+	type UseBrowserLocationReturn,
 	type UseClonedReturn,
 	type UseControllableStateReturn,
+	type UseNetworkReturn,
 	type UsePrecisionReturn,
 	type UseScriptTagReturn,
-	type UseStyleTagReturn
+	type UseShareReturn,
+	type UseStyleTagReturn,
+	type UrlParams
 } from '../dist/index.js';
 
 const cloned: UseClonedReturn<ClonedSnapshot<{ n: number }>> = useCloned({ n: 1 });
@@ -47,6 +55,19 @@ const open: UseControllableStateReturn<boolean> = useControllableState({ default
 open.value = true;
 const isOpen: boolean | undefined = open.value;
 
+const net: UseNetworkReturn = useNetwork();
+const online: boolean = net.isOnline;
+
+const loc: UseBrowserLocationReturn = useBrowserLocation();
+const path: string | undefined = loc.pathname;
+
+const sharer: UseShareReturn = useShare({ title: 'probe' });
+const canShare: boolean = sharer.isSupported;
+
+const params: UrlParams = useUrlSearchParams('history');
+params.page = '2';
+const page: string | string[] = params.page;
+
 console.log(
 	n,
 	modified,
@@ -60,5 +81,9 @@ console.log(
 	inFlight,
 	rerun,
 	rounded,
-	isOpen
+	isOpen,
+	online,
+	path,
+	canShare,
+	page
 );
