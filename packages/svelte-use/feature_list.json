@@ -694,7 +694,7 @@
 				{
 					"name": "useBroadcastChannel",
 					"source": "vueuse/core/useBroadcastChannel",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useBroadcastChannel/"
 				},
 				{
@@ -706,7 +706,7 @@
 				{
 					"name": "useEventSource",
 					"source": "vueuse/core/useEventSource",
-					"status": "todo",
+					"status": "done",
 					"target": "src/lib/network/useEventSource/",
 					"tier": "T2"
 				},
@@ -747,7 +747,7 @@
 			"name": "Network & connectivity",
 			"status": "todo",
 			"tier": "T2",
-			"evidence": "Batch A: useNetwork + useBrowserLocation + useShare + useUrlSearchParams (35 tests across 8 files, new network/ category). Two real bugs, each with a red test first: (1) the write-back effect in useUrlSearchParams ran before the initial-read effect, so mounting alone overwrote the query (and pushed a duplicate in push mode) - an initialized flag holds it until the URL is absorbed; (2) updateState read Object.keys(state) while writing state from inside an effect, invalidating itself forever (effect_update_depth_exceeded, 28s hang) - known keys now live in a plain set. useShare is rune-free (plain index.ts); the DOM lib already types canShare/share, so typeof probes replaced a structural guard the linter proved unnecessary. useUrlSearchParams drops upstream's T generic (casting to a generic target trips no-unsafe-type-assertion) and its watchPausable (the in-sync skip covers the echo case). Remaining: useBroadcastChannel, useEventSource, useFetch, useWebSocket - see advisor-plans/feat-023-network.md Batches B-D."
+			"evidence": "Batch A: useNetwork + useBrowserLocation + useShare + useUrlSearchParams (35 tests across 8 files, new network/ category). Two real bugs, each with a red test first: (1) the write-back effect in useUrlSearchParams ran before the initial-read effect, so mounting alone overwrote the query (and pushed a duplicate in push mode) - an initialized flag holds it until the URL is absorbed; (2) updateState read Object.keys(state) while writing state from inside an effect, invalidating itself forever (effect_update_depth_exceeded, 28s hang) - known keys now live in a plain set. useShare is rune-free (plain index.ts); the DOM lib already types canShare/share, so typeof probes replaced a structural guard the linter proved unnecessary. useUrlSearchParams drops upstream's T generic (casting to a generic target trips no-unsafe-type-assertion) and its watchPausable (the in-sync skip covers the echo case). Remaining: useBroadcastChannel, useEventSource, useFetch, useWebSocket - see advisor-plans/feat-023-network.md Batches B-D. Batch B: useBroadcastChannel + useEventSource (27 tests across 4 files; isMessageEvent joined shared/is.ts). BroadcastChannel opens in an effect (matching upstream's tryOnMounted) and closes on cleanup. EventSource ports the full option surface; reconnect fires only on refusal (readyState closed), and a lastUrl seed keeps mount to exactly one open (upstream's watch never fires initially). The events default is one assertion in one place (upstream writes it twice). Two verbatim upstream quirks pinned, not fixed: initial CONNECTING with immediate:false, and retries counting attempts. One documented any-boundary each (MessageEvent.data, default serializer) - same rationale as useCloned's single cast. Remaining: useFetch, useWebSocket."
 		},
 		{
 			"dependencies": [],

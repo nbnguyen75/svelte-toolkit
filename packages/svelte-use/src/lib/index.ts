@@ -45,7 +45,9 @@ export * from './shared/getter.ts';
 export * from './shared/is.ts';
 export * from './shared/usePrecision/index.ts';
 // * Network
+export * from './network/useBroadcastChannel/index.ts';
 export * from './network/useBrowserLocation/index.ts';
+export * from './network/useEventSource/index.ts';
 export * from './network/useNetwork/index.ts';
 export * from './network/useShare/index.ts';
 export * from './network/useUrlSearchParams/index.ts';

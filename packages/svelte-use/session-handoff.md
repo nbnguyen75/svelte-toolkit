@@ -3,7 +3,7 @@
 ## Current State
 
 - Harness and tooling configured in `packages/svelte-use/` (see `progress.md`).
-- Pure library package (no SvelteKit shell). **74 util modules shipped**:
+- Pure library package (no SvelteKit shell). **76 util modules shipped**:
   - `browser/` (41): `onClickOutside`, `onElementRemoval`, `onKeyStroke`,
     `onLongPress`, `onStartTyping`, `useBase64`, `useBreakpoints`, `useClipboard`,
     `useColorMode`, `useCssSupports`, `useCssVar`, `useDark`, `useDraggable`,
@@ -33,12 +33,13 @@
     `isWindowLike` / `isDocumentLike` / `isScrollableElement` /
     `scrollElementOf` guards lifted out of `useScroll`)
     — internal helpers, **not** utils.
-  - `network/` (new category, feat-023 Batch A): `useNetwork`,
-    `useBrowserLocation`, `useShare`, `useUrlSearchParams`
-- Suite: **1383 tests / 150 files**. `dist` builds, `publint` clean.
+  - `network/` (feat-023 Batches A+B): `useNetwork`,
+    `useBrowserLocation`, `useShare`, `useUrlSearchParams`,
+    `useBroadcastChannel`, `useEventSource`
+- Suite: **1410 tests / 154 files**. `dist` builds, `publint` clean.
 - `feature_list.json` is **implement-only, and this package only**: 25 features,
   129 functions, no `cut`/`deferred`/`svelte-native` statuses and **no**
-  `package:` markers. 20 features done, 5 todo; 84 functions done, 42 todo (of
+  `package:` markers. 20 features done, 5 todo; 86 functions done, 40 todo (of
   126 — `useClamp`, `useToNumber` and `useId` were cut to recipes, not shipped). The `features` array
   is physically ordered by tier (T1, then T2, then niche, then extra), historical
   order kept inside each tier.
@@ -66,10 +67,9 @@
   Roadmap order is by tier, not by feature id, and the array is now stored in
   that order so the remaining work reads top-down.
 - **T1 IS COMPLETE. Zero T1 functions remain anywhere in the list.** Tier 2 has
-  **11 functions left across 3 features**, in this order:
-  `feat-023` (4 left: `useBroadcastChannel`, `useEventSource`, `useFetch`,
-  `useWebSocket` — Batch A shipped the other 4; plan in
-  `advisor-plans/feat-023-network.md`), `feat-024`
+  **6 functions left across 3 features**, in this order:
+  `feat-023` (2 left: `useFetch`, `useWebSocket` — Batches A and B shipped the
+  other 6; plan in `advisor-plans/feat-023-network.md`), `feat-024`
   (`useGeolocation`, `useIdle`, `usePermission`), `feat-026` (`useWakeLock`).
   Then niche (34). Note a feature marked `done` is not the same as "nothing left
   in it" - read the function statuses, not the feature status, when picking work.
@@ -587,15 +587,15 @@ compare resolved`src`instead (which also matches a relative`src`).
 ## Next Session
 
 - **Last Updated**: 2026-10-06
-- **Current Objective**: `feat-023` Batch A is **done** — `useNetwork`,
-  `useBrowserLocation`, `useShare`, `useUrlSearchParams` shipped (new
-  `network/` category), closing 4 of 8. Counts: 25 features (20 done / 5
-  todo), 126 functions (84 done / 42 todo), 74 modules, 1383 tests / 150
-  files, T2 down to 11 across 3 features.
-- **Recommended Next Step**: `feat-023` Batch B (`useBroadcastChannel`,
-  `useEventSource`), then C (`useFetch`), then D (`useWebSocket`) — full plan
-  in `advisor-plans/feat-023-network.md`.
-  Nine conventions the last ten batches settled, worth reusing rather than
+- **Current Objective**: `feat-023` Batch B is **done** —
+  `useBroadcastChannel` and `useEventSource` shipped, closing 6 of 8.
+  Counts: 25 features (20 done / 5 todo), 126 functions (86 done / 40 todo),
+  76 modules, 1410 tests / 154 files, T2 down to 6 across 3 features (the
+  earlier "T2 11" note missed tier inheritance — untiered feat-023 entries
+  inherit T2).
+- **Recommended Next Step**: `feat-023` Batch C (`useFetch`), then D
+  (`useWebSocket`) — full plan in `advisor-plans/feat-023-network.md`.
+  House conventions settled by the recent batches, worth reusing rather than
   re-deriving:
   - Event type guards (`isPointerEvent`, `isMouseEvent`, `isTouchEvent`,
     `isElement`) and `Position` live in `shared/`; `bindListener` lives in

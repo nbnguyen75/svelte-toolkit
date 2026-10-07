@@ -687,3 +687,17 @@ calls were put to the maintainer rather than decided in the code.
 - [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1383/1383 across 150 files**, `publint` All good, `init.ps1` exit 0. All four added to `test/dist-consumer-probe.ts`.
 - [ ] **Next:** feat-023 Batch B (`useBroadcastChannel`, `useEventSource`), then C (`useFetch`), then D (`useWebSocket`) - plan in `advisor-plans/feat-023-network.md`.
 - [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?
+
+### feat-023 Batch B: useBroadcastChannel, useEventSource (6/8)
+
+- [x] **Two utils, no cuts.** Counts: **126 functions (86 done / 40 todo)**; T2 down to **6 across 3 features** (feat-023: `useFetch` + `useWebSocket`; feat-024: 3; feat-026: 1). Correction: the Batch A note said "T2 11" - it counted only explicit tiers and missed that untiered feat-023 entries inherit the feature''s T2. Always re-derive with `fn.tier ?? feature.tier`.
+- [x] **One `any`-boundary each, both documented like `useCloned`''s single cast.** `MessageEvent.data` is typed `any` in lib.dom and the callers name the generic, so the assignment _is_ the boundary. A structural `isMessageEvent` guard (new in `shared/is.ts`) narrows first; `typeof e.data === ''string''` keeps the read off `any` where a concrete type suffices.
+- [x] **The events default is one assertion in one place.** Upstream writes `as unknown as Events` twice; `[''message'']` is asserted once. A misplaced disable comment cost a cycle: `oxlint-disable-next-line` suppresses the _next_ line, so it must sit directly above the asserted expression, not above the function.
+- [x] **A `typeof`-narrowed `in` check still counts as structural.** `isMessageEvent` probes `'data'' in event` exactly like `isPointerEvent` probes `'pointerId''`.
+- [x] **A false-positive rule gets a disable, not obedience.** `unicorn/require-post-message-target-origin` cannot tell `BroadcastChannel.postMessage` (no origin parameter exists) from `window.postMessage` - silenced with the reason on the line.
+- [x] **Seed watched values at setup.** The auto-connect effect compares the live URL against the setup-time URL so mount opens exactly once (upstream''s `watch` never fires initially - an undefined seed reopened on mount in the first draft).
+- [x] **Two verbatim upstream quirks pinned, not fixed:** initial `CONNECTING` with `immediate: false`, and `retries` counting attempts (`retries: 2` reconnects once, then `onFailed`).
+- [x] 27 tests (7 + 3 broadcast incl. unmount-close, 14 + 3 EventSource incl. refusal-only reconnect, budget exhaustion, URL-change reopen). Fake `EventSource`/`BroadcastChannel` stand-ins; fake timers for delays; no network.
+- [x] **Verified, not assumed:** `bun run check` 0 errors / 0 warnings, `format` clean, `lint` 0 problems, **1410/1410 across 154 files**, `publint` All good, `init.ps1` exit 0. Both added to `test/dist-consumer-probe.ts`.
+- [ ] **Next:** feat-023 Batch C (`useFetch`), then D (`useWebSocket`) - plan in `advisor-plans/feat-023-network.md`.
+- [ ] **Open question for the maintainer (carried since 2026-10-02):** want a `packages/svelte-base/feature_list.json` holding the 11 removed hooks, or leave svelte-base untracked until the package is scaffolded?

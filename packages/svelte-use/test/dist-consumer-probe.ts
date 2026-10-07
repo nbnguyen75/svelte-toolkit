@@ -1,9 +1,11 @@
 import {
 	useBase64,
+	useBroadcastChannel,
 	useBrowserLocation,
 	useCloned,
 	useControllableState,
 	useDark,
+	useEventSource,
 	useNetwork,
 	useObjectUrl,
 	usePrecision,
@@ -15,9 +17,11 @@ import {
 	type Base64Target,
 	type ClonedSnapshot,
 	type UseBase64Return,
+	type UseBroadcastChannelReturn,
 	type UseBrowserLocationReturn,
 	type UseClonedReturn,
 	type UseControllableStateReturn,
+	type UseEventSourceReturn,
 	type UseNetworkReturn,
 	type UsePrecisionReturn,
 	type UseScriptTagReturn,
@@ -68,6 +72,13 @@ const params: UrlParams = useUrlSearchParams('history');
 params.page = '2';
 const page: string | string[] = params.page;
 
+const bus: UseBroadcastChannelReturn<string, string> = useBroadcastChannel({ name: 'probe' });
+bus.post('x');
+const heard: string | undefined = bus.data;
+
+const feed: UseEventSourceReturn<string[], string> = useEventSource('/feed');
+const latest: string | null = feed.data;
+
 console.log(
 	n,
 	modified,
@@ -85,5 +96,7 @@ console.log(
 	online,
 	path,
 	canShare,
-	page
+	page,
+	heard,
+	latest
 );

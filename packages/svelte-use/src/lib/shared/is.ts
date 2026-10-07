@@ -120,6 +120,18 @@ export function isPointerEvent(event: Event): event is PointerEvent {
 }
 
 /**
+ * True for a `MessageEvent`.
+ *
+ * Same reasoning as {@link isPointerEvent}: a listener helper typed against a
+ * bare `EventTarget` hands back a plain `Event`, but the platform guarantees
+ * `MessageEvent` for `message` events. Probed structurally — `instanceof`
+ * misses events from another realm (an iframe) and cannot narrow.
+ */
+export function isMessageEvent(event: Event): event is MessageEvent {
+	return 'data' in event;
+}
+
+/**
  * True for a `MouseEvent`.
  *
  * Same reasoning as {@link isPointerEvent}: a listener helper typed against a
